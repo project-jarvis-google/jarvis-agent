@@ -20,17 +20,17 @@ export function WelcomeScreen({
       {/* The "Card" Container */}
       {/* This div now holds the card's styling: background, blur, padding, border, shadow, and hover effect */}
       <div className="w-full max-w-2xl z-10
-                      bg-neutral-900/50 backdrop-blur-md 
+                       backdrop-blur-md 
                       p-8 rounded-2xl border border-neutral-700 
                       shadow-2xl shadow-black/60 
                       transition-all duration-300 hover:border-neutral-600">
         
         {/* Header section of the card */}
         <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold text-white flex items-center justify-center gap-3">
+          <h1 className="text-4xl font-bold text-black flex items-center justify-center gap-3">
             ✨ Delivery App Mod Agent 🚀
           </h1>
-          <p className="text-lg text-neutral-300 max-w-md mx-auto">
+          <p className="text-lg text-neutral-700 max-w-md mx-auto">
             Your Answer to every question related to App Mod!
           </p>
         </div>
@@ -43,7 +43,7 @@ export function WelcomeScreen({
               <Button
                 variant="outline"
                 onClick={onCancel}
-                className="text-red-400 hover:text-red-300 hover:bg-red-900/20 border-red-700/50" // Enhanced cancel button
+                className="bg-black text-white hover:bg-black/80" // Enhanced cancel button
               >
                 Cancel
               </Button>

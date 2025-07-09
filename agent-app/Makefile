@@ -5,7 +5,7 @@ install:
 
 # Start the ADK API server and React frontend development server simultaneously
 dev:
-	make dev-frontend
+	make dev-backend && make dev-frontend
 
 # Start the ADK API server
 dev-backend:

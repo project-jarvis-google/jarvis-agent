@@ -19,8 +19,9 @@ export default defineConfig({
     allowedHosts: true,
     proxy: {
       // Proxy API requests to the backend server
+      // target: "https://agent-app-428871167882.us-central1.run.app"
       "/api": {
-        target: "https://agent-app-428871167882.us-central1.run.app", // Default backend address
+        target: "http://localhost:8000", // Default backend address
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/api/, ''),
