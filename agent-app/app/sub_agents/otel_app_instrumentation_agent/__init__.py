@@ -1,0 +1,1 @@
+from .agent import otel_app_instrumentation_agent

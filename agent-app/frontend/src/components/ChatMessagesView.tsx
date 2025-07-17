@@ -148,7 +148,7 @@ const HumanMessageBubble: React.FC<HumanMessageBubbleProps> = ({
   mdComponents,
 }) => {
   return (
-    <div className="text-white rounded-3xl break-words min-h-7 bg-neutral-700 max-w-[100%] sm:max-w-[90%] px-4 pt-3 rounded-br-lg">
+    <div className="text-black rounded-3xl break-words min-h-7 bg-[#3c404326] max-w-[100%] sm:max-w-[90%] px-4 pt-3 rounded-br-lg">
       <ReactMarkdown components={mdComponents} remarkPlugins={[remarkGfm]}>
         {message.content}
       </ReactMarkdown>
@@ -324,13 +324,13 @@ export function ChatMessagesView({
   return (
     <div className="flex flex-col h-full w-full">
       {/* Header with New Chat button */}
-      <div className="border-b border-neutral-700 p-4 bg-neutral-800">
+      <div className="border-b border-neutral-700 p-4 bg-[#4285F4]">
         <div className="max-w-4xl mx-auto flex justify-between items-center">
-          <h1 className="text-lg font-semibold text-neutral-100">Delivery App Mod Agent</h1>
+          <h1 className="text-3xl font-semibold text-neutral-100">Otel Agent</h1>
           <Button
             onClick={handleNewChat}
             variant="outline"
-            className="bg-neutral-700 hover:bg-neutral-600 text-neutral-100 border-neutral-600 hover:border-neutral-500"
+            className="text-black border-neutral-600 hover:border-neutral-500"
           >
             New Chat
           </Button>

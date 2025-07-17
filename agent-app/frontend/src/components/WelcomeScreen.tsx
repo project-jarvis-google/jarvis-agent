@@ -1,5 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { InputForm } from "@/components/InputForm";
+import logo from '@/assets/logo.jpg';
+import Card from '@mui/material/Card';
+import CardMedia from '@mui/material/CardMedia';
 
 interface WelcomeScreenProps {
   handleSubmit: (query: string) => void;
@@ -27,13 +30,21 @@ export function WelcomeScreen({
         
         {/* Header section of the card */}
         <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold text-black flex items-center justify-center gap-3">
-            ✨ Delivery App Mod Agent 🚀
-          </h1>
-          <p className="text-lg text-neutral-700 max-w-md mx-auto">
-            Your Answer to every question related to App Mod!
-          </p>
-        </div>
+      {/* The Card is now smaller and centered */}
+      <Card sx={{ maxWidth: 175, mx: 'auto' }} elevation={8}>
+        <CardMedia
+          component="img"
+          height="120" // Reduced the height from 194
+          image={logo}
+        />
+      </Card>
+      <h1 className="text-4xl font-bold text-[#4285F4] flex items-center justify-center gap-3">
+        Otel Agent
+      </h1>
+      <p className="text-base text-neutral-600 max-w-md mx-auto">
+        Your Answer to every question related to Open-Telemetry!
+      </p>
+    </div>
 
         {/* Input form section of the card */}
         <div className="mt-8">

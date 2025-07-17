@@ -25,8 +25,21 @@ import google.auth
 _, project_id = google.auth.default()
 os.environ.setdefault("GOOGLE_CLOUD_PROJECT", project_id)
 os.environ.setdefault("GOOGLE_CLOUD_LOCATION", "global")
+os.environ.setdefault("VERTEX_AI_RAG_CORPUS_ID", "7782220156096217088")
 os.environ.setdefault("GOOGLE_GENAI_USE_VERTEXAI", "True")
+os.environ.setdefault("GCS_INSTRUMENTATION_BUCKET_NAME", "otel-instrumentation-test-bucket")
+os.environ.setdefault("GCS_OTEL_COLLECTOR_BUCKET_NAME", "otel-agent")
+os.environ.setdefault("GOOGLE_CLOUD_LOCATION_CORPUS", "us-central1")
 
+
+# GOOGLE_GENAI_USE_VERTEXAI=1
+# GOOGLE_CLOUD_PROJECT=agents-stg
+# GOOGLE_CLOUD_LOCATION=us-central1
+# GOOGLE_CLOUD_STORAGE_BUCKET=<YOUR_STORAGE_BUCKET>  # Only required for deployment on Agent Engine
+# # VERTEX_AI_RAG_CORPUS_ID=6917529027641081856
+# VERTEX_AI_RAG_CORPUS_ID=7782220156096217088
+# GCS_INSTRUMENTATION_BUCKET_NAME=otel-instrumentation-test-bucket
+# GCS_OTEL_COLLECTOR_BUCKET_NAME=otel-agent
 
 @dataclass
 class ResearchConfiguration:

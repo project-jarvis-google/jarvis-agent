@@ -13,7 +13,7 @@ dev-backend:
 
 # Start the React frontend development server
 dev-frontend:
-	npm --prefix frontend run dev
+	npm --prefix frontend run local
 
 # Launch local dev playground
 playground:
@@ -36,9 +36,7 @@ backend:
 		--project $$PROJECT_ID \
 		--region "us-central1" \
 		--labels "created-by=adk" \
-		--set-env-vars \
-		"COMMIT_SHA=$(shell git rev-parse HEAD)" \
-		$(if $(IAP),--iap) \
+		--allow-unauthenticated \
 		$(if $(PORT),--port=$(PORT))
 
 # Launch local development server with hot-reload

@@ -1,5 +1,4 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { v4 as uuidv4 } from 'uuid';
 import { WelcomeScreen } from "@/components/WelcomeScreen";
 import { ChatMessagesView } from "@/components/ChatMessagesView";
 
@@ -11,27 +10,6 @@ interface MessageWithAgent {
   id: string;
   agent?: string;
   finalReportWithCitations?: boolean;
-}
-
-interface AgentMessage {
-  parts: { text: string }[];
-  role: string;
-}
-
-interface AgentResponse {
-  content: AgentMessage;
-  usageMetadata: {
-    candidatesTokenCount: number;
-    promptTokenCount: number;
-    totalTokenCount: number;
-  };
-  author: string;
-  actions: {
-    stateDelta: {
-      research_plan?: string;
-      final_report_with_citations?: boolean;
-    };
-  };
 }
 
 interface ProcessedEvent {
@@ -53,6 +31,7 @@ export default function App() {
   const currentAgentRef = useRef('');
   const accumulatedTextRef = useRef("");
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const API_BASE_URL=`https://agent-app-428871167882.us-central1.run.app`
 
   const retryWithBackoff = async (
     fn: () => Promise<any>,
@@ -81,7 +60,7 @@ export default function App() {
   };
 
   const createSession = async (): Promise<{userId: string, sessionId: string, appName: string}> => {
-    const response = await fetch(`/api/apps/app/users/u_999/sessions`, {
+    const response = await fetch(API_BASE_URL + `/apps/app/users/u_999/sessions`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -103,7 +82,7 @@ export default function App() {
   const checkBackendHealth = async (): Promise<boolean> => {
     try {
       // Use the docs endpoint or root endpoint to check if backend is ready
-      const response = await fetch("/api/docs", {
+      const response = await fetch(API_BASE_URL+ `/docs`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json"
@@ -281,7 +260,7 @@ export default function App() {
     }
   };
 
-  const handleSubmit = useCallback(async (query: string, model: string, effort: string) => {
+  const handleSubmit = useCallback(async (query: string) => {
     if (!query.trim()) return;
 
     setIsLoading(true);
@@ -322,7 +301,7 @@ export default function App() {
 
       // Send the message with retry logic
       const sendMessage = async () => {
-        const response = await fetch("/api/run_sse", {
+        const response = await fetch(API_BASE_URL + `/run_sse`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -466,25 +445,13 @@ export default function App() {
     window.location.reload();
   }, []);
 
-  // Scroll to bottom when messages update
-  const scrollToBottom = useCallback(() => {
-    if (scrollAreaRef.current) {
-      const scrollViewport = scrollAreaRef.current.querySelector(
-        "[data-radix-scroll-area-viewport]"
-      );
-      if (scrollViewport) {
-        scrollViewport.scrollTop = scrollViewport.scrollHeight;
-      }
-    }
-  }, []);
-
   const BackendLoadingScreen = () => (
     <div className="flex-1 flex flex-col items-center justify-center p-4 overflow-hidden relative">
       <div className="w-full max-w-2xl z-10 bg-card/50 backdrop-blur-md p-8 rounded-2xl border shadow-2xl">
         
         <div className="text-center space-y-6">
           <h1 className="text-4xl font-bold text-card-foreground flex items-center justify-center gap-3">
-            ✨ Delivery App Mod Agent 🚀
+            ✨ Otel Agent 🚀
           </h1>
           
           <div className="flex flex-col items-center space-y-4">

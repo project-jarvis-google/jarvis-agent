@@ -129,14 +129,14 @@ export function ActivityTimeline({
     }
   }, [isLoading, processedEvents]);
   return (
-    <Card className={`border-none rounded-lg bg-neutral-700 ${isTimelineCollapsed ? "h-10 py-2" : "max-h-96 py-2"}`}>
+    <Card className={`border-none rounded-lg bg-[#E8F0FE] ${isTimelineCollapsed ? "h-10 py-2" : "max-h-96 py-2"}`}>
       <CardHeader className="py-0">
         <CardDescription className="flex items-center justify-between">
           <div
             className="flex items-center justify-start text-sm w-full cursor-pointer gap-2 text-neutral-100"
             onClick={() => setIsTimelineCollapsed(!isTimelineCollapsed)}
           >
-            <span>Response</span>
+            <span className="text-black text-lg">Response</span>
             {websiteCount > 0 && (
               <span className="text-xs bg-neutral-600 px-2 py-0.5 rounded-full">
                 {websiteCount} websites
@@ -156,11 +156,11 @@ export function ActivityTimeline({
             {isLoading && processedEvents.length === 0 && (
               <div className="relative pl-8 pb-4">
                 <div className="absolute left-3 top-3.5 h-full w-0.5 bg-neutral-800" />
-                <div className="absolute left-0.5 top-2 h-5 w-5 rounded-full bg-neutral-800 flex items-center justify-center ring-4 ring-neutral-900">
+                <div className="absolute left-0.5 top-2 h-5 w-5 rounded-full bg-neutral-800 flex items-center justify-center ring-3 ring-neutral-900">
                   <Loader2 className="h-3 w-3 text-neutral-400 animate-spin" />
                 </div>
                 <div>
-                  <p className="text-sm text-neutral-300 font-medium">
+                  <p className="text-base text-black font-medium">
                     Thinking...
                   </p>
                 </div>
@@ -174,16 +174,16 @@ export function ActivityTimeline({
                     (isLoading && index === processedEvents.length - 1) ? (
                       <div className="absolute left-3 top-3.5 h-full w-0.5 bg-neutral-600" />
                     ) : null}
-                    <div className="absolute left-0.5 top-2 h-6 w-6 rounded-full bg-neutral-600 flex items-center justify-center ring-4 ring-neutral-700">
+                    <div className="absolute left-0.5 top-2 h-6 w-6 rounded-full bg-white flex items-center justify-center ring-2 ring-neutral-700">
                       {getEventIcon(eventItem.title, index)}
                     </div>
                     <div>
-                      <p className="text-sm text-neutral-200 font-medium mb-0.5">
+                      <p className="text-base text-black font-medium mb-0.5">
                         {eventItem.title}
                       </p>
-                      <div className="text-xs text-neutral-300 leading-relaxed">
+                      <div className="text-base text-black leading-relaxed">
                         {isJsonData(eventItem.data) ? (
-                          <pre className="bg-neutral-800 p-2 rounded text-xs overflow-x-auto whitespace-pre-wrap">
+                          <pre className="bg-[#00000026] p-2 rounded text-xs overflow-x-auto whitespace-pre-wrap">
                             {formatEventData(eventItem.data)}
                           </pre>
                         ) : (
@@ -201,7 +201,7 @@ export function ActivityTimeline({
                                 </a>
                               ),
                               code: ({ children }) => (
-                                <code className="bg-neutral-800 px-1 py-0.5 rounded text-xs">
+                                <code className="bg-white px-1 py-0.5 rounded text-xs">
                                   {children}
                                 </code>
                               ),
@@ -216,11 +216,11 @@ export function ActivityTimeline({
                 ))}
                 {isLoading && processedEvents.length > 0 && (
                   <div className="relative pl-8 pb-4">
-                    <div className="absolute left-0.5 top-2 h-5 w-5 rounded-full bg-neutral-600 flex items-center justify-center ring-4 ring-neutral-700">
+                    <div className="absolute left-0.5 top-2 h-5 w-5 rounded-full bg-white flex items-center justify-center ring-3 ring-neutral-700">
                       <Loader2 className="h-3 w-3 text-neutral-400 animate-spin" />
                     </div>
                     <div>
-                      <p className="text-sm text-neutral-300 font-medium">
+                      <p className="text-base text-black font-medium">
                         Thinking...
                       </p>
                     </div>

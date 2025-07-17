@@ -12,91 +12,36 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import datetime
-import logging
-import re
-from collections.abc import AsyncGenerator
-from typing import Literal
+"""Opentelemetry Helper Agent: Answers user's query about the opentelemetry, or build opentelemetry collector configurations 
+based on user input or return the java instrumented application gcs bucket url"""
 
-
-
-import datetime
-from zoneinfo import ZoneInfo
-from google.adk.agents import Agent
-
-from google.adk.agents import BaseAgent, LlmAgent, LoopAgent, SequentialAgent
-from google.adk.agents.callback_context import CallbackContext
-from google.adk.agents.invocation_context import InvocationContext
-from google.adk.events import Event, EventActions
-from google.adk.planners import BuiltInPlanner
-from google.adk.tools import google_search
+from google.adk.agents import LlmAgent
 from google.adk.tools.agent_tool import AgentTool
-from google.genai import types as genai_types
-from pydantic import BaseModel, Field
 
+
+from .sub_agents.otel_doc_rag_corpus_agent import otel_doc_rag_corpus_agent
+from .sub_agents.otel_app_instrumentation_agent import otel_app_instrumentation_agent
+from .sub_agents.otel_collector_config_agent import otel_collector_config_agent
 from .config import config
 
+MODEL = "gemini-2.5-flash"
 
-def get_weather(city: str) -> dict:
-    """Retrieves the current weather report for a specified city.
-
-    Args:
-        city (str): The name of the city for which to retrieve the weather report.
-
-    Returns:
-        dict: status and result or error msg.
-    """
-    if city.lower() == "new york":
-        return {
-            "status": "success",
-            "report": (
-                "The weather in New York is sunny with a temperature of 25 degrees"
-                " Celsius (77 degrees Fahrenheit)."
-            ),
-        }
-    else:
-        return {
-            "status": "error",
-            "error_message": f"Weather information for '{city}' is not available.",
-        }
-
-
-def get_current_time(city: str) -> dict:
-    """Returns the current time in a specified city.
-
-    Args:
-        city (str): The name of the city for which to retrieve the current time.
-
-    Returns:
-        dict: status and result or error msg.
-    """
-
-    if city.lower() == "new york":
-        tz_identifier = "America/New_York"
-    else:
-        return {
-            "status": "error",
-            "error_message": (
-                f"Sorry, I don't have timezone information for {city}."
-            ),
-        }
-
-    tz = ZoneInfo(tz_identifier)
-    now = datetime.datetime.now(tz)
-    report = (
-        f'The current time in {city} is {now.strftime("%Y-%m-%d %H:%M:%S %Z%z")}'
-    )
-    return {"status": "success", "report": report}
-
-root_agent = Agent(
-    name="weather_time_agent",
-    model="gemini-2.0-flash",
+otel_coordinator = LlmAgent(
+    name="otel_coordinator",
+    model=MODEL,
     description=(
-        "Agent to answer questions about the time and weather in a city."
+        "Answers user's query about the opentelemetry, or create an opentelemetry collector starter pack with" \
+        "configurations based on user input. If the user requests for it, return the java instrumented application gcs bucket url."
     ),
-    instruction=(
-        "You are a helpful agent who can answer user questions about the time and weather in a city."
-    ),
-    tools=[get_weather, get_current_time],
+    instruction="You are a helpful agent who can answer user questions about Opentelemetry framework or create an " \
+    "opentelemetry collector starter pack with configurations based on user input." \
+    "If the user requests for it, return the java instrumented application gcs bucket url.",
+    output_key="otel_coordinator_output",
+    tools=[
+        AgentTool(agent=otel_doc_rag_corpus_agent),
+        AgentTool(agent=otel_app_instrumentation_agent),
+        AgentTool(agent=otel_collector_config_agent),
+    ],
 )
 
+root_agent = otel_coordinator
