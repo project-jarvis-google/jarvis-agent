@@ -13,7 +13,7 @@ dev-backend:
 
 # Start the React frontend development server
 dev-frontend:
-	npm --prefix frontend run local
+	npm --prefix frontend run dev
 
 # Launch local dev playground
 playground:
