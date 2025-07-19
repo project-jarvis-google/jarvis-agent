@@ -27,17 +27,29 @@ playground:
 	uv run adk web --port 8501
 
 # Deploy the agent remotely
-# Usage: make backend [IAP=true] [PORT=8080] - Set IAP=true to enable Identity-Aware Proxy, PORT to specify container port
-backend:
+# Usage: make backend [PORT=8080] - Set IAP=true to enable Identity-Aware Proxy, PORT to specify container port
+backend-deploy:
 	PROJECT_ID=$$(gcloud config get-value project) && \
-	gcloud beta run deploy agent-app \
+	gcloud beta run deploy jarvis-backend \
 		--source . \
 		--memory "4Gi" \
 		--project $$PROJECT_ID \
 		--region "us-central1" \
-		--labels "created-by=adk" \
+		--labels "created-by=jarvis" \
 		--allow-unauthenticated \
-		$(if $(PORT),--port=$(PORT))
+		--port 8080
+
+frontend-deploy:
+	PROJECT_ID=$$(gcloud config get-value project) && \
+	cd frontend && \
+	gcloud beta run deploy jarvis-frontend \
+	--source . \
+	--memory "4Gi" \
+	--project $$PROJECT_ID \
+	--region "us-central1" \
+	--labels "created-by=jarvis" \
+	--allow-unauthenticated \
+	--port 8080
 
 # Launch local development server with hot-reload
 local-backend:

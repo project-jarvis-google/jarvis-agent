@@ -31,8 +31,8 @@ export default function App() {
   const currentAgentRef = useRef('');
   const accumulatedTextRef = useRef("");
   const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const API_BASE_URL=`https://agent-app-428871167882.us-central1.run.app`
-
+  // const API_BASE_URL=`https://agent-app-428871167882.us-central1.run.app`
+  const API_BASE_URL=`http://localhost:8000`
   const retryWithBackoff = async (
     fn: () => Promise<any>,
     maxRetries: number = 10,
