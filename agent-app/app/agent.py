@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Opentelemetry Helper Agent: Answers user's query about the opentelemetry, or build opentelemetry collector configurations 
+"""Opentelemetry Helper Agent: Answers user's query about the opentelemetry, or build opentelemetry collector configurations
 based on user input or return the java instrumented application gcs bucket url"""
 
 from google.adk.agents import LlmAgent
@@ -26,9 +26,7 @@ MODEL = "gemini-2.5-flash"
 root_agent = LlmAgent(
     name="otel_coordinator",
     model=MODEL,
-    description=(
-        "Answers user's query about anything."
-    ),
+    description=("Answers user's query about anything."),
     instruction=ROOT_AGENT_PROMPT,
     tools=[
         AgentTool(agent=google_search_dummy_agent),

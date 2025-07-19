@@ -9,5 +9,5 @@ google_search_dummy_agent = Agent(
     description="Agent to answer questions using Google Search.",
     instruction=GOOGLE_SEARCH_PROMPT,
     # google_search is a pre-built tool which allows the agent to perform Google searches.
-    tools=[google_search]
+    tools=[google_search],
 )
