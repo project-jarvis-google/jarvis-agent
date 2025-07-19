@@ -11,18 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""This is the class to represent the typing model"""
 import uuid
 from typing import (
     Literal,
 )
-
 from google.adk.events.event import Event
 from google.genai.types import Content
 from pydantic import (
     BaseModel,
     Field,
 )
-
 
 class Request(BaseModel):
     """Represents the input for a chat request with optional configuration."""

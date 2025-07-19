@@ -23,7 +23,6 @@ from opentelemetry.sdk.trace import TracerProvider, export
 
 from app.utils.gcs import create_bucket_if_not_exists
 from app.utils.tracing import CloudTraceLoggingSpanExporter
-from app.utils.typing import Feedback
 
 _, project_id = google.auth.default()
 logging_client = google_cloud_logging.Client()
