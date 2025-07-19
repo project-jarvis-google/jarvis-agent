@@ -61,23 +61,8 @@ app: FastAPI = get_fast_api_app(
     allow_origins=allow_origins,
     session_service_uri=session_service_uri,
 )
-app.title = "agent-app"
-app.description = "API for interacting with the Agent agent-app"
-
-
-@app.post("/feedback")
-def collect_feedback(feedback: Feedback) -> dict[str, str]:
-    """Collect and log feedback.
-
-    Args:
-        feedback: The feedback data to log
-
-    Returns:
-        Success message
-    """
-    logger.log_struct(feedback.model_dump(), severity="INFO")
-    return {"status": "success"}
-
+app.title = "jarvis-app"
+app.description = "API for interacting with the Agent jarvis-app"
 
 # Main execution
 if __name__ == "__main__":

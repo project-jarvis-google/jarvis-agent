@@ -17,31 +17,20 @@ based on user input or return the java instrumented application gcs bucket url""
 
 from google.adk.agents import LlmAgent
 from google.adk.tools.agent_tool import AgentTool
-
-
-from .sub_agents.otel_doc_rag_corpus_agent import otel_doc_rag_corpus_agent
-from .sub_agents.otel_app_instrumentation_agent import otel_app_instrumentation_agent
-from .sub_agents.otel_collector_config_agent import otel_collector_config_agent
-from .config import config
+from .sub_agents.google_search_dummy_agent import google_search_dummy_agent
+from .config import project_id
+from .prompt import ROOT_AGENT_PROMPT
 
 MODEL = "gemini-2.5-flash"
 
-otel_coordinator = LlmAgent(
+root_agent = LlmAgent(
     name="otel_coordinator",
     model=MODEL,
     description=(
-        "Answers user's query about the opentelemetry, or create an opentelemetry collector starter pack with" \
-        "configurations based on user input. If the user requests for it, return the java instrumented application gcs bucket url."
+        "Answers user's query about anything."
     ),
-    instruction="You are a helpful agent who can answer user questions about Opentelemetry framework or create an " \
-    "opentelemetry collector starter pack with configurations based on user input." \
-    "If the user requests for it, return the java instrumented application gcs bucket url.",
-    output_key="otel_coordinator_output",
+    instruction=ROOT_AGENT_PROMPT,
     tools=[
-        AgentTool(agent=otel_doc_rag_corpus_agent),
-        AgentTool(agent=otel_app_instrumentation_agent),
-        AgentTool(agent=otel_collector_config_agent),
+        AgentTool(agent=google_search_dummy_agent),
     ],
 )
-
-root_agent = otel_coordinator
