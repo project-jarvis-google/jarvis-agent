@@ -1,6 +1,7 @@
 Prerequisites:
 - Make - https://formulae.brew.sh/formula/make
-- 
+- Python 3.10
+- Google Github account
 
 Steps:
 
