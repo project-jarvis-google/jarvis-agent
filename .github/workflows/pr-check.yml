@@ -19,15 +19,12 @@ jobs:
           cd agent-app
           make checks-github
 
-      - name: Install Poetry
-        run: pip install poetry
-
-      - name: Install dependencies
-        run: poetry install
-
       - name: Lint the code
         run: |
-          cd agent-app/app
+          cd agent-app
+          pip install poetry
+          poetry install
+          cd app
           pip install pylint
           find . -path './.venv' -prune -o -name "*.py" -type f -print0 | xargs -0 pylint --ignore-paths='utils/.*' --disable=unexpected-keyword-arg,missing-kwoa
 
