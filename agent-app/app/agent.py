@@ -20,7 +20,7 @@ from .sub_agents.google_search_dummy_agent import google_search_dummy_agent
 from .config import project_id, MODEL
 from .prompt import ROOT_AGENT_PROMPT
 
-
+system.out.println
 root_agent = LlmAgent(
     name="jarvis_coordinator",
     model=MODEL,
