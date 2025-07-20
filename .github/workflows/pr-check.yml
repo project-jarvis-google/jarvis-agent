@@ -22,7 +22,7 @@ jobs:
       - name: Lint the code
         run: |
           cd agent-app
-          make install
+          make checks-github
           cd app
           pip install pylint
           find . -path './.venv' -prune -o -name "*.py" -type f -print0 | xargs -0 pylint --ignore-paths='utils/.*' --disable=unexpected-keyword-arg,missing-kwoa
