@@ -14,24 +14,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'  # You can customize this
-
-      - name: Install uv
+      - name: Build the code
         run: |
-          curl -Ls https://astral.sh/uv/install.sh | bash
-          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+          make install
 
-      - name: Verify uv installation
-        run: uv --version
-
-      - name: Install dependencies using uv
-        run: |
-          cd agent-app
-          uv pip install --system .
-
-      - name: Run build (optional step)
-        run: |
-          python -m compileall .
+      
