@@ -76,4 +76,4 @@ checks-github:
 	uv sync --dev --extra jupyter && npm --prefix frontend install
 
 checks-pylint:
-	pylint $(git ls-files '*.py') --ignore-paths='agent-app/app/utils/*' --disable=unexpected-keyword-arg,missing-kwoa
+	pylint . --ignore-paths='agent-app/app/utils/*' --disable=unexpected-keyword-arg,missing-kwoa
