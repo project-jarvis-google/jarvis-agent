@@ -23,6 +23,8 @@ jobs:
         run: |
           cd agent-app
           pip install pylint
+          ls
+          pwd
           make checks-pylint
 
       
