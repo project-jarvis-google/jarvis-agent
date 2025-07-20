@@ -451,7 +451,7 @@ export default function App() {
         
         <div className="text-center space-y-6">
           <h1 className="text-4xl font-bold text-card-foreground flex items-center justify-center gap-3">
-            ✨ Otel Agent 🚀
+            ✨ Jarvis Agent 🚀
           </h1>
           
           <div className="flex flex-col items-center space-y-4">

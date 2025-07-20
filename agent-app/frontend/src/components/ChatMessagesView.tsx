@@ -326,7 +326,7 @@ export function ChatMessagesView({
       {/* Header with New Chat button */}
       <div className="border-b border-neutral-700 p-4 bg-[#4285F4]">
         <div className="max-w-4xl mx-auto flex justify-between items-center">
-          <h1 className="text-3xl font-semibold text-neutral-100">Otel Agent</h1>
+          <h1 className="text-3xl font-semibold text-neutral-100">Jarvis Agent</h1>
           <Button
             onClick={handleNewChat}
             variant="outline"

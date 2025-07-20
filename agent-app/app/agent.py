@@ -12,19 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Opentelemetry Helper Agent: Answers user's query about the opentelemetry, or build opentelemetry collector configurations
-based on user input or return the java instrumented application gcs bucket url"""
+"""Jarvis Agent: Answers user's query about the Presales and Delivery of theApplication Modernization, Application Development and Apigee as practice"""
 
 from google.adk.agents import LlmAgent
 from google.adk.tools.agent_tool import AgentTool
 from .sub_agents.google_search_dummy_agent import google_search_dummy_agent
-from .config import project_id
+from .config import project_id, MODEL
 from .prompt import ROOT_AGENT_PROMPT
 
-MODEL = "gemini-2.5-flash"
 
 root_agent = LlmAgent(
-    name="otel_coordinator",
+    name="jarvis_coordinator",
     model=MODEL,
     description=("Answers user's query about anything."),
     instruction=ROOT_AGENT_PROMPT,
