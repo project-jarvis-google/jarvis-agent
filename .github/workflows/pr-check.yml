@@ -19,4 +19,9 @@ jobs:
           cd agent-app
           make checks-github
 
+      - name: Lint the code
+        run: |
+          cd agent-app
+          make checks-pylint
+
       
