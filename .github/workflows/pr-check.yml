@@ -1,0 +1,35 @@
+name: PR Build Check
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build Python Project using uv
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'  # You can customize this
+
+      - name: Install uv
+        run: |
+          curl -Ls https://astral.sh/uv/install.sh | bash
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Verify uv installation
+        run: uv --version
+
+      - name: Install dependencies using uv
+        run: uv pip install -r requirements.txt
+
+      - name: Run build (optional step)
+        run: |
+          python -m compileall .
