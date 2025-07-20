@@ -11,13 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+"""Agent App"""
 import os
 
 import google.auth
 from fastapi import FastAPI
 from google.adk.cli.fast_api import get_fast_api_app
-from google.cloud import logging as google_cloud_logging
 from opentelemetry import trace
 from opentelemetry.sdk.trace import TracerProvider, export
 
@@ -25,8 +24,6 @@ from app.utils.gcs import create_bucket_if_not_exists
 from app.utils.tracing import CloudTraceLoggingSpanExporter
 
 _, project_id = google.auth.default()
-logging_client = google_cloud_logging.Client()
-logger = logging_client.logger(__name__)
 allow_origins = (
     os.getenv("ALLOW_ORIGINS", "*").split(",") if os.getenv("ALLOW_ORIGINS") else "*"
 )
@@ -49,16 +46,16 @@ db_pass = os.environ.get("DB_PASS")
 db_host = os.environ.get("DB_HOST")
 
 # Set session_service_uri if database credentials are available
-session_service_uri = None
+SESSION_SERVICE_URI = None
 if db_host and db_pass:
-    session_service_uri = f"postgresql://{db_user}:{db_pass}@{db_host}:5432/{db_name}"
+    SESSION_SERVICE_URI = f"postgresql://{db_user}:{db_pass}@{db_host}:5432/{db_name}"
 
 app: FastAPI = get_fast_api_app(
     agents_dir=AGENT_DIR,
     web=True,
     artifact_service_uri=bucket_name,
     allow_origins=allow_origins,
-    session_service_uri=session_service_uri,
+    session_service_uri=SESSION_SERVICE_URI,
 )
 app.title = "jarvis-app"
 app.description = "API for interacting with the Agent jarvis-app"

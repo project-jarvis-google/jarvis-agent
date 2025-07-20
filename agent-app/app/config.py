@@ -11,9 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+"""Configs for the sub agent google_search_dummy"""
 import os
-from dataclasses import dataclass
 import google.auth
 
 _, project_id = google.auth.default()

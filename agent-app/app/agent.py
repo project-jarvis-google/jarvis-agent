@@ -12,12 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Jarvis Agent: Answers user's query about the Presales and Delivery of theApplication Modernization, Application Development and Apigee as practice"""
+"""
+Jarvis Agent: Answers user's query about the Presales 
+and Delivery of theApplication Modernization, Application Development 
+and Apigee as practice
+"""
 
 from google.adk.agents import LlmAgent
 from google.adk.tools.agent_tool import AgentTool
 from .sub_agents.google_search_dummy_agent import google_search_dummy_agent
-from .config import project_id, MODEL
+from .config import MODEL
 from .prompt import ROOT_AGENT_PROMPT
 
 root_agent = LlmAgent(
@@ -29,5 +33,3 @@ root_agent = LlmAgent(
         AgentTool(agent=google_search_dummy_agent),
     ],
 )
-
-
