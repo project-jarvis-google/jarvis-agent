@@ -39,10 +39,10 @@ export function WelcomeScreen({
         />
       </Card>
       <h1 className="text-4xl font-bold text-[#4285F4] flex items-center justify-center gap-3">
-        Otel Agent
+        Jarvis Agent
       </h1>
       <p className="text-base text-neutral-600 max-w-md mx-auto">
-        Your Answer to every question related to Open-Telemetry!
+        Your Answer to every question related to App Mod, App Dev and Apigee!
       </p>
     </div>
 

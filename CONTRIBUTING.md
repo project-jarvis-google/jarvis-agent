@@ -1,20 +1,24 @@
-# Contributing to delivery-app-mod-agent
+# Contributing to Jarvis-agent
 
-We welcome contributions to the `delivery-app-mod-agent` project! Please follow these guidelines to ensure a smooth contribution process.
+🎉 Thank you for your interest in contributing to `jarvis-agent`! 🎉
 
-## Prerequisites
+We're excited to have you on board. To make the process as smooth as possible for everyone, we've put together these guidelines. Following them helps us review and merge your contributions efficiently.
+
+## 📋 Prerequisites
 
 Before you start, make sure you have the following installed:
 
 - **Make**:  [https://formulae.brew.sh/formula/make](https://formulae.brew.sh/formula/make)
 - **Python 3.10** 
 - **Google Github account**
+- **GCP Project agents-stg**
+- **Access to Org https://github.com/project-jarvis-google**
 
-## Steps to Contribute
+## 🚀 Steps to Contribute
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/arjunvijaygoogle/delivery-app-mod-agent.git
+    git clone https://github.com/project-jarvis-google/jarvis-agent.git
     ```
 
 2.  **Install dependencies:**
@@ -25,6 +29,7 @@ Before you start, make sure you have the following installed:
 
 3.  **Run the development environment:**
     ```bash
+    gcloud auth application-default login
     make dev
     ```
     This command starts both the frontend and backend:
@@ -33,7 +38,9 @@ Before you start, make sure you have the following installed:
       - Backend Docs: [http://localhost:8000/docs](http://localhost:8000/docs) (FastAPI)
       - ADK UI: [http://localhost:8000/](http://localhost:8000/) (ADK UI)
 
-## Adding a New Agent
+## ✨ Adding a New Agent
+
+This is the most common way to contribute! Here’s how you can add your own sub-agent to the system.
 
 1.  **Create a feature branch:**
     ```bash
@@ -46,7 +53,7 @@ Before you start, make sure you have the following installed:
 
 ```python
       root_agent = LlmAgent(
-            name="otel_coordinator",
+            name="jarvis_coordinator",
             model=MODEL,
                 AgentTool(agent=google_search_dummy_agent),
             ],
@@ -54,6 +61,7 @@ Before you start, make sure you have the following installed:
 ```
 4.  **Documentation:**  Ensure that each method has a proper docstring and follows the project structure.  Also, make sure to add `__init__.py` file in your agent directory.
 5.  **Test your changes:**
+    1.  Run the following command locally and test your changes for new sub agent by prompting
     ```bash
     make dev
     ```
