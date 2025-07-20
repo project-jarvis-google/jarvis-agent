@@ -28,7 +28,9 @@ jobs:
         run: uv --version
 
       - name: Install dependencies using uv
-        run: uv pip install -r requirements.txt
+        run: |
+          cd agent-app/app
+          uv pip install -r requirements.txt
 
       - name: Run build (optional step)
         run: |
