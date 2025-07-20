@@ -21,6 +21,7 @@ jobs:
 
       - name: Lint the code
         run: |
+          cd agent-app
           pip install pylint
           make checks-pylint
 
