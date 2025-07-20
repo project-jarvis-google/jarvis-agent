@@ -16,6 +16,7 @@ jobs:
 
       - name: Build the code
         run: |
+          cd agent-app
           make install
 
       
