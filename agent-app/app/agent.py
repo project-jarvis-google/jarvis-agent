@@ -41,3 +41,4 @@ root_agent = LlmAgent(
     ],
   # -- This is the key step to link the agents ---
     sub_agents=[discovery_architect_agent]
+)
