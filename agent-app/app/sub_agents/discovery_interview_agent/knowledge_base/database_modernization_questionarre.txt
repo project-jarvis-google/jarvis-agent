@@ -1,0 +1,56 @@
+# Database Overview & Workload
+- Current database technology, version, and edition (e.g., Oracle 19c Enterprise)
+- Primary workload type (OLTP, OLAP, or HTAP)
+- Total size of the database and its projected growth rate
+- Current hosting platform (e.g., on-premises, private cloud, other public cloud)
+- The number and complexity of schemas, tables, views, and indexes
+- The nature and volume of large objects (LOBs, BLOBs, etc.) stored in the database
+
+# Performance & Scalability
+- Known performance bottlenecks and peak load times
+- Average and peak transaction volumes and concurrent user counts
+- Current read/write ratio for the primary workload
+- Existing database scaling strategy (vertical vs. horizontal)
+- Key performance metrics and any existing performance benchmarking reports
+- Details on connection pooling mechanisms currently in use
+
+# High Availability & Disaster Recovery
+- Current Recovery Point Objective (RPO) and Recovery Time Objective (RTO) requirements
+- The existing High Availability (HA) setup (e.g., clustering, replication, Oracle RAC)
+- The current Disaster Recovery (DR) strategy and the date it was last tested
+- Requirements for cross-regional replication for DR or data locality
+
+# Security & Compliance
+- Data encryption methods for data at rest and in transit
+- The current strategy for managing user authentication and authorization
+- Use of specific security features like Virtual Private Database (VPD) or Row-Level Security
+- Any specific compliance or data residency requirements (e.g., GDPR, HIPAA) that dictate where data must be stored
+- Current auditing and logging mechanisms for database activity
+- The presence of any sensitive data (e.g., PII, financial data) that requires special handling
+- Requirements for fine-grained access control
+- Use of dedicated key management, such as CMEK, for encryption keys
+
+# Data Migration
+- The business tolerance and acceptable window for downtime during the final cutover
+- The strategy for data validation and integrity checks post-migration
+- The number and nature of applications that depend on the current database
+- Compatibility of schema, data types, and proprietary functions with potential target databases
+- The complexity of embedded SQL and proprietary code (e.g., PL/SQL) within applications
+
+# Backup & Recovery
+- The current database backup and recovery strategy and tools
+- Location and type of backup storage (e.g., local disk, NAS, tape, cloud)
+
+# Monitoring & Operations
+- Current tools and processes for monitoring database health and performance
+- The current patching and maintenance schedule and process
+
+# Cost & Licensing
+- The current annual costs for database licensing, support, and hardware maintenance
+- The desired future cost model (e.g., pay-as-you-go, subscription)
+
+# Oracle Specific Details
+- The use of Oracle-specific features like RAC, Data Guard, GoldenGate, or advanced compression
+- The extent to which PL/SQL, stored procedures, triggers, and packages are used
+- The use of partitioning strategies for large tables
+- The storage management method (e.g., ASM vs. standard file systems like ext4, NTFS)
