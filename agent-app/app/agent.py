@@ -21,15 +21,21 @@ and Apigee as practice
 from google.adk.agents import LlmAgent
 from google.adk.tools.agent_tool import AgentTool
 from .sub_agents.google_search_dummy_agent import google_search_dummy_agent
+from .sub_agents.discovery_interview_agent import discovery_architect_agent
 from .config import MODEL
 from .prompt import ROOT_AGENT_PROMPT
+from .tools import transfer_tool
 
+# This is now the main agent for your application
 root_agent = LlmAgent(
+    model=MODEL, # A fast model is good for simple routing
     name="jarvis_coordinator",
-    model=MODEL,
-    description=("Answers user's query about anything."),
     instruction=ROOT_AGENT_PROMPT,
-    tools=[
-        AgentTool(agent=google_search_dummy_agent),
-    ],
+    # tools=[
+    #     AgentTool(agent=google_search_dummy_agent),
+    #     AgentTool(agent=discovery_architect_agent)
+    # ],
+    tools=[transfer_tool],
+    # -- This is the key step to link the agents ---
+    sub_agents=[discovery_architect_agent]
 )
