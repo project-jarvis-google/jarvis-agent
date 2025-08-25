@@ -12,13 +12,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+### Stage 1
+
+FROM golang:1.22-alpine AS go-builder
+
+ENV GOBIN=/go-installs
+
+RUN go install github.com/go-enry/enry@latest
+
+### Stage 2
+
 FROM python:3.11-slim
 
-RUN pip install --no-cache-dir uv==0.6.12
+RUN pip install --no-cache-dir uv==0.6.12 && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends git nodejs npm && \
+    npm install -g node-gyp && \
+    npm install -g @google/gemini-cli && \
+    rm -rf /var/lib/apt/lists/*
 
 WORKDIR /code
 
-COPY ./pyproject.toml ./README.md ./uv.lock* ./
+RUN mkdir /go-installs
+
+COPY ./pyproject.toml ./uv.lock* ./
+
+COPY --from=go-builder /go-installs /go-installs
 
 COPY ./app ./app
 

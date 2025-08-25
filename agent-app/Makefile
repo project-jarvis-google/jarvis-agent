@@ -32,6 +32,8 @@ backend-deploy:
 	PROJECT_ID=$$(gcloud config get-value project) && \
 	gcloud beta run deploy jarvis-backend \
 		--source . \
+		--env-vars-file=./.env.prod.yaml \
+		--update-secrets=GEMINI_API_KEY=jarvis-agent-GEMINI_API_KEY:latest \
 		--memory "4Gi" \
 		--project $$PROJECT_ID \
 		--region "us-central1" \
