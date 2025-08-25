@@ -23,7 +23,7 @@ def identify_languages_from_source_code(tool_context: ToolContext) -> bool:
     logging.info("in identify_languages_from_source_code os.path.exists => %s", os.path.exists(secure_temp_repo_dir))
     if 'secure_temp_repo_dir' in locals() and os.path.exists(secure_temp_repo_dir):
         
-        result = subprocess.run(["/usr/local/google/home/cbangera/go/bin/enry","-json"], cwd=secure_temp_repo_dir, capture_output=True, text=True, check=True)
+        result = subprocess.run(["/go-installs/enry","-json"], cwd=secure_temp_repo_dir, capture_output=True, text=True, check=True)
 
         tool_context.state["languages_breakdown_json_str"] = result.stdout
 
