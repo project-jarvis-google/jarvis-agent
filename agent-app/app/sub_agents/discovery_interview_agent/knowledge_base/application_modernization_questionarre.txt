@@ -1,0 +1,20 @@
+# Application Overview
+
+- The primary business purpose and function of the application.
+- The system's architectural style (e.g., 2-tier, 3-tier, monolith).
+- The application's business criticality and any defined Service Level Agreements (SLAs).
+- Any regulatory or compliance requirements the system must adhere to.
+- The overall system architecture, including component diagrams and data flow.
+- A list of high-level dependencies on other internal or external systems.
+- The current model for user authentication and authorization.
+- The current strategy for application logging, monitoring, and alerting.
+
+# Application Components
+
+## Backend
+- Suitability of the backend services for containerization.
+- Details of any scheduled batch processes, including their triggers (e.g., cron, Windows Scheduler), schedules, and I/O formats.
+- Architecture and development/testing setup for any messaging components (e.g., RabbitMQ, Kafka).
+
+## Frontend
+- The primary technology stack used for the front-end.
