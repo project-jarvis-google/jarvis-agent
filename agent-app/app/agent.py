@@ -36,3 +36,10 @@ root_agent = LlmAgent(
         AgentTool(agent=mosaic_rag_agent_presales)
     ],
 )
+
+root_agent = SequentialAgent(
+    name="Cloud_Service_Advisor_AI_Agent",
+ #   model=MODEL,
+    description=ROOT_AGENT_PROMPT,
+    sub_agents=[recommendation_agent]
+)
