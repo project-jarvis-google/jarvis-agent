@@ -18,20 +18,30 @@ and Delivery of theApplication Modernization, Application Development
 and Apigee as practice
 """
 
-from google.adk.agents import LlmAgent
+from google.adk.agents import Agent
 from google.adk.tools.agent_tool import AgentTool
 from .sub_agents.google_search_dummy_agent import google_search_dummy_agent
 from .sub_agents.common_utility_agent.mosaic_rag_agent_presales import mosaic_rag_agent_presales
+from .sub_agents.recommendation_agent import recommendation_agent
+from .sub_agents.writer_agent import writer_agent
+from google.adk.agents import SequentialAgent
 from .config import MODEL
 from .prompt import ROOT_AGENT_PROMPT
 
-root_agent = LlmAgent(
-    name="jarvis_coordinator",
-    model=MODEL,
-    description=("Answers user's query about anything."),
-    instruction=ROOT_AGENT_PROMPT,
-    tools=[
-        AgentTool(agent=google_search_dummy_agent),
-        AgentTool(agent=mosaic_rag_agent_presales)
-    ],
+# root_agent = LlmAgent(
+#     name="jarvis_coordinator",
+#     model=MODEL,
+#     description=("Answers user's query about anything."),
+#     instruction=ROOT_AGENT_PROMPT,
+#     tools=[
+#         AgentTool(agent=google_search_dummy_agent),
+#         AgentTool(agent=mosaic_rag_agent_presales)
+#     ],
+# )
+
+root_agent = SequentialAgent(
+    name="Cloud_Service_Advisor_AI_Agent",
+ #   model=MODEL,
+    description=ROOT_AGENT_PROMPT,
+    sub_agents=[recommendation_agent]
 )
