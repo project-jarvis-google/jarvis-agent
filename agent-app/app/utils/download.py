@@ -17,14 +17,11 @@ logging.basicConfig(
 )
 
 # --- Environment Variables ---
-BUCKET_NAME = os.environ.get("BUCKET_NAME", "agent-cloud-service-recomendation")
+BUCKET_NAME = os.environ.get("BUCKET_NAME", "agent-cloud-service-recomendation-test")
 
 
 def download_pdf_from_gcs(file_name: str, expiration_time: int = 24):
     try:
-        # Ensure the filename has the correct extension
-        # if not file_name.endswith(".pdf"):
-        #  file_name = file_name + ".pdf"
         
         logging.info(f"Initializing GCS client to download '{file_name}'.")
         storage_client = storage.Client()
@@ -44,12 +41,6 @@ def download_pdf_from_gcs(file_name: str, expiration_time: int = 24):
             expiration=expiration_time,
             method="GET",
         )
-
-        #blob.download_to_filename(file_name)
-
-        # logging.info(
-        #     f"Successfully downloaded '{file_name}' from bucket '{BUCKET_NAME}' to local path '{file_name}'."
-        # )
 
         logging.info(f"Successfully generated signed url for '{file_name}' from bucket '{BUCKET_NAME}'.")
         return signed_url
