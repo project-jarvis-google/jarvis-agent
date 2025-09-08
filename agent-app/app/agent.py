@@ -34,7 +34,7 @@ root_agent = LlmAgent(
     instruction=ROOT_AGENT_PROMPT,
     tools=[
         AgentTool(agent=google_search_dummy_agent),
-        AgentTool(agent=mosaic_rag_agent_presales),
-        AgentTool(agent=recommendation_agent)
+        AgentTool(agent=mosaic_rag_agent_presales)
     ],
+    sub_agents=[recommendation_agent]
 )

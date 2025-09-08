@@ -17,7 +17,7 @@ logging.basicConfig(
 )
 
 # --- Environment Variables ---
-BUCKET_NAME = os.environ.get("BUCKET_NAME", "agent-cloud-service-recomendation-test")
+BUCKET_NAME = os.environ.get("BUCKET_NAME", "agent-cloud-service-recomendation")
 
 
 def download_pdf_from_gcs(file_name: str, expiration_time: int = 24):
