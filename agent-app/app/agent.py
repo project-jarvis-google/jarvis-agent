@@ -25,7 +25,7 @@ from .sub_agents.common_utility_agent.mosaic_rag_agent_presales import mosaic_ra
 from .sub_agents.recommendation_agent import recommendation_agent
 from .config import MODEL
 from .prompt import ROOT_AGENT_PROMPT
-from .tools import transfer_tool
+from .tools import transfer_to_discovery_agent_tool
 
 root_agent = LlmAgent(
     name="jarvis_coordinator",
@@ -34,7 +34,9 @@ root_agent = LlmAgent(
     instruction=ROOT_AGENT_PROMPT,
     tools=[
         AgentTool(agent=google_search_dummy_agent),
-        AgentTool(agent=mosaic_rag_agent_presales)
+        AgentTool(agent=mosaic_rag_agent_presales),
+        AgentTool(agent=tech_stack_profiler),
+        transfer_to_discovery_agent_tool
     ],
     sub_agents=[recommendation_agent]
 )
