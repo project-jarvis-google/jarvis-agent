@@ -49,7 +49,6 @@ db_host = os.environ.get("DB_HOST")
 SESSION_SERVICE_URI = None
 if db_host and db_pass:
     SESSION_SERVICE_URI = f"postgresql://{db_user}:{db_pass}@{db_host}:5432/{db_name}"
-
 app: FastAPI = get_fast_api_app(
     agents_dir=AGENT_DIR,
     web=True,
@@ -63,5 +62,4 @@ app.description = "API for interacting with the Agent jarvis-app"
 # Main execution
 if __name__ == "__main__":
     import uvicorn
-
     uvicorn.run(app, host="0.0.0.0", port=8000)

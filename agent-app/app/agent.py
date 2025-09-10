@@ -27,8 +27,8 @@ from .sub_agents.discovery_interview_agent import discovery_architect_agent
 from .config import MODEL
 from .prompt import ROOT_AGENT_PROMPT
 from .tools import transfer_to_discovery_agent_tool
+from .sub_agents.recommendation_agent import recommendation_agent
 
-# This is now the main agent for your application
 root_agent = LlmAgent(
     model=MODEL, # A fast model is good for simple routing
     name="jarvis_coordinator",
@@ -40,5 +40,5 @@ root_agent = LlmAgent(
         transfer_to_discovery_agent_tool
     ],
   # -- This is the key step to link the agents ---
-    sub_agents=[discovery_architect_agent]
+    sub_agents=[discovery_architect_agent, recommendation_agent]
 )
