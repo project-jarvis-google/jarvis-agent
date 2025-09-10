@@ -32,7 +32,6 @@ RUN pip install --no-cache-dir uv==0.6.12 && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /code
-COPY requirements.txt .
 
 RUN mkdir /go-installs
 
