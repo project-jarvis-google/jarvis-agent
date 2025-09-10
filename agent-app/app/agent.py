@@ -18,19 +18,20 @@ and Delivery of theApplication Modernization, Application Development
 and Apigee as practice
 """
 
-from google.adk.agents import LlmAgent, SequentialAgent
+from google.adk.agents import LlmAgent
 from google.adk.tools.agent_tool import AgentTool
 from .sub_agents.google_search_dummy_agent import google_search_dummy_agent
 from .sub_agents.common_utility_agent.mosaic_rag_agent_presales import mosaic_rag_agent_presales
-from .sub_agents.recommendation_agent import recommendation_agent
+from .sub_agents.tech_stack_profiler_agent import tech_stack_profiler
+from .sub_agents.discovery_interview_agent import discovery_architect_agent
 from .config import MODEL
 from .prompt import ROOT_AGENT_PROMPT
 from .tools import transfer_to_discovery_agent_tool
+from .sub_agents.recommendation_agent import recommendation_agent
 
 root_agent = LlmAgent(
+    model=MODEL, # A fast model is good for simple routing
     name="jarvis_coordinator",
-    model=MODEL,
-    description=("Answers user's query about anything."),
     instruction=ROOT_AGENT_PROMPT,
     tools=[
         AgentTool(agent=google_search_dummy_agent),
@@ -38,5 +39,6 @@ root_agent = LlmAgent(
         AgentTool(agent=tech_stack_profiler),
         transfer_to_discovery_agent_tool
     ],
-    sub_agents=[recommendation_agent]
+  # -- This is the key step to link the agents ---
+    sub_agents=[discovery_architect_agent, recommendation_agent]
 )
