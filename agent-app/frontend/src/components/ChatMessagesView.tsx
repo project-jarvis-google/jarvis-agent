@@ -17,6 +17,12 @@ type MdComponentProps = {
   [key: string]: any;
 };
 
+interface DisplayFile {
+  name: string;
+  type: string;
+  url: string; 
+}
+
 interface ProcessedEvent {
   title: string;
   data: any;
@@ -138,20 +144,44 @@ const mdComponents = {
 
 // Props for HumanMessageBubble
 interface HumanMessageBubbleProps {
-  message: { content: string; id: string };
+  message: { content: string; id: string; files?: DisplayFile[] }; 
   mdComponents: typeof mdComponents;
 }
 
-// HumanMessageBubble Component
 const HumanMessageBubble: React.FC<HumanMessageBubbleProps> = ({
   message,
   mdComponents,
 }) => {
   return (
     <div className="text-black rounded-3xl break-words min-h-7 bg-[#3c404326] max-w-[100%] sm:max-w-[90%] px-4 pt-3 rounded-br-lg">
-      <ReactMarkdown components={mdComponents} remarkPlugins={[remarkGfm]}>
-        {message.content}
-      </ReactMarkdown>
+      
+      {/* Render file previews if they exist */}
+      {message.files && message.files.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-2">
+          {message.files.map((file, index) => (
+            <div key={index} className="rounded-lg overflow-hidden border border-neutral-300 bg-white/50">
+              {file.type.startsWith("image/") ? (
+                <img
+                  src={file.url}
+                  alt={file.name}
+                  className="max-w-xs max-h-48 object-contain"
+                />
+              ) : (
+                <Badge variant="secondary" className="p-2 text-black">
+                  {file.name}
+                </Badge>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Render markdown text content only if it exists */}
+      {message.content && (
+        <ReactMarkdown components={mdComponents} remarkPlugins={[remarkGfm]}>
+          {message.content}
+        </ReactMarkdown>
+      )}
     </div>
   );
 };
@@ -282,10 +312,10 @@ const AiMessageBubble: React.FC<AiMessageBubbleProps> = ({
 };
 
 interface ChatMessagesViewProps {
-  messages: { type: "human" | "ai"; content: string; id: string; agent?: string; finalReportWithCitations?: boolean }[];
+  messages: { type: "human" | "ai"; content: string; id: string; agent?: string; finalReportWithCitations?: boolean; files?: DisplayFile[]; }[];
   isLoading: boolean;
   scrollAreaRef: React.RefObject<HTMLDivElement | null>;
-  onSubmit: (query: string) => void;
+  onSubmit: (query: string, files: File[]) => void;  
   onCancel: () => void;
   displayData: string | null;
   messageEvents: Map<string, ProcessedEvent[]>;
