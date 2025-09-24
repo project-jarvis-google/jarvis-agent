@@ -17,9 +17,12 @@ dependencies = [
     "GitPython>=3.1.45",
     "google-cloud-storage",
     "reportlab",
-    "markdown-it-py==4.0.0",
-    "xhtml2pdf==0.2.17"
-
+    "markdown-it-py==3.0.0",
+    "xhtml2pdf==0.2.17",
+    "markdown_pdf==1.9",
+    "fpdf==1.7.2",
+    "pandas==2.3.2",
+    "tabulate==0.9.0"
 ]
 
 requires-python = ">=3.10,<3.14"
