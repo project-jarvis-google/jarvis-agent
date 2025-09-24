@@ -10,12 +10,40 @@ interface MessageWithAgent {
   id: string;
   agent?: string;
   finalReportWithCitations?: boolean;
+  files?: DisplayFile[]; 
+}
+
+interface DisplayFile {
+  name: string;
+  type: string;
+  url: string; 
 }
 
 interface ProcessedEvent {
   title: string;
   data: any;
 }
+const readFileAsBase64 = (
+  file: File
+): Promise<{ dataUrl: string; base64Data: string; mimeType: string; name: string }> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result as string;
+      // dataUrl is "data:mime/type;base64,DATA"
+      // We need just "DATA" for the API
+      const base64Data = dataUrl.split(",")[1];
+      resolve({
+        dataUrl: dataUrl,
+        base64Data: base64Data,
+        mimeType: file.type,
+        name: file.name,
+      });
+    };
+    reader.onerror = (error) => reject(error);
+    reader.readAsDataURL(file);
+  });
+};
 
 export default function App() {
   const [userId, setUserId] = useState<string | null>(null);
@@ -260,9 +288,9 @@ export default function App() {
     }
   };
 
-  const handleSubmit = useCallback(async (query: string) => {
-    if (!query.trim()) return;
-
+  const handleSubmit = useCallback(
+    async (query: string, files: File[]) => {
+    if (!query.trim() && files.length === 0) return; 
     setIsLoading(true);
     try {
       // Create session if it doesn't exist
@@ -282,10 +310,37 @@ export default function App() {
         setAppName(currentAppName);
         console.log('Session created successfully:', { currentUserId, currentSessionId, currentAppName });
       }
+        const fileProcessingPromises = files.map(readFileAsBase64);
+        const processedFiles = await Promise.all(fileProcessingPromises);
+
+        const filesForDisplay: DisplayFile[] = processedFiles.map((pf) => ({
+          name: pf.name,
+          type: pf.mimeType,
+          url: pf.dataUrl,
+        }));
+
+        const apiParts: any[] = [{ text: query }];
+        processedFiles.forEach((pf) => {
+          apiParts.push({
+            inlineData: {
+              mimeType: pf.mimeType,
+              data: pf.base64Data, 
+            },
+          });
+        });
+
 
       // Add user message to chat
-      const userMessageId = Date.now().toString();
-      setMessages(prev => [...prev, { type: "human", content: query, id: userMessageId }]);
+       const userMessageId = Date.now().toString();
+        setMessages(prev => [
+          ...prev,
+          {
+            type: "human",
+            content: query,
+            id: userMessageId,
+            files: filesForDisplay, 
+          },
+        ]);
 
       // Create AI message placeholder
       const aiMessageId = Date.now().toString() + "_ai";
@@ -311,7 +366,7 @@ export default function App() {
             userId: currentUserId,
             sessionId: currentSessionId,
             newMessage: {
-              parts: [{ text: query }],
+              parts: apiParts,
               role: "user"
             },
             streaming: false
@@ -396,7 +451,8 @@ export default function App() {
       }]);
       setIsLoading(false);
     }
-  }, [processSseEventData]);
+  }, [processSseEventData, userId, sessionId, appName]
+);
 
   useEffect(() => {
     if (scrollAreaRef.current) {
