@@ -24,12 +24,11 @@ from .sub_agents.google_search_dummy_agent import google_search_dummy_agent
 from .sub_agents.common_utility_agent.mosaic_rag_agent_presales import mosaic_rag_agent_presales
 from .sub_agents.tech_stack_profiler_agent import tech_stack_profiler
 from .sub_agents.discovery_interview_agent import discovery_architect_agent
-from .sub_agents.capability_mapper_agent import capability_mapper_agent
 from .config import MODEL
 from .prompt import ROOT_AGENT_PROMPT
-from .tools import transfer_to_discovery_agent_tool, transfer_to_capability_mapper_agent_tool
+from .tools import transfer_to_discovery_agent_tool
 from .sub_agents.recommendation_agent import recommendation_agent
-
+from .sub_agents.infrastructure_scanner_agent import infra_scanner_agent
 root_agent = LlmAgent(
     model=MODEL, # A fast model is good for simple routing
     name="jarvis_coordinator",
@@ -38,9 +37,9 @@ root_agent = LlmAgent(
         AgentTool(agent=google_search_dummy_agent),
         AgentTool(agent=mosaic_rag_agent_presales),
         AgentTool(agent=tech_stack_profiler),
-        transfer_to_discovery_agent_tool,
-        transfer_to_capability_mapper_agent_tool
+        AgentTool(agent=infra_scanner_agent),
+        transfer_to_discovery_agent_tool
     ],
   # -- This is the key step to link the agents ---
-    sub_agents=[discovery_architect_agent, recommendation_agent, capability_mapper_agent]
+    sub_agents=[discovery_architect_agent, recommendation_agent]
 )
