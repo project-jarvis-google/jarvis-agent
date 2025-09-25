@@ -2,7 +2,7 @@ import json
 import logging
 
 def filter_json_arr(json_arr_data: dict, desired_attributes: list):
-    return [{key: item[key] for key in desired_attributes} for item in json_arr_data]
+    return [[item[key] for key in desired_attributes] for item in json_arr_data]
 
 def extract_json_arr_str(gemini_output: str) -> str | None:
     """

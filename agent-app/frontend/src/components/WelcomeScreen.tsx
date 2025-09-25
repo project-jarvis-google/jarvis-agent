@@ -5,7 +5,7 @@ import Card from '@mui/material/Card';
 import CardMedia from '@mui/material/CardMedia';
 
 interface WelcomeScreenProps {
-  handleSubmit: (query: string) => void;
+  handleSubmit: (query: string, files: File[]) => void; 
   isLoading: boolean;
   onCancel: () => void;
 }
