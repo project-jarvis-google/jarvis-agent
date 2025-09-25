@@ -40,3 +40,8 @@ transfer_to_capability_mapper_agent_tool = _create_transfer_tool(
     agent_name="capability_mapper_agent",
     description="Transfers the conversation to the specialized Business Capability Mapper agent."
 )
+
+transfer_to_strategy_recommender_agent_tool = _create_transfer_tool(
+    agent_name="strategy_recommender_agent",
+    description="Transfers the conversation to the specialized Strategy Recommendation agent."
+)

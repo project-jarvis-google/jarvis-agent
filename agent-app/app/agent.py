@@ -27,8 +27,9 @@ from .sub_agents.discovery_interview_agent import discovery_architect_agent
 from .sub_agents.capability_mapper_agent import capability_mapper_agent
 from .config import MODEL
 from .prompt import ROOT_AGENT_PROMPT
-from .tools import transfer_to_discovery_agent_tool, transfer_to_capability_mapper_agent_tool
+from .tools import transfer_to_discovery_agent_tool, transfer_to_capability_mapper_agent_tool,transfer_to_strategy_recommender_agent_tool
 from .sub_agents.recommendation_agent import recommendation_agent
+from .sub_agents.strategy_recommender_agent import strategy_recommender_agent
 
 root_agent = LlmAgent(
     model=MODEL, # A fast model is good for simple routing
@@ -39,8 +40,9 @@ root_agent = LlmAgent(
         AgentTool(agent=mosaic_rag_agent_presales),
         AgentTool(agent=tech_stack_profiler),
         transfer_to_discovery_agent_tool,
-        transfer_to_capability_mapper_agent_tool
+        transfer_to_capability_mapper_agent_tool,
+        transfer_to_strategy_recommender_agent_tool
     ],
   # -- This is the key step to link the agents ---
-    sub_agents=[discovery_architect_agent, recommendation_agent, capability_mapper_agent]
+    sub_agents=[discovery_architect_agent, recommendation_agent, capability_mapper_agent,strategy_recommender_agent]
 )

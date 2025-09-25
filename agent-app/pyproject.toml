@@ -23,6 +23,10 @@ dependencies = [
     "fpdf==1.7.2",
     "pandas==2.3.2",
     "tabulate==0.9.0"
+    "markdown-it-py==4.0.0",
+    "xhtml2pdf==0.2.17",
+    "pdfplumber"
+
 ]
 
 requires-python = ">=3.10,<3.14"
