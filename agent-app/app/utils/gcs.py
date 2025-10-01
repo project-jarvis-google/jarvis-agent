@@ -40,3 +40,27 @@ def create_bucket_if_not_exists(bucket_name: str, project: str, location: str) -
             project=project,
         )
         logging.info(f"Created bucket {bucket.name} in {bucket.location}")
+
+def upload_str_to_gcs_bucket(gcs_bucket_name: str, gcs_file_name: str, file_path: str, file_content_type: str) -> bool:
+    """Uploads a file to a Google Cloud Storage bucket.
+
+    Args:
+        gcs_bucket_name: The name of the GCS bucket.
+        gcs_file_name: The desired name of the file in the bucket.
+        file_path: The local path to the file to upload.
+        file_content_type: The content type of the file (e.g., 'application/pdf').
+
+    Returns:
+        True if the upload was successful, False otherwise.
+    """
+    try:
+        storage_client = storage.Client()
+        bucket = storage_client.bucket(gcs_bucket_name)
+        blob = bucket.blob(gcs_file_name)
+        logging.info(f"Uploading {file_path} to gs://{gcs_bucket_name}/{gcs_file_name}...")
+        blob.upload_from_filename(file_path, content_type=file_content_type)
+        logging.info(f"Successfully uploaded to gs://{gcs_bucket_name}/{gcs_file_name}")
+        return True
+    except exceptions.GoogleAPICallError as e:
+        logging.error(f"Failed to upload {file_path} to GCS bucket {gcs_bucket_name}: {e}", exc_info=True)
+        return False

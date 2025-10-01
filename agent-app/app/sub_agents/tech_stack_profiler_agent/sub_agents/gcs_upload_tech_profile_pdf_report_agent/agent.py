@@ -1,9 +1,7 @@
 import os
-import tempfile
 
 from datetime import datetime
-from fpdf import FPDF
-from google.cloud import storage
+from app.utils.pdf_converter import convert_str_to_pdf
 from google.adk.agents import LlmAgent
 from google.adk.tools import ToolContext
 
@@ -22,37 +20,25 @@ def upload_report_to_gcs_as_pdf(tool_context: ToolContext) -> str:
     generated_report = tool_context.state["generated_report"]
     print("generated_report => ", generated_report)
 
-    pdf = FPDF()
-    pdf.add_page()
-    for x in generated_report.splitlines():
-        if("###" in x):
-            pdf.set_font("Arial", style="B", size = 15)
-            x = x.replace("###","").strip()
-        elif("##" in x):
-            pdf.set_font("Arial", style="B", size = 17)
-            x = x.replace("##","").strip()
-        else:
-            pdf.set_font("Arial", size = 13)
-        pdf.cell(200, 10, txt = x, ln = 1, align = 'L')
-
     custom_temp_path = os.getenv("CUSTOM_TEMP_PATH")
     # custom_temp_path="/usr/local/google/home/cbangera/Projects/Jarvis/jarvis-agent/local-temp-dir"
 
-    # with tempfile.TemporaryDirectory(dir=custom_temp_path, delete=False) as tmpdirname:
-    with tempfile.TemporaryDirectory(dir=custom_temp_path) as tmpdirname:
-        # print(f'Temporary directory created at: {tmpdirname}')
-        pdf.output(tmpdirname + "/temp.pdf")
+    is_gcs_upload_successful = convert_str_to_pdf(
+        data_str=generated_report,
+        format="markdown",
+        custom_temp_path=custom_temp_path,
+        del_pdf_temp_file_after_creation=True,
+        upload_pdf_to_gcs=True,
+        gcs_bucket_name=bucket_name,
+        gcs_file_name=filename
+    ).get("is_gcs_file_upload_successful")
 
-        print(f'File created at: {tmpdirname}')
-        
-        storage_client = storage.Client()
-        bucket = storage_client.bucket(bucket_name)
-        blob = bucket.blob(filename)
-        blob.upload_from_filename(tmpdirname + "/temp.pdf", content_type='application/pdf')
-
-    public_url = f"https://storage.googleapis.com/{bucket_name}/{filename}" 
-    print(f"Uploaded '{filename}' to public GCS bucket.")
-    return f"Successfully created the questionnaire. It is publicly accessible at: {public_url}"
+    if is_gcs_upload_successful:
+        public_url = f"https://storage.googleapis.com/{bucket_name}/{filename}" 
+        print(f"Uploaded '{filename}' to public GCS bucket.")
+        return f"Successfully created the pdf report. It is publicly accessible at: {public_url}"
+    
+    return f"Pdf report creation unsuccessful!"
 
 gcs_upload_tech_profile_pdf_report_agent = LlmAgent(
     name="gcs_upload_tech_profile_pdf_report_agent",
