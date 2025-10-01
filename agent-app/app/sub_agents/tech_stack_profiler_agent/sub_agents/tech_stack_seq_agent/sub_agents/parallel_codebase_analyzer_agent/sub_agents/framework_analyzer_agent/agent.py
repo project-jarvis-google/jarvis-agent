@@ -1,6 +1,6 @@
 from google.adk.agents import LlmAgent
 
-from .framework_identification_tools import identify_frameworks
+from .framework_identification_tools import identify_frameworks_initiator
 from .prompt import FRAMEWORK_IDENTIFICATION_AGENT_PROMPT
 
 MODEL = "gemini-2.5-pro"
@@ -14,5 +14,5 @@ framework_analyzer_agent = LlmAgent(
         """
     ),
     instruction=FRAMEWORK_IDENTIFICATION_AGENT_PROMPT,
-    tools=[identify_frameworks],
+    tools=[identify_frameworks_initiator],
 )

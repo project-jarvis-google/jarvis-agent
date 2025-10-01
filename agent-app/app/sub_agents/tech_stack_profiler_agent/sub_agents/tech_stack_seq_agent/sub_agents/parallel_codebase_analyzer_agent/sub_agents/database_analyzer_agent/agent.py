@@ -1,6 +1,6 @@
 from google.adk.agents import LlmAgent
 
-from .database_identification_tools import identify_databases
+from .database_identification_tools import identify_databases_initiator
 from .prompt import DATABASE_ANALYZER_PROMPT
 
 MODEL = "gemini-2.5-pro"
@@ -15,5 +15,5 @@ database_analyzer_agent = LlmAgent(
         """
     ),
     instruction=DATABASE_ANALYZER_PROMPT,
-    tools=[identify_databases],
+    tools=[identify_databases_initiator],
 )

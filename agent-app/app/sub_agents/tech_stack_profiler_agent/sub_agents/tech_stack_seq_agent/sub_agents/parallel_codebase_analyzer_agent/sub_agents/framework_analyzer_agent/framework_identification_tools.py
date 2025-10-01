@@ -1,3 +1,5 @@
+import asyncio
+import concurrent.futures
 import os
 import subprocess
 import json
@@ -9,15 +11,15 @@ from google.adk.tools import ToolContext
 from app.sub_agents.tech_stack_profiler_agent.utils.json_utils import filter_json_arr, extract_json_arr_str
 from .prompt import FRAMEWORK_IDENTIFICATION_GEMINI_PROMPT
 
-def identify_frameworks(tool_context: ToolContext) -> bool:
+def identify_frameworks(secure_temp_repo_dir: str) -> str:
 
     # tool_context.state["filtered_framework_data"] = "filtered_framework_sample_data"
 
     # return True
 
-    is_framework_identification_successful = False
+    # is_framework_identification_successful = False
 
-    secure_temp_repo_dir = tool_context.state["secure_temp_repo_dir"]
+    # secure_temp_repo_dir = tool_context.state["secure_temp_repo_dir"]
 
     logging.info("inside identify_frameworks secure_temp_repo_dir => %s", secure_temp_repo_dir)
 
@@ -86,15 +88,23 @@ def identify_frameworks(tool_context: ToolContext) -> bool:
                 gemini_env = os.environ.copy()  
                 gemini_env["GEMINI_API_KEY"] = os.getenv("GEMINI_API_KEY")
                 args = "-p " + "\"" + FRAMEWORK_IDENTIFICATION_GEMINI_PROMPT + "\""
-                result = subprocess.run(["/usr/local/bin/gemini", args], timeout=120, env=gemini_env, cwd=secure_temp_repo_dir, capture_output=True, text=True, check=True)
-                stderr = result.stderr
-                stdout = result.stdout
+                # result = subprocess.run(["/usr/local/bin/gemini", args], timeout=120, env=gemini_env, cwd=secure_temp_repo_dir, capture_output=True, text=True, check=True)
+                # stderr = result.stderr
+                # stdout = result.stdout
+                with subprocess.Popen(["/usr/local/bin/gemini", "-p", FRAMEWORK_IDENTIFICATION_GEMINI_PROMPT],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    env=gemini_env,
+                    cwd=secure_temp_repo_dir,
+                    text=True
+                ) as process:
+                    stdout, stderr = process.communicate(timeout=120)
             
             logging.info("result.stderr => %s", stderr)
             logging.info("result.stdout => %s", stdout)
 
             frameworks_json_str = extract_json_arr_str(stdout)
-            is_framework_identification_successful = True
+            # is_framework_identification_successful = True
 
             # tool_context.state["frameworks_json_str"] = frameworks_json_str
 
@@ -105,7 +115,7 @@ def identify_frameworks(tool_context: ToolContext) -> bool:
 
             filtered_framework_data_final_str = '\n'.join([' - '.join(map(str, inner_list)) for inner_list in filtered_framework_data])
 
-            tool_context.state["filtered_framework_data_final_str"] = filtered_framework_data_final_str
+            # tool_context.state["filtered_framework_data_final_str"] = filtered_framework_data_final_str
 
             # tool_context.state["filtered_framework_data"] = filtered_framework_data
 
@@ -121,17 +131,24 @@ def identify_frameworks(tool_context: ToolContext) -> bool:
             logging.error(f"Error output (stderr): {e.stderr}")
             logging.error(f"Command that failed: {e.cmd}")
             logging.error(f"Return code: {e.returncode}")
-            return is_framework_identification_successful
+            return filtered_framework_data_final_str
         except subprocess.TimeoutExpired as e:
             logging.error("TimeoutExpired Exception encountered !!!")
             logging.error(f"Error occurred: {e}")
             logging.error(f"Error output (stdout): {e.stdout}")
             logging.error(f"Error output (stderr): {e.stderr}")
             logging.error(f"Command that failed: {e.cmd}")
-            return is_framework_identification_successful
+            return filtered_framework_data_final_str
 
-    return is_framework_identification_successful
+    return filtered_framework_data_final_str
 
+async def identify_frameworks_initiator(tool_context: ToolContext) -> bool:
+    secure_temp_repo_dir = tool_context.state["secure_temp_repo_dir"]
+    loop = asyncio.get_running_loop()
+    with concurrent.futures.ProcessPoolExecutor() as pool:
+        tool_context.state["filtered_framework_data_final_str"] = await loop.run_in_executor(pool, identify_frameworks, secure_temp_repo_dir)
+        return True
+    
 #FOR TESTING
 # if __name__ == "__main__":
 #     logging.info(identify_frameworks("/usr/local/google/home/cbangera/Projects/OtelAgent/otel-agent-gemini-cli-test"))

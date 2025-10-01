@@ -1,3 +1,5 @@
+import asyncio
+import concurrent.futures
 import os
 import shutil
 
@@ -14,9 +16,11 @@ import logging
 
 #TODO: Error Handling
 
-def identify_languages_from_source_code(tool_context: ToolContext) -> bool:
+def identify_languages_from_source_code(secure_temp_repo_dir: str) -> str:
 
-    secure_temp_repo_dir = tool_context.state["secure_temp_repo_dir"]
+    # secure_temp_repo_dir = tool_context.state["secure_temp_repo_dir"]
+
+    filtered_language_data_final_str = ""
     
     logging.info("secure_temp_repo_dir => %s", secure_temp_repo_dir)
 
@@ -35,9 +39,16 @@ def identify_languages_from_source_code(tool_context: ToolContext) -> bool:
             '''
 
         else:
-            result = subprocess.run(["/go-installs/enry","-json"], cwd=secure_temp_repo_dir, capture_output=True, text=True, check=True)
-            stderr = result.stderr
-            stdout = result.stdout
+            # result = subprocess.run(["/usr/local/google/home/cbangera/go/bin/enry","-json"], cwd=secure_temp_repo_dir, capture_output=True, text=True, check=True)
+            # stderr = result.stderr
+            # stdout = result.stdout
+            with subprocess.Popen(["/usr/local/google/home/cbangera/go/bin/enry", "-json"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                cwd=secure_temp_repo_dir,
+                text=True
+            ) as process:
+                stdout, stderr = process.communicate(timeout=120)
 
         logging.info("result.stderr => %s", stderr)
         logging.info("result.stdout => %s", stdout)
@@ -51,7 +62,7 @@ def identify_languages_from_source_code(tool_context: ToolContext) -> bool:
 
         filtered_language_data_final_str = '\n'.join([' - '.join(map(str, inner_list)) for inner_list in filtered_language_data])
 
-        tool_context.state["filtered_language_data_final_str"] = filtered_language_data_final_str
+        # tool_context.state["filtered_language_data_final_str"] = filtered_language_data_final_str
 
 
         # tool_context.state["filtered_language_data"] = filtered_language_data
@@ -63,7 +74,15 @@ def identify_languages_from_source_code(tool_context: ToolContext) -> bool:
         # shutil.rmtree(secure_temp_repo_dir)
         # logging.info("Temporary directory cleaned up in identify_languages_from_source_code.")
 
-    return True
+    return filtered_language_data_final_str
+
+
+async def identify_languages_from_source_code_initiator(tool_context: ToolContext) -> bool:
+    secure_temp_repo_dir = tool_context.state["secure_temp_repo_dir"]
+    loop = asyncio.get_running_loop()
+    with concurrent.futures.ProcessPoolExecutor() as pool:
+        tool_context.state["filtered_language_data_final_str"] = await loop.run_in_executor(pool, identify_languages_from_source_code, secure_temp_repo_dir)
+        return True
 
 #FOR TESTING
 # if __name__ == "__main__":

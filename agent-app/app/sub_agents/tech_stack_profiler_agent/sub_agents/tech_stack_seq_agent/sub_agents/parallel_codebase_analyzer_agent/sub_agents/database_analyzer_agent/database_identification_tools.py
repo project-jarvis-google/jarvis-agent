@@ -1,3 +1,5 @@
+import asyncio
+import concurrent.futures
 import os
 import subprocess
 import json
@@ -9,15 +11,17 @@ from google.adk.tools import ToolContext
 from app.sub_agents.tech_stack_profiler_agent.utils.json_utils import filter_json_arr, extract_json_arr_str
 from .prompt import DATABASE_IDENTIFICATION_GEMINI_PROMPT
 
-def identify_databases(tool_context: ToolContext) -> bool:
+def identify_databases(secure_temp_repo_dir: str) -> str:
 
     # tool_context.state["filtered_database_data"] = "filtered_database_sample_data"
 
     # return True
 
-    is_database_identification_successful = False
+    # is_database_identification_successful = False
 
-    secure_temp_repo_dir = tool_context.state["secure_temp_repo_dir"]
+    filtered_database_data_final_str = ""
+
+    # secure_temp_repo_dir = tool_context.state["secure_temp_repo_dir"]
 
     logging.info("inside identify_databases secure_temp_repo_dir => %s", secure_temp_repo_dir)
 
@@ -71,15 +75,6 @@ def identify_databases(tool_context: ToolContext) -> bool:
                     "Username: spring.datasource.username=root found in Transaction-Service/src/main/resources/application.yml",
                     "Password: spring.datasource.password=root found in Transaction-Service/src/main/resources/application.yml"
                     ]
-                },
-                {
-                    "name": "MySQL",
-                    "evidence": "Identified as a dependency in User-Service/pom.xml",
-                    "configurations": [
-                    "Connection String: spring.datasource.url=jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DB_NAME:user_service} found in User-Service/src/main/resources/application.yml",
-                    "Username: spring.datasource.username=${MYSQL_USER:root} found in User-Service/src/main/resources/application.yml",
-                    "Password: spring.datasource.password=${MYSQL_PASSWORD:root} found in User-Service/src/main/resources/application.yml"
-                    ]
                 }
                 ]
                 ```
@@ -91,16 +86,24 @@ def identify_databases(tool_context: ToolContext) -> bool:
             else:
                 gemini_env = os.environ.copy()  
                 gemini_env["GEMINI_API_KEY"] = os.getenv("GEMINI_API_KEY")
-                args = "-p " + "\"" + DATABASE_IDENTIFICATION_GEMINI_PROMPT + "\""
-                result = subprocess.run(["/usr/local/bin/gemini", args], timeout=120, env=gemini_env, cwd=secure_temp_repo_dir, capture_output=True, text=True, check=True)
-                stderr = result.stderr
-                stdout = result.stdout
+                # args = "-p " + "\"" + DATABASE_IDENTIFICATION_GEMINI_PROMPT + "\""
+                # result = subprocess.run(["/usr/local/bin/gemini", args], timeout=120, env=gemini_env, cwd=secure_temp_repo_dir, capture_output=True, text=True, check=True)
+                # stderr = result.stderr
+                # stdout = result.stdout
+                with subprocess.Popen(["/usr/local/bin/gemini", "-p", DATABASE_IDENTIFICATION_GEMINI_PROMPT],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    env=gemini_env,
+                    cwd=secure_temp_repo_dir,
+                    text=True
+                ) as process:
+                    stdout, stderr = process.communicate(timeout=120)
 
             logging.info("result.stderr => %s", stderr)
             logging.info("result.stdout => %s", stdout)
 
             databases_json_str = extract_json_arr_str(stdout)
-            is_database_identification_successful = True
+            # is_database_identification_successful = True
 
             # tool_context.state["databases_json_str"] = databases_json_str
 
@@ -111,7 +114,7 @@ def identify_databases(tool_context: ToolContext) -> bool:
 
             filtered_database_data_final_str = '\n\n'.join(['\n'.join(map(str, inner_list)) for inner_list in filtered_database_data])
 
-            tool_context.state["filtered_database_data_final_str"] = filtered_database_data_final_str
+            # tool_context.state["filtered_database_data_final_str"] = filtered_database_data_final_str
 
             # tool_context.state["filtered_database_data"] = filtered_database_data
 
@@ -127,16 +130,23 @@ def identify_databases(tool_context: ToolContext) -> bool:
             logging.error(f"Error output (stderr): {e.stderr}")
             logging.error(f"Command that failed: {e.cmd}")
             logging.error(f"Return code: {e.returncode}")
-            return is_database_identification_successful
+            return filtered_database_data_final_str
         except subprocess.TimeoutExpired as e:
             logging.error("TimeoutExpired Exception encountered !!!")
             logging.error(f"Error occurred: {e}")
             logging.error(f"Error output (stdout): {e.stdout}")
             logging.error(f"Error output (stderr): {e.stderr}")
             logging.error(f"Command that failed: {e.cmd}")
-            return is_database_identification_successful
+            return filtered_database_data_final_str
 
-    return is_database_identification_successful
+    return filtered_database_data_final_str
+
+async def identify_databases_initiator(tool_context: ToolContext) -> bool:
+    secure_temp_repo_dir = tool_context.state["secure_temp_repo_dir"]
+    loop = asyncio.get_running_loop()
+    with concurrent.futures.ProcessPoolExecutor() as pool:
+        tool_context.state["filtered_database_data_final_str"] = await loop.run_in_executor(pool, identify_databases, secure_temp_repo_dir)
+        return True
 
 #FOR TESTING
 # if __name__ == "__main__":
