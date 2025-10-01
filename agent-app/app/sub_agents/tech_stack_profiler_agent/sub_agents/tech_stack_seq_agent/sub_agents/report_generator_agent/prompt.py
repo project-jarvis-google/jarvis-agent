@@ -14,20 +14,17 @@ REPORT_GENERATOR_PROMPT ="""
         Display the report to the user in the following format without any sort of table borders:
         
         **Output Format:**
-
+        
         ## Summary of Tech Profiling:
 
         ### Programming Language Identification and Breakdown:
         {filtered_language_data_final_str}
-        [Convert from JSON format to a tabular format. The order or columns is: language, percentage]
 
         ### Framework Identification and Categorization:
         {filtered_framework_data_final_str}
-        [Convert from JSON format to a tabular format. The order or columns is: name, category]
 
         ### Database Identification:
         {filtered_database_data_final_str}
-        [Convert from JSON format to a tabular format. The order or columns is: name, configurations]
 
         Output *only* the structured report following this format. Do not include introductory or concluding 
         phrases outside this structure.
