@@ -16,7 +16,11 @@ interface InputFormProps {
   context?: "homepage" | "chat";
 }
 
-export function InputForm({ onSubmit, isLoading, context = "homepage" }: InputFormProps) {
+export function InputForm({
+  onSubmit,
+  isLoading,
+  context = "homepage",
+}: InputFormProps) {
   const [inputValue, setInputValue] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -35,7 +39,7 @@ export function InputForm({ onSubmit, isLoading, context = "homepage" }: InputFo
       handleSubmit(e as any);
     }
   };
-  
+
   const handleUploadClick = () => {
     fileInputRef.current?.click();
   };
@@ -53,7 +57,8 @@ export function InputForm({ onSubmit, isLoading, context = "homepage" }: InputFo
     setFiles((prev) => prev.filter((_, index) => index !== indexToRemove));
   };
 
-  const placeholderText = context === "chat" ? "Enter a prompt here" : "Ask me anything...";
+  const placeholderText =
+    context === "chat" ? "Enter a prompt here" : "Ask me anything...";
 
   return (
     <Box>
@@ -62,19 +67,28 @@ export function InputForm({ onSubmit, isLoading, context = "homepage" }: InputFo
         multiple
         ref={fileInputRef}
         onChange={handleFileChange}
-        style={{ display: 'none' }}
-        accept="image/*,application/pdf,text/*,.csv"
+        style={{ display: "none" }}
+        accept="image/*,application/pdf,text/*,.csv,.doc,.docx,.xls,.xlsx"
       />
 
       <Box component="form" onSubmit={handleSubmit}>
         {files.length > 0 && (
-          <Stack direction="row" spacing={1} sx={{ mb: 1, flexWrap: 'wrap', gap: 0.5 }}>
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{ mb: 1, flexWrap: "wrap", gap: 0.5 }}
+          >
             {files.map((file, index) => (
-              <Chip key={index} label={file.name} onDelete={() => handleRemoveFile(index)} size="small" />
+              <Chip
+                key={index}
+                label={file.name}
+                onDelete={() => handleRemoveFile(index)}
+                size="small"
+              />
             ))}
           </Stack>
         )}
-        
+
         <OutlinedInput
           fullWidth
           value={inputValue}
@@ -84,21 +98,31 @@ export function InputForm({ onSubmit, isLoading, context = "homepage" }: InputFo
           multiline
           maxRows={5}
           sx={{
-            borderRadius: '28px',
-            backgroundColor: 'action.hover',
-            '& .MuiOutlinedInput-notchedOutline': { border: 'none' },
+            borderRadius: "28px",
+            backgroundColor: "action.hover",
+            "& .MuiOutlinedInput-notchedOutline": { border: "none" },
           }}
           startAdornment={
             <InputAdornment position="start">
-              <IconButton onClick={handleUploadClick} disabled={isLoading} edge="start">
+              <IconButton
+                onClick={handleUploadClick}
+                disabled={isLoading}
+                edge="start"
+              >
                 <AttachFileIcon />
               </IconButton>
             </InputAdornment>
           }
           endAdornment={
             <InputAdornment position="end">
-      
-              <IconButton type="submit" disabled={isLoading || (!inputValue.trim() && files.length === 0)} edge="end" color="primary">
+              <IconButton
+                type="submit"
+                disabled={
+                  isLoading || (!inputValue.trim() && files.length === 0)
+                }
+                edge="end"
+                color="primary"
+              >
                 <SendIcon />
               </IconButton>
             </InputAdornment>

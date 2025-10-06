@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, Typography, Grid, Paper } from "@mui/material";
-import AutoAwesomeOutlinedIcon from '@mui/icons-material/AutoAwesomeOutlined';
-import { InputForm } from "./InputForm"; 
+import { InputForm } from "./InputForm";
+import logo from "../assets/logo.png";
 
 interface WelcomeScreenProps {
   handleSubmit: (query: string, files: File[]) => void;
@@ -9,37 +9,103 @@ interface WelcomeScreenProps {
 }
 
 const suggestionPrompts = [
-  "List the active projects that are showing RED status.", "List the Active projects with no RAG status.", "How many projects are currently showing Active Status in JAPAC?", "List the Active Projects assigned to <LDAP id>", "How many Active projects are there with Infra & Migration?", "List the projects that got completed in last 1 month.", "List the projects with GSD planned end date approaching.", "What is the Cost Score of <Project Name> ?",
+  "Generate a conceptual architecture for a new mobile banking app.",
+  "Recommend a cloud migration strategy for a legacy Java monolith.",
+  "Analyze our application portfolio and identify the best candidates for modernization.",
+  "Create a sample Statement of Work (SOW) for a 3-month Apigee implementation.",
+  "Generate unit tests for this Spring Boot controller I've uploaded.",
+  "Scaffold a new microservice using Python and Flask with a CI/CD pipeline.",
 ];
 
 export function WelcomeScreen({ handleSubmit, isLoading }: WelcomeScreenProps) {
   const handleSuggestionClick = (prompt: string) => {
-    if (!isLoading) handleSubmit(prompt, []);
+    if (!isLoading) {
+      handleSubmit(prompt, []);
+    }
   };
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "space-between", height: "100%", textAlign: "center", p: 2 }}>
-      <Box sx={{ flexGrow: 0.5 }} />
-      <Box>
-        <AutoAwesomeOutlinedIcon sx={{ fontSize: 48, color: "#1976d2" }} />
-        <Typography variant="h4" component="h1" sx={{ fontWeight: "bold", mt: 2 }}>Jarvis Agent</Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>Explore your projects and gain rich insights through the power of AI.</Typography>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        height: "100%",
+        textAlign: "center",
+        p: 2,
+      }}
+    >
+      <Box sx={{ mb: 4 }}>
+        <Box
+          component="img"
+          src={logo}
+          alt="Jarvis Agent Logo"
+          sx={{ height: 150, mb: 3 }}
+        />
+        <Typography
+          variant="h3"
+          component="h1"
+          sx={{ fontWeight: "bold", mb: 1 }}
+        >
+          Jarvis Agent
+        </Typography>
+        <Typography variant="h6" color="text.secondary">
+          Explore your projects and gain rich insights through the power of AI.
+        </Typography>
       </Box>
-      <Grid container spacing={2} sx={{ maxWidth: "900px", my: 4 }}>
+
+      <Grid
+        container
+        spacing={2}
+        sx={{ maxWidth: "900px", justifyContent: "center" }}
+      >
         {suggestionPrompts.map((prompt) => (
-          <Grid xs={12} sm={6} md={3} key={prompt}>
-            <Paper variant="outlined" onClick={() => handleSuggestionClick(prompt)} sx={{ p: 2, height: "100%", cursor: "pointer", borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', "&:hover": { backgroundColor: "action.hover", borderColor: 'primary.main' }}}>
-              <Typography variant="body2">{prompt}</Typography>
+          <Grid item xs={12} sm={6} key={prompt}>
+            <Paper
+              variant="outlined"
+              onClick={() => handleSuggestionClick(prompt)}
+              sx={{
+                p: 2,
+                height: "100%",
+                cursor: "pointer",
+                borderRadius: "16px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                borderColor: "rgba(255, 255, 255, 0.23)",
+                transition: "background-color 0.3s, border-color 0.3s",
+                "&:hover": {
+                  backgroundColor: "action.hover",
+                  borderColor: "primary.main",
+                },
+              }}
+            >
+              <Typography variant="body2" color="text.secondary">
+                {prompt}
+              </Typography>
             </Paper>
           </Grid>
         ))}
       </Grid>
+
       <Box sx={{ flexGrow: 1 }} />
-      <Box sx={{ width: "100%", maxWidth: "700px" }}>
-        <InputForm onSubmit={handleSubmit} isLoading={isLoading} context="homepage" />
-        <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: "block" }}>Generative AI may display inaccurate information, so double-check its responses.</Typography>
+
+      <Box sx={{ width: "100%", maxWidth: "700px", mt: 4 }}>
+        <InputForm
+          onSubmit={handleSubmit}
+          isLoading={isLoading}
+          context="homepage"
+        />
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          sx={{ mt: 1, display: "block" }}
+        >
+          Generative AI may display inaccurate information, so double-check its
+          responses.
+        </Typography>
       </Box>
-      {/* <Typography variant="body2" color="text.secondary" sx={{ mt: 3 }}>Powered by Gemini</Typography> */}
     </Box>
   );
 }

@@ -1,14 +1,9 @@
-import React from 'react';
-import { ChatMessagesView } from '../components/ChatMessagesView';
-import { useChatContext } from '../contexts/ChatContext';
+import React from "react";
+import { ChatMessagesView } from "../components/ChatMessagesView";
+import { useChatContext } from "../contexts/ChatContext";
 
 const Chat: React.FC = () => {
-  const { 
-    messages, 
-    isLoading, 
-    handleSubmit, 
-    onCancel 
-  } = useChatContext();
+  const { messages, isLoading, handleSubmit, onCancel } = useChatContext();
 
   return (
     <ChatMessagesView

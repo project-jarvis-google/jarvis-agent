@@ -1,104 +1,261 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Box, Paper, IconButton, Stack, CircularProgress, Avatar, Typography, Chip } from "@mui/material";
+import {
+  Box,
+  Paper,
+  Stack,
+  Avatar,
+  Typography,
+  Chip,
+  CircularProgress,
+} from "@mui/material";
+import { useTypingEffect } from "../hooks/useTypingEffect";
 import { InputForm } from "./InputForm";
 import ReactMarkdown from "react-markdown";
-import remarkGfm from 'remark-gfm'; 
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import SmartToyOutlinedIcon from '@mui/icons-material/SmartToyOutlined';
-import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
-import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
+import remarkGfm from "remark-gfm";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
+import SmartToyOutlinedIcon from "@mui/icons-material/SmartToyOutlined";
+import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
+import InsertDriveFileOutlinedIcon from "@mui/icons-material/InsertDriveFileOutlined";
+import logo from "../assets/logo.png";
 
-interface DisplayFile { name: string; type: string; url: string; }
-export interface Message { type: "human" | "ai"; content: string; id: string; files?: DisplayFile[]; }
-interface ChatMessagesViewProps { messages: Message[]; isLoading: boolean; onSubmit: (query: string, files: File[]) => void; onCancel: () => void; }
+interface DisplayFile {
+  name: string;
+  type: string;
+  url: string;
+}
+export interface Message {
+  type: "human" | "ai";
+  content: string;
+  id: string;
+  files?: DisplayFile[];
+}
+interface ChatMessagesViewProps {
+  messages: Message[];
+  isLoading: boolean;
+  onSubmit: (query: string, files: File[]) => void;
+  onCancel: () => void;
+}
 
+const AIMessageBubble: React.FC<{ message: Message }> = ({ message }) => {
+  const typedContent = useTypingEffect(message.content, 20);
 
-export function ChatMessagesView({ messages, isLoading, onSubmit, onCancel }: ChatMessagesViewProps) {
-  const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
+  return (
+    <Stack
+      key={message.id}
+      direction="row"
+      spacing={2}
+      sx={{ justifyContent: "flex-start", alignItems: "flex-start" }}
+    >
+      <Avatar sx={{ bgcolor: "primary.main", p: 0.5 }}>
+        <Box
+          component="img"
+          src={logo}
+          sx={{ height: "100%", width: "100%" }}
+        />
+      </Avatar>
+      <Box sx={{ maxWidth: "80%" }}>
+        <Typography sx={{ fontWeight: "bold", mb: 0.5 }}>
+          Jarvis Agent
+        </Typography>
+        <Paper
+          elevation={0}
+          sx={{
+            p: 2,
+            bgcolor: "action.hover",
+            color: "text.primary",
+            borderRadius: "20px",
+            position: "relative",
+          }}
+        >
+          <Typography component="div" sx={{ "& p": { margin: 0 } }}>
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={{
+                code({ node, inline, className, children, ...props }) {
+                  const match = /language-(\w+)/.exec(className || "");
+                  return !inline && match ? (
+                    <SyntaxHighlighter
+                      style={vscDarkPlus}
+                      language={match[1]}
+                      PreTag="div"
+                      {...props}
+                    >
+                      {String(children).replace(/\n$/, "")}
+                    </SyntaxHighlighter>
+                  ) : (
+                    <code
+                      className={className}
+                      {...props}
+                      style={{
+                        backgroundColor: "rgba(255, 255, 255, 0.1)",
+                        padding: "2px 4px",
+                        borderRadius: "4px",
+                      }}
+                    >
+                      {children}
+                    </code>
+                  );
+                },
+              }}
+            >
+              {typedContent}
+            </ReactMarkdown>
+          </Typography>
+        </Paper>
+      </Box>
+    </Stack>
+  );
+};
+
+export function ChatMessagesView({
+  messages,
+  isLoading,
+  onSubmit,
+  onCancel,
+}: ChatMessagesViewProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
-
 
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages]);
-
-  const handleCopy = async (text: string, messageId: string) => { await navigator.clipboard.writeText(text); setCopiedMessageId(messageId); setTimeout(() => setCopiedMessageId(null), 2000); };
+  }, [messages, isLoading]);
 
   return (
-    <Stack sx={{ height: "100%", width: '100%' }}>
-      <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', overflowY: 'auto' }}>
-        <Box ref={scrollRef} sx={{ width: '100%', maxWidth: '900px', p: 3 }}>
+    <Stack sx={{ height: "100%", width: "100%" }}>
+      <Box
+        sx={{
+          flexGrow: 1,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          overflowY: "auto",
+        }}
+      >
+        <Box ref={scrollRef} sx={{ width: "100%", maxWidth: "900px", p: 3 }}>
           <Stack spacing={4}>
-            {messages.map((message) => (
+            {messages.map((message) => {
+              if (message.type === "ai") {
+                return message.content ? (
+                  <AIMessageBubble key={message.id} message={message} />
+                ) : null;
+              }
+              return (
+                <Stack
+                  key={message.id}
+                  direction="row"
+                  spacing={2}
+                  sx={{ justifyContent: "flex-end", alignItems: "flex-start" }}
+                >
+                  <Box sx={{ maxWidth: "80%" }}>
+                    {(message.content ||
+                      (message.files && message.files.length > 0)) && (
+                      <>
+                        <Typography sx={{ fontWeight: "bold", mb: 0.5 }}>
+                          You
+                        </Typography>
+                        <Paper
+                          elevation={0}
+                          sx={{
+                            p: 2,
+                            bgcolor: "action.selected",
+                            color: "text.primary",
+                            borderRadius: "20px",
+                            position: "relative",
+                          }}
+                        >
+                          {message.files && message.files.length > 0 && (
+                            <Stack
+                              spacing={1}
+                              sx={{ mb: message.content ? 1.5 : 0 }}
+                            >
+                              {message.files.map((file, index) => (
+                                <Paper
+                                  key={index}
+                                  variant="outlined"
+                                  sx={{
+                                    p: 1,
+                                    borderRadius: "12px",
+                                    bgcolor: "background.default",
+                                  }}
+                                >
+                                  {file.type.startsWith("image/") ? (
+                                    <Box
+                                      component="img"
+                                      src={file.url}
+                                      alt={file.name}
+                                      sx={{
+                                        maxWidth: "100%",
+                                        maxHeight: "200px",
+                                        borderRadius: "8px",
+                                        objectFit: "contain",
+                                      }}
+                                    />
+                                  ) : (
+                                    <Chip
+                                      icon={<InsertDriveFileOutlinedIcon />}
+                                      label={file.name}
+                                      variant="outlined"
+                                      sx={{
+                                        height: "auto",
+                                        "& .MuiChip-label": { p: 1 },
+                                      }}
+                                    />
+                                  )}
+                                </Paper>
+                              ))}
+                            </Stack>
+                          )}
+
+                          {message.content && (
+                            <Typography
+                              component="div"
+                              sx={{ "& p": { margin: 0 } }}
+                            >
+                              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                {message.content}
+                              </ReactMarkdown>
+                            </Typography>
+                          )}
+                        </Paper>
+                      </>
+                    )}
+                  </Box>
+                  <Avatar>
+                    <PersonOutlineOutlinedIcon />
+                  </Avatar>
+                </Stack>
+              );
+            })}
+            {isLoading && (
               <Stack
-                key={message.id}
                 direction="row"
                 spacing={2}
-                sx={{ justifyContent: message.type === 'human' ? 'flex-end' : 'flex-start', alignItems: 'flex-start' }}
+                sx={{ justifyContent: "flex-start", alignItems: "center" }}
               >
-                {message.type === 'ai' && <Avatar sx={{ bgcolor: 'primary.main' }}><SmartToyOutlinedIcon /></Avatar>}
-                <Box sx={{ maxWidth: '80%' }}>
-                  <Typography sx={{ fontWeight: 'bold', mb: 0.5 }}>
-                    {message.type === 'human' ? 'You' : 'Jarvis Agent'}
-                  </Typography>
-                  <Paper
-                    elevation={0}
-                    sx={{ p: 2, bgcolor: message.type === 'human' ? 'action.selected' : 'action.hover', color: 'text.primary', borderRadius: '20px', position: 'relative' }}
-                  >
-                    {message.type === 'human' && message.files && message.files.length > 0 && (
-                      <Stack spacing={1} sx={{ mb: message.content ? 1.5 : 0 }}>
-                        {message.files.map((file, index) => (
-                          <Paper key={index} variant="outlined" sx={{ p: 1, borderRadius: '12px' }}>
-                            {file.type.startsWith('image/') ? (
-                              <Box component="img" src={file.url} alt={file.name} sx={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '8px', objectFit: 'contain' }} />
-                            ) : (
-                              <Chip icon={<InsertDriveFileOutlinedIcon />} label={file.name} variant="outlined" sx={{ height: 'auto', '& .MuiChip-label': { p: 1 } }} />
-                            )}
-                          </Paper>
-                        ))}
-                      </Stack>
-                    )}
-                    
-                    {message.content && (
-                      <Typography component="div" sx={{ '& p': { margin: 0 } }}>
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
-                      </Typography>
-                    )}
-                  </Paper>
-                </Box>
-                 {message.type === 'human' && <Avatar><PersonOutlineOutlinedIcon /></Avatar>}
+                <Avatar sx={{ bgcolor: "primary.main", p: 0.5 }}>
+                  <Box
+                    component="img"
+                    src={logo}
+                    sx={{ height: "100%", width: "100%" }}
+                  />
+                </Avatar>
+                <CircularProgress size={24} />
               </Stack>
-            ))}
-            {isLoading && messages.length > 0 && messages[messages.length - 1]?.type === 'human' && (
-                            <Stack direction="row" spacing={2} sx={{ justifyContent: 'flex-start', alignItems: 'flex-start' }}>
-                                <Avatar sx={{ bgcolor: 'primary.main' }}><SmartToyOutlinedIcon /></Avatar>
-                                <Box>
-                                    <Typography sx={{ fontWeight: 'bold', mb: 0.5 }}>Jarvis Agent</Typography>
-                                    <Paper
-                                        elevation={0}
-                                        sx={{
-                                            p: 2,
-                                            borderRadius: '20px',
-                                            bgcolor: 'action.hover',
-                                            display: 'flex', 
-                                            alignItems: 'center', 
-                                            justifyContent: 'center', 
-                                            minHeight: 40, 
-                                        }}
-                                    >
-                                        <CircularProgress size={24} />
-                                    </Paper>
-                                </Box>
-                            </Stack>
-                        )}
+            )}
           </Stack>
         </Box>
       </Box>
-      <Box sx={{ p: 2, bgcolor: 'background.default', display: 'flex', justifyContent: 'center' }}>
-        <Box sx={{ width: '100%', maxWidth: '900px' }}>
+      <Box
+        sx={{
+          p: 2,
+          bgcolor: "background.default",
+          display: "flex",
+          justifyContent: "center",
+        }}
+      >
+        <Box sx={{ width: "100%", maxWidth: "900px" }}>
           <InputForm onSubmit={onSubmit} isLoading={isLoading} context="chat" />
         </Box>
       </Box>

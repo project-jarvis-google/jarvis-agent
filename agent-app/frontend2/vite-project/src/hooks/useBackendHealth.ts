@@ -16,7 +16,7 @@ export function useBackendHealth(apiBaseUrl: string) {
   useEffect(() => {
     const checkBackend = async () => {
       setIsCheckingBackend(true);
-      const maxAttempts = 60; // ~2 minutes
+      const maxAttempts = 60; 
       let attempts = 0;
 
       while (attempts < maxAttempts) {
