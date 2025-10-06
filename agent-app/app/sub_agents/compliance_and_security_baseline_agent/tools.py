@@ -76,7 +76,7 @@ def _convert_markdown_to_flowables(markdown_text: str):
 
 
 def _create_gcs_file_and_get_link(report_markdown: str) -> str:
-    """Generates a PDF from markdown, uploads to GCS, and returns a signed URL."""
+    """Generates a PDF from markdown, uploads to GCS, and returns a signed URL that forces a download."""
     bucket_name = os.getenv("GCS_BUCKET_NAME")
     if not bucket_name:
         return "Error: GCS_BUCKET_NAME environment variable is not set."
@@ -100,7 +100,7 @@ def _create_gcs_file_and_get_link(report_markdown: str) -> str:
         timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
         pdf_blob_name = f"compliance-reports/{safe_app_name}_{timestamp}.pdf"
 
-        # PDF Generation using the robust function
+        # PDF Generation (no changes)
         pdf_buffer = io.BytesIO()
         doc = SimpleDocTemplate(pdf_buffer, pagesize=letter, rightMargin=inch, leftMargin=inch, topMargin=inch, bottomMargin=inch)
         story = _convert_markdown_to_flowables(report_markdown)
@@ -108,10 +108,20 @@ def _create_gcs_file_and_get_link(report_markdown: str) -> str:
         pdf_bytes = pdf_buffer.getvalue()
         pdf_buffer.close()
 
-        # GCS upload and link generation
+        # GCS upload (no changes)
         pdf_blob = bucket.blob(pdf_blob_name)
         pdf_blob.upload_from_string(pdf_bytes, content_type='application/pdf')
-        download_url = pdf_blob.generate_signed_url(version="v4", expiration=datetime.timedelta(minutes=15), method="GET")
+
+        # Get just the filename part for the download attribute
+        download_filename = pdf_blob_name.split("/")[-1]
+
+        download_url = pdf_blob.generate_signed_url(
+            version="v4",
+            expiration=datetime.timedelta(minutes=15),
+            method="GET",
+            # This parameter tells the browser to download the file automatically
+            response_disposition=f'attachment; filename="{download_filename}"'
+        )
         return download_url
     except Exception as e:
         logger.error(f"Failed to generate or upload report: {e}", exc_info=True)
