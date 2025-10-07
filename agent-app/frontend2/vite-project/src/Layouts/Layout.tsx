@@ -1,38 +1,25 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
+import { useTheme } from '@mui/material/styles';
 import {
-  Drawer,
-  List,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  CssBaseline,
-  Box,
-  Typography,
-  IconButton,
-  Button,
-  ListSubheader,
-  Divider,
-  AppBar as MuiAppBar,
-  Toolbar,
-  Stack,
+  Drawer, List, ListItemButton, ListItemIcon, ListItemText, CssBaseline, Box, Typography, IconButton, Button, ListSubheader, Divider, AppBar as MuiAppBar, Toolbar, Stack
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { Link, useNavigate } from "react-router-dom"; // 1. Import useNavigate
+import { Link, Outlet, useNavigate } from "react-router-dom";
 import { useChatContext } from "../contexts/ChatContext";
+import { ColorModeContext } from "../App";
 import MenuIcon from "@mui/icons-material/Menu";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import AddIcon from "@mui/icons-material/Add";
-import SmartToyOutlinedIcon from "@mui/icons-material/SmartToyOutlined";
-import LightbulbOutlinedIcon from "@mui/icons-material/LightbulbOutlined";
-import BugReportOutlinedIcon from "@mui/icons-material/BugReportOutlined";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import logo from "../assets/logo.png";
-
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import SmartToyOutlinedIcon from '@mui/icons-material/SmartToyOutlined';
+import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined';
+import BugReportOutlinedIcon from '@mui/icons-material/BugReportOutlined';
+import Brightness4Icon from '@mui/icons-material/Brightness4';
+import Brightness7Icon from '@mui/icons-material/Brightness7';
+import logo from '../assets/LOGO.jpg';
 const drawerWidth = 260;
 
-const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })<{
-  open?: boolean;
-}>(({ theme, open }) => ({
+const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })<{ open?: boolean; }>(({ theme, open }) => ({
   flexGrow: 1,
   padding: theme.spacing(3),
   transition: theme.transitions.create("margin", {
@@ -40,6 +27,8 @@ const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })<{
     duration: theme.transitions.duration.leavingScreen,
   }),
   marginLeft: `-${drawerWidth}px`,
+  display: 'flex',
+  flexDirection: 'column',
   height: 'calc(100vh - 64px)',
   ...(open && {
     transition: theme.transitions.create("margin", {
@@ -49,9 +38,7 @@ const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })<{
     marginLeft: 0,
   }),
 }));
-const AppBar = styled(MuiAppBar, {
-  shouldForwardProp: (prop) => prop !== "open",
-})<{ open?: boolean }>(({ theme, open }) => ({
+const AppBar = styled(MuiAppBar, { shouldForwardProp: (prop) => prop !== "open", })<{ open?: boolean }>(({ theme, open }) => ({
   transition: theme.transitions.create(["margin", "width"], {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
@@ -74,15 +61,16 @@ const DrawerHeader = styled("div")(({ theme }) => ({
 }));
 
 const agentList = [
-    { name: "Jarvis", icon: <SmartToyOutlinedIcon /> },
-    { name: "Code Scaffolding Agent", icon: <SmartToyOutlinedIcon /> },
-    { name: "Tech Stack Profiler", icon: <SmartToyOutlinedIcon /> },
-    { name: "Unit Test Agent", icon: <SmartToyOutlinedIcon /> },
+    { name: "SPARC", icon: <SmartToyOutlinedIcon /> },
 ];
-const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+
+const Layout: React.FC = () => {
   const [open, setOpen] = useState(true);
   const { handleCancel, clearChat, messages } = useChatContext();
   const navigate = useNavigate();
+  const theme = useTheme();
+  const colorMode = useContext(ColorModeContext);
+
   const handleDrawerOpen = () => setOpen(true);
   const handleDrawerClose = () => setOpen(false);
 
@@ -104,7 +92,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           borderColor: "divider",
         }}
       >
-        <Toolbar>
+        <Toolbar sx={{ justifyContent: 'space-between' }}>
           <IconButton
             color="inherit"
             aria-label="open drawer"
@@ -113,6 +101,9 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             sx={{ mr: 2, ...(open && { display: "none" }) }}
           >
             <MenuIcon />
+          </IconButton>
+          <IconButton sx={{ ml: 1 }} onClick={colorMode.toggleColorMode} color="inherit">
+            {theme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
           </IconButton>
         </Toolbar>
       </AppBar>
@@ -133,14 +124,12 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       >
         <DrawerHeader>
           <Link to="/" style={{ textDecoration: "none", color: "inherit" }}>
-            <Link to="/" style={{ textDecoration: "none", color: "inherit" }}>
-              <Box
-                component="img"
-                src={logo}
-                alt="Jarvis Agent Logo"
-                sx={{ height: 40, pl: 1 }} 
-              />
-            </Link>
+            <Box
+              component="img"
+              src={logo}
+              alt="SPARC logo"
+              sx={{ height: 40, pl: 1 }}
+            />
           </Link>
           <IconButton onClick={handleDrawerClose}>
             <ChevronLeftIcon />
@@ -151,17 +140,12 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           <Stack spacing={1}>
             <Button
               onClick={handleCancel}
-              variant="contained"
+              variant="outlined"
               startIcon={<AddIcon />}
               fullWidth
               sx={{
                 justifyContent: "flex-start",
                 textTransform: "none",
-                                backgroundColor: "black",
-                color: "white",
-                '&:hover': {
-                  backgroundColor: '#333'
-                },
               }}
             >
               Start new chat
@@ -188,12 +172,14 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             </ListSubheader>
           }
         >
-          <ListItemButton selected>
-            <ListItemIcon sx={{ minWidth: 40 }}>
-              <SmartToyOutlinedIcon />
-            </ListItemIcon>
-            <ListItemText primary="Jarvis" />
-          </ListItemButton>
+          {agentList.map((agent) => (
+            <ListItemButton key={agent.name} selected={agent.name === "Jarvis"}>
+              <ListItemIcon sx={{ minWidth: 40 }}>
+                {agent.icon}
+              </ListItemIcon>
+              <ListItemText primary={agent.name} />
+            </ListItemButton>
+          ))}
         </List>
 
         <Box sx={{ flexGrow: 1 }} />
@@ -216,7 +202,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
       <Main open={open}>
         <DrawerHeader />
-        {children}
+        <Outlet />
       </Main>
     </Box>
   );

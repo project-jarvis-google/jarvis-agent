@@ -100,6 +100,7 @@ export function InputForm({
           sx={{
             borderRadius: "28px",
             backgroundColor: "action.hover",
+            padding:'20px',
             "& .MuiOutlinedInput-notchedOutline": { border: "none" },
           }}
           startAdornment={
