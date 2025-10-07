@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, Typography, Grid, Paper } from "@mui/material";
 import { InputForm } from "./InputForm";
-import logo from '../assets/logo.png';
+import logo from '../assets/LOGO.jpg';
 
 interface WelcomeScreenProps {
   handleSubmit: (query: string, files: File[]) => void;
@@ -15,7 +15,6 @@ const suggestionPrompts = [
   "Create a sample Statement of Work (SOW) for a 3-month Apigee implementation.",
   "Generate unit tests for this Spring Boot controller I've uploaded.",
   "Scaffold a new microservice using Python and Flask with a CI/CD pipeline.",
- 
 ];
 
 export function WelcomeScreen({ handleSubmit, isLoading }: WelcomeScreenProps) {
@@ -31,7 +30,7 @@ export function WelcomeScreen({ handleSubmit, isLoading }: WelcomeScreenProps) {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'flex-start',
         height: '100%',
         textAlign: 'center',
         p: 2,
@@ -41,14 +40,14 @@ export function WelcomeScreen({ handleSubmit, isLoading }: WelcomeScreenProps) {
         <Box
           component="img"
           src={logo}
-          alt="Jarvis Agent Logo"
+          alt="SPARC Logo"
           sx={{ height: 150, mb: 3 }}
         />
         <Typography variant="h3" component="h1" sx={{ fontWeight: 'bold', mb: 1 }}>
-          Jarvis Agent
+          SPARC
         </Typography>
         <Typography variant="h6" color="text.secondary">
-          Explore your projects and gain rich insights through the power of AI.
+          Strategic Platform for Application Re-architecting & Conversion
         </Typography>
       </Box>
 
@@ -82,7 +81,7 @@ export function WelcomeScreen({ handleSubmit, isLoading }: WelcomeScreenProps) {
       
       <Box sx={{ flexGrow: 1 }} />
 
-      <Box sx={{ width: "100%", maxWidth: "700px", mt: 4 }}>
+      <Box sx={{ width: "100%", maxWidth: "900px", mt: 4}}>
         <InputForm onSubmit={handleSubmit} isLoading={isLoading} context="homepage" />
         <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: "block" }}>
           Generative AI may display inaccurate information, so double-check its responses.

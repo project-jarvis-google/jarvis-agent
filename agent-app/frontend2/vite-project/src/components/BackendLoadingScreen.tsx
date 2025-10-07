@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
 import { keyframes } from '@mui/system';
-import logo from '../assets/logo.png'; 
+import logo from '../assets/LOGO.jpg'; 
 
 const pulseAnimation = keyframes`
   0% { transform: scaleY(0.5); opacity: 0.7; }
@@ -24,11 +24,11 @@ export const BackendLoadingScreen = () => (
     <Box 
       component="img"
       src={logo}
-      alt="Jarvis Agent Logo"
+      alt="SPARC Logo"
       sx={{ height: 80, mb: 3 }}
     />
     <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold', mb: 1 }}>
-      Jarvis Agent
+      SPARC
     </Typography>
     <Typography variant="h6" color="text.secondary" sx={{ mb: 4 }}>
       Waiting for backend to be ready...

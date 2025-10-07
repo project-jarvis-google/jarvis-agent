@@ -36,7 +36,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap>
-            Jarvis Agent
+            SPARC
           </Typography>
         </Toolbar>
       </AppBar>

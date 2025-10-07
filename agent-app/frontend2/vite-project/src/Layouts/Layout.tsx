@@ -16,8 +16,7 @@ import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined';
 import BugReportOutlinedIcon from '@mui/icons-material/BugReportOutlined';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
-import logo from '../assets/logo.png';
-
+import logo from '../assets/LOGO.jpg';
 const drawerWidth = 260;
 
 const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })<{ open?: boolean; }>(({ theme, open }) => ({
@@ -62,7 +61,7 @@ const DrawerHeader = styled("div")(({ theme }) => ({
 }));
 
 const agentList = [
-    { name: "Jarvis Agent", icon: <SmartToyOutlinedIcon /> },
+    { name: "SPARC", icon: <SmartToyOutlinedIcon /> },
 ];
 
 const Layout: React.FC = () => {
@@ -128,7 +127,7 @@ const Layout: React.FC = () => {
             <Box
               component="img"
               src={logo}
-              alt="Jarvis Agent Logo"
+              alt="SPARC logo"
               sx={{ height: 40, pl: 1 }}
             />
           </Link>

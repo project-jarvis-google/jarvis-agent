@@ -17,7 +17,7 @@ import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import SmartToyOutlinedIcon from "@mui/icons-material/SmartToyOutlined";
 import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
 import InsertDriveFileOutlinedIcon from "@mui/icons-material/InsertDriveFileOutlined";
-import logo from "../assets/logo.png";
+import logo from "../assets/LOGO.jpg";
 
 interface DisplayFile {
   name: string;
@@ -56,7 +56,7 @@ const AIMessageBubble: React.FC<{ message: Message }> = ({ message }) => {
       </Avatar>
       <Box sx={{ maxWidth: "80%" }}>
         <Typography sx={{ fontWeight: "bold", mb: 0.5 }}>
-          Jarvis Agent
+          SPARC
         </Typography>
         <Paper
           elevation={0}
@@ -241,6 +241,9 @@ export function ChatMessagesView({
                     sx={{ height: "100%", width: "100%" }}
                   />
                 </Avatar>
+                 <Typography sx={{ fontWeight: "bold", mr: 2 }}>
+                  SPARC is thinking...
+                </Typography>
                 <CircularProgress size={24} />
               </Stack>
             )}
