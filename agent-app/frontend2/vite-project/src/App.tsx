@@ -11,37 +11,34 @@ import { BackendLoadingScreen } from "./components/BackendLoadingScreen";
 import { BackendUnavailable } from "./components/BackendUnavailable";
 import { ChatProvider } from "./contexts/ChatContext";
 
-// 1. Create a context to pass the toggle function
 export const ColorModeContext = createContext({ toggleColorMode: () => {} });
 
-const API_BASE_URL = "http://localhost:8000"; //update this as per requirement
+/* const API_BASE_URL = "http://localhost:8000"; 
+ */
+
+const API_BASE_URL = "http://localhost:8000"; 
 
 const App: React.FC = () => {
   const { isBackendReady, isCheckingBackend } = useBackendHealth(API_BASE_URL);
   
-  // 2. Add state for managing the theme mode
-  const [mode, setMode] = useState<'light' | 'dark'>('dark');
+  const [mode, setMode] = useState<'light' | 'dark'>('light');
   
-  // 3. Create the toggle function
   const colorMode = useMemo(() => ({
     toggleColorMode: () => {
       setMode((prevMode) => (prevMode === 'light' ? 'dark' : 'light'));
     },
   }), []);
 
-  // 4. Create the theme dynamically based on the mode
   const theme = useMemo(() => createTheme({
     palette: {
       mode,
       ...(mode === 'light'
         ? {
-            // Palette for light mode
             primary: { main: '#1976d2' },
             background: { default: '#f4f6f8', paper: '#ffffff' },
             text: { primary: '#000000', secondary: '#555555' },
           }
         : {
-            // Palette for dark mode
             primary: { main: '#BB86FC' },
             background: { default: '#121212', paper: '#1E1E1E' },
             text: { primary: '#FFFFFF', secondary: '#B3B3B3' },
