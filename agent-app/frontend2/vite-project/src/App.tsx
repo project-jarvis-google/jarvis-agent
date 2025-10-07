@@ -1,5 +1,8 @@
-import React from "react";
-import { Routes, Route } from "react-router-dom"; 
+import React, { useState, useMemo, createContext } from "react";
+import { Routes, Route } from "react-router-dom";
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { Box, CssBaseline } from '@mui/material'; // Import Box for the main wrapper
+
 import Home from "./pages/Home";
 import Chat from "./pages/Chat";
 import Layout from "./Layouts/Layout";
@@ -8,23 +11,66 @@ import { BackendLoadingScreen } from "./components/BackendLoadingScreen";
 import { BackendUnavailable } from "./components/BackendUnavailable";
 import { ChatProvider } from "./contexts/ChatContext";
 
-const API_BASE_URL = "http://localhost:8000";
+// 1. Create a context to pass the toggle function
+export const ColorModeContext = createContext({ toggleColorMode: () => {} });
+
+const API_BASE_URL = "http://localhost:8000"; //update this as per requirement
 
 const App: React.FC = () => {
   const { isBackendReady, isCheckingBackend } = useBackendHealth(API_BASE_URL);
+  
+  // 2. Add state for managing the theme mode
+  const [mode, setMode] = useState<'light' | 'dark'>('dark');
+  
+  // 3. Create the toggle function
+  const colorMode = useMemo(() => ({
+    toggleColorMode: () => {
+      setMode((prevMode) => (prevMode === 'light' ? 'dark' : 'light'));
+    },
+  }), []);
+
+  // 4. Create the theme dynamically based on the mode
+  const theme = useMemo(() => createTheme({
+    palette: {
+      mode,
+      ...(mode === 'light'
+        ? {
+            // Palette for light mode
+            primary: { main: '#1976d2' },
+            background: { default: '#f4f6f8', paper: '#ffffff' },
+            text: { primary: '#000000', secondary: '#555555' },
+          }
+        : {
+            // Palette for dark mode
+            primary: { main: '#BB86FC' },
+            background: { default: '#121212', paper: '#1E1E1E' },
+            text: { primary: '#FFFFFF', secondary: '#B3B3B3' },
+            action: { hover: 'rgba(255, 255, 255, 0.08)', selected: 'rgba(255, 255, 255, 0.16)' },
+          }),
+    },
+    typography: {
+      fontFamily: 'Roboto, Arial, sans-serif',
+      h3: { fontWeight: 700 }, h4: { fontWeight: 700 }, h6: { fontWeight: 700 },
+    },
+  }), [mode]);
 
   if (isCheckingBackend) return <BackendLoadingScreen />;
   if (!isBackendReady) return <BackendUnavailable />;
 
   return (
-    <ChatProvider apiBaseUrl={API_BASE_URL}>
-      <Layout>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/chat" element={<Chat />} />
-        </Routes>
-      </Layout>
-    </ChatProvider>
+    <ColorModeContext.Provider value={colorMode}>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <ChatProvider apiBaseUrl={API_BASE_URL}>
+          <Routes>
+            <Route path="/" element={<Layout />}>
+              <Route index element={<Home />} />
+              <Route path="chat" element={<Chat />} />
+            </Route>
+          </Routes>
+        </ChatProvider>
+      </ThemeProvider>
+    </ColorModeContext.Provider>
   );
 };
 
