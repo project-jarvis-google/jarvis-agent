@@ -46,11 +46,11 @@ export function useChat(apiBaseUrl: string) {
   const [messages, setMessages] = useState<MessageWithAgent[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const [displayData, setDisplayData] = useState<string | null>(null);
-  const [messageEvents, setMessageEvents] = useState<
+  const [displayData] = useState<string | null>(null);
+  const [messageEvents] = useState<
     Map<string, ProcessedEvent[]>
   >(new Map());
-  const [websiteCount, setWebsiteCount] = useState(0);
+  const [websiteCount] = useState(0);
 
   const createSession = async () => {
     const response = await fetch(

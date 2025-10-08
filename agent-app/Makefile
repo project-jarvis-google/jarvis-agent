@@ -53,6 +53,18 @@ frontend-deploy:
 	--allow-unauthenticated \
 	--port 8080
 
+frontend-deploy-new:
+	PROJECT_ID=$$(gcloud config get-value project) && \
+	cd frontend2/vite-project && \
+	gcloud beta run deploy jarvis-frontend-new \
+	--source . \
+	--memory "4Gi" \
+	--project $$PROJECT_ID \
+	--region "us-central1" \
+	--labels "created-by=jarvis" \
+	--allow-unauthenticated \
+	--port 8080
+
 # Launch local development server with hot-reload
 local-backend:
 	uv run uvicorn app.server:app --host 0.0.0.0 --port 8000 --reload

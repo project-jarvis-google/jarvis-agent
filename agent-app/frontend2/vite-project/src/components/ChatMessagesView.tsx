@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useRef, useEffect } from "react";
 import {
   Box,
   Paper,
@@ -14,7 +14,6 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
-import SmartToyOutlinedIcon from "@mui/icons-material/SmartToyOutlined";
 import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
 import InsertDriveFileOutlinedIcon from "@mui/icons-material/InsertDriveFileOutlined";
 import logo from "../assets/LOGO.jpg";
@@ -34,7 +33,6 @@ interface ChatMessagesViewProps {
   messages: Message[];
   isLoading: boolean;
   onSubmit: (query: string, files: File[]) => void;
-  onCancel: () => void;
 }
 
 const AIMessageBubble: React.FC<{ message: Message }> = ({ message }) => {
@@ -112,7 +110,6 @@ export function ChatMessagesView({
   messages,
   isLoading,
   onSubmit,
-  onCancel,
 }: ChatMessagesViewProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 

@@ -1,7 +1,7 @@
 import React, { useState, useMemo, createContext } from "react";
 import { Routes, Route } from "react-router-dom";
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { Box, CssBaseline } from '@mui/material'; // Import Box for the main wrapper
+import { CssBaseline } from '@mui/material'; // Import Box for the main wrapper
 
 import Home from "./pages/Home";
 import Chat from "./pages/Chat";
@@ -16,7 +16,7 @@ export const ColorModeContext = createContext({ toggleColorMode: () => {} });
 /* const API_BASE_URL = "http://localhost:8000"; 
  */
 
-const API_BASE_URL = "http://localhost:8000"; 
+const API_BASE_URL = "https://jarvis-backend-428871167882.us-central1.run.app"; 
 
 const App: React.FC = () => {
   const { isBackendReady, isCheckingBackend } = useBackendHealth(API_BASE_URL);
