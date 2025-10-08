@@ -70,16 +70,17 @@ const AIMessageBubble: React.FC<{ message: Message }> = ({ message }) => {
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               components={{
-                code({ node, inline, className, children, ...props }) {
-                  const match = /language-(\w+)/.exec(className || "");
-                  return !inline && match ? (
+                   code(props) {
+                  const { children, className, node, ref, ...rest } = props;
+                  const match = /language-(\w+)/.exec(className || '');
+                  return match ? (
                     <SyntaxHighlighter
-                      style={vscDarkPlus}
-                      language={match[1]}
+                      {...rest}
                       PreTag="div"
-                      {...props}
+                      language={match[1]}
+                      style={vscDarkPlus}
                     >
-                      {String(children).replace(/\n$/, "")}
+                      {String(children).replace(/\n$/, '')}
                     </SyntaxHighlighter>
                   ) : (
                     <code
