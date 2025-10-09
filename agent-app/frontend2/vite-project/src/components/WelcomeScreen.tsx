@@ -14,6 +14,8 @@ const suggestionPrompts = [
   "Create a sample Statement of Work (SOW) for a 3-month Apigee implementation.",
   "Generate unit tests for this Spring Boot controller I've uploaded.",
   "Scaffold a new microservice using Python and Flask with a CI/CD pipeline.",
+  "Draft a migration roadmap for containerizing on-prem applications using Kubernetes.",
+  "Summarize the pros and cons of using serverless architecture for enterprise workloads.",
 ];
 
 export function WelcomeScreen({ handleSubmit, isLoading }: WelcomeScreenProps) {
@@ -57,10 +59,28 @@ export function WelcomeScreen({ handleSubmit, isLoading }: WelcomeScreenProps) {
       <Grid
         container
         spacing={2}
-        sx={{ maxWidth: "900px", justifyContent: "center" }}
+        sx={{
+          maxWidth: "1100px",
+          justifyContent: "center",
+          display: "flex",
+          flexWrap: "wrap",
+        }}
       >
         {suggestionPrompts.map((prompt) => (
-          <Grid item {...({ xs: 12, sm: 6 } as any)} key={prompt}>
+          <Grid
+            item
+            {...({ xs: 12, sm: 6, md: 3 } as any)}
+            key={prompt}
+            sx={{
+              width: {
+                xs: "100%", 
+                sm: "48%", 
+                md: "23%", 
+              },
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
             <Paper
               variant="outlined"
               onClick={() => handleSuggestionClick(prompt)}
@@ -69,6 +89,7 @@ export function WelcomeScreen({ handleSubmit, isLoading }: WelcomeScreenProps) {
                 height: "100%",
                 cursor: "pointer",
                 borderRadius: "16px",
+                textAlign: "center",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
