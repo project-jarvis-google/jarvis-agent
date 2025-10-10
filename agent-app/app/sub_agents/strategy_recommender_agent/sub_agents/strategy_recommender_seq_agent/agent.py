@@ -6,7 +6,7 @@ from google.adk.artifacts import InMemoryArtifactService
 from google.adk.sessions import InMemorySessionService
 from .sub_agents.source_reports_staging_agent import source_reports_staging_agent
 from .sub_agents.parallel_reports_analyzer_agent import parallel_reports_analyzer_agent
-from .sub_agents.report_generation_agent import report_generator_agent
+from .sub_agents.report_generation_agent import strategy_report_generator_agent
 
 
 
@@ -18,7 +18,7 @@ strategy_recommender_seq_agent = SequentialAgent(
         """Executes a sequence of source reports staging, then parallel reports analysis and finally report generation"""
     ),
 
-    sub_agents=[source_reports_staging_agent,parallel_reports_analyzer_agent,report_generator_agent]
+    sub_agents=[source_reports_staging_agent,parallel_reports_analyzer_agent,strategy_report_generator_agent]
 )
 
 
