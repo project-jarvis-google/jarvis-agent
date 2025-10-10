@@ -16,7 +16,7 @@ import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined';
 import BugReportOutlinedIcon from '@mui/icons-material/BugReportOutlined';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
-import logo from '../assets/LOGO.jpg';
+import logo from '../assets/spark-final.png';
 const drawerWidth = 260;
 
 const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })<{ open?: boolean; }>(({ theme, open }) => ({

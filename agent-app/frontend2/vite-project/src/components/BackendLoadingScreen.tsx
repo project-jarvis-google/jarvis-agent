@@ -1,6 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import { keyframes } from '@mui/system';
-import logo from '../assets/LOGO.jpg'; 
+import logo from '../assets/spark-final.png'; 
 
 const pulseAnimation = keyframes`
   0% { transform: scaleY(0.5); opacity: 0.7; }

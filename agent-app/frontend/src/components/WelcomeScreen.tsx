@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { InputForm } from "@/components/InputForm";
-import logo from '@/assets/logo.jpg';
+import logo from '@/assets/spark-final.png';
 import Card from '@mui/material/Card';
 import CardMedia from '@mui/material/CardMedia';
 

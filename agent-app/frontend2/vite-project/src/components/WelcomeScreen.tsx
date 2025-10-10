@@ -1,6 +1,6 @@
 import { Box, Typography, Grid, Paper } from "@mui/material";
 import { InputForm } from "./InputForm";
-import logo from "../assets/LOGO.jpg";
+import logo from "../assets/spark-final.png";
 
 interface WelcomeScreenProps {
   handleSubmit: (query: string, files: File[]) => void;
