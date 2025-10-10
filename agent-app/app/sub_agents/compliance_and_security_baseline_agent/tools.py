@@ -1,11 +1,11 @@
 # tool.py
-import csv
-import datetime
-import io
-import logging
 import os
+import logging
+import datetime
 import re
-import tempfile  # Added for the new function
+import io
+import csv
+import tempfile # Added for the new function
 
 from google.adk.tools import FunctionTool
 from google.cloud import storage
@@ -18,6 +18,11 @@ from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# --- NEW: Helper function from Agent 1 ---
+def _get_gcs_client():
+    """Initializes and returns a Google Cloud Storage client."""
+    return storage.Client()
 
 
 # --- NEW: Helper function from Agent 1 ---
@@ -65,18 +70,18 @@ def _convert_markdown_to_flowables(markdown_text: str):
         elif stripped_line.startswith("### "):
             story.append(Paragraph(format_text(stripped_line[2:]), styles["h3"]))
             story.append(Spacer(1, 0.1 * inch))
-        elif stripped_line.startswith(("* ", "- ")):
-            p = Paragraph(f"• {format_text(stripped_line[2:])}", styles["BodyText"])
+        elif stripped_line.startswith(('* ', '- ')):
+            p = Paragraph(f"• {format_text(stripped_line[2:])}", styles['BodyText'])
             p.style.leftIndent = 20
             story.append(p)
-        elif re.match(r"^\d+\.\s", stripped_line):
-            p = Paragraph(format_text(stripped_line), styles["BodyText"])
+        elif re.match(r'^\d+\.\s', stripped_line):
+            p = Paragraph(format_text(stripped_line), styles['BodyText'])
             p.style.leftIndent = 20
             story.append(p)
         elif stripped_line == "---":
             story.append(Spacer(1, 0.25 * inch))
         else:
-            story.append(Paragraph(format_text(line), styles["BodyText"]))
+            story.append(Paragraph(format_text(line), styles['BodyText']))
 
     return story
 
@@ -84,7 +89,7 @@ def _convert_markdown_to_flowables(markdown_text: str):
 # --- MODIFIED FUNCTION ---
 def _create_gcs_file_and_get_link(report_markdown: str) -> str:
     """Generates a PDF from markdown, uploads to GCS, and returns a public URL."""
-
+    
     bucket_name = os.getenv("GCS_BUCKET_NAME")
     if not bucket_name:
         return "Error: GCS_BUCKET_NAME environment variable is not set."
@@ -98,9 +103,7 @@ def _create_gcs_file_and_get_link(report_markdown: str) -> str:
         return f"Error: Failed to connect to GCS. Check credentials. Details: {e}"
 
     try:
-        app_name_match = re.search(
-            r"Application:\s*\*\*(.*?)\*\*", report_markdown, re.IGNORECASE
-        )
+        app_name_match = re.search(r"Application:\s*\*\*(.*?)\*\*", report_markdown, re.IGNORECASE)
         if not app_name_match:
             app_name_match = re.search(
                 r"Report\s*-\s*(.*)", report_markdown, re.IGNORECASE
@@ -119,7 +122,7 @@ def _create_gcs_file_and_get_link(report_markdown: str) -> str:
             tmp_path = tmp.name
 
         pdf_blob = bucket.blob(pdf_blob_name)
-        pdf_blob.upload_from_filename(tmp_path, content_type="application/pdf")
+        pdf_blob.upload_from_filename(tmp_path, content_type='application/pdf')
         os.remove(tmp_path)
 
         # --- MODIFICATION START: Changed link generation ---
@@ -128,7 +131,7 @@ def _create_gcs_file_and_get_link(report_markdown: str) -> str:
         logger.info(f"Uploaded '{pdf_blob_name}' to public GCS bucket.")
         return f"Successfully created the compliance report. It is publicly accessible at: {public_url}"
         # --- MODIFICATION END ---
-
+        
     except Exception as e:
         logger.error(f"Failed to generate or upload report: {e}", exc_info=True)
         return (
@@ -161,16 +164,16 @@ def process_and_upload_csv(filename: str, file_content: str) -> str:
 
         # 2. Add new data (example: adding a processing date)
         if data:
-            data[0].append("ProcessedDate")  # Add header
+            data[0].append('ProcessedDate') # Add header
             processing_date = str(datetime.date.today())
-            for row in data[1:]:  # Skip header row
+            for row in data[1:]: # Skip header row
                 row.append(processing_date)
 
         # 3. Write modified data to a new in-memory CSV
         output = io.StringIO()
         writer = csv.writer(output)
         writer.writerows(data)
-        updated_csv_content = output.getvalue().encode("utf-8")
+        updated_csv_content = output.getvalue().encode('utf-8')
 
         # 4. Upload the new CSV to GCS
         base_filename = os.path.splitext(filename)[0]
@@ -180,7 +183,7 @@ def process_and_upload_csv(filename: str, file_content: str) -> str:
         storage_client = _get_gcs_client()
         bucket = storage_client.bucket(bucket_name)
         blob = bucket.blob(gcs_path)
-        blob.upload_from_string(updated_csv_content, content_type="text/csv")
+        blob.upload_from_string(updated_csv_content, content_type='text/csv')
 
         # 5. Return the public URL, just like in Agent 1
         public_url = f"https://storage.googleapis.com/{bucket_name}/{gcs_path}"
