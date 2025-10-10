@@ -6,8 +6,8 @@ from .prompt import REPORT_GENERATION_PROMPT
 
 MODEL = "gemini-2.5-flash"
 
-report_generator_agent = LlmAgent(
-    name="report_generator_agent",
+strategy_report_generator_agent = LlmAgent(
+    name="strategy_report_generator_agent",
     model=MODEL,
     description=(
         "Agent for creating a Strategy Recommendation report from the output of previous agent."
@@ -20,7 +20,7 @@ report_generator_agent = LlmAgent(
 session_service = InMemorySessionService()
 
 runner = Runner(
-    agent=report_generator_agent,
+    agent=strategy_report_generator_agent,
     app_name="report_generator_app",
     session_service=session_service,
 )
