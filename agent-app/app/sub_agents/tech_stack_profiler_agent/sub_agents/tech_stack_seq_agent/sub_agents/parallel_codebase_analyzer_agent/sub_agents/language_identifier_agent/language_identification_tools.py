@@ -35,7 +35,8 @@ def identify_languages_from_source_code(tool_context: ToolContext) -> bool:
             '''
 
         else:
-            result = subprocess.run(["/go-installs/enry","-json"], cwd=secure_temp_repo_dir, capture_output=True, text=True, check=True)
+            enry_install_location = os.getenv("ENRY_INSTALLATION_LOCATION", "/go-installs/enry")
+            result = subprocess.run([enry_install_location,"-json"], cwd=secure_temp_repo_dir, capture_output=True, text=True, check=True)
             stderr = result.stderr
             stdout = result.stdout
 

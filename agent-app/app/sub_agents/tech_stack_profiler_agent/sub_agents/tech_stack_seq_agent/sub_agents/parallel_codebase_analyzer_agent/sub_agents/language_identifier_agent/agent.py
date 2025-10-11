@@ -17,4 +17,5 @@ language_identifier_agent = LlmAgent(
     instruction=LANGUAGE_IDENTIFICATION_PROMPT,
     # output_key="languages_breakdown_percentage",
     tools=[identify_languages_from_source_code],
+    disallow_transfer_to_parent=True
 )
