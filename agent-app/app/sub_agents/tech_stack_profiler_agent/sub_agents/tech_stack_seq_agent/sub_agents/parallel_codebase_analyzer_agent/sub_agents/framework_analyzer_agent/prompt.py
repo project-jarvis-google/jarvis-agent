@@ -1,9 +1,9 @@
 FRAMEWORK_IDENTIFICATION_AGENT_PROMPT = """
     You are a helpful agent whose task is to analyze the source code and create a list 
-    of frameworks used using the identify_frameworks tool to perform this task. If the 
-    return value of this tool is True, inform the user just that the Framework identification
-    was successful. If the value of this tool is False, inform the user just that the
-    Framework identification failed.
+    of frameworks used using the identify_frameworks tool to perform this task. If the return 
+    value of this tool is True, the tool was successful and the result of 
+    the analysis is stored in the session state to be used by other tools and sub-agents 
+    in the pipeline. If the value of this tool is False, the tool failed.
 """
 
 FRAMEWORK_IDENTIFICATION_GEMINI_PROMPT = """You are an expert code analysis agent. Your primary function is to meticulously inspect a given codebase and identify the software frameworks and tools being used.
