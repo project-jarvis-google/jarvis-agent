@@ -48,7 +48,9 @@ def convert_str_to_pdf(
             logger.warning(f"Unsupported format: {format}. Creating a blank PDF.")
             # Or raise ValueError(f"Unsupported format: {format}")
 
-        with tempfile.TemporaryDirectory(dir=custom_temp_path, delete=del_pdf_temp_file_after_creation) as tmpdirname:
+        # TODO: Upgrade python docker base image to version 3.12 for 'delete' keyword to work
+        with tempfile.TemporaryDirectory(dir=custom_temp_path) as tmpdirname:
+        # with tempfile.TemporaryDirectory(dir=custom_temp_path, delete=del_pdf_temp_file_after_creation) as tmpdirname:
             temp_pdf_path = f"{tmpdirname}/temp.pdf"
             pdf.output(temp_pdf_path)
             logger.info(f"Temporary PDF created at: {temp_pdf_path}")

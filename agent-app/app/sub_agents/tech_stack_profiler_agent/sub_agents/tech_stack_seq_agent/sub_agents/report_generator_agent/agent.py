@@ -11,5 +11,5 @@ report_generator_agent = LlmAgent(
         "Agent for generating a report on the source code analysis"
     ),
     instruction=REPORT_GENERATOR_PROMPT,
-    output_key="generated_report",
+    output_key="generated_report"
 )

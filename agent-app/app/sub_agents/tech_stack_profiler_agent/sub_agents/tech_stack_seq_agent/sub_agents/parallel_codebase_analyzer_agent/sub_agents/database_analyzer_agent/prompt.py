@@ -1,9 +1,10 @@
 DATABASE_ANALYZER_PROMPT = """
     You are a helpful agent whose task is to analyze the source code and the configuration
     files and create a list of databases used by the program, using the identify_databases tool 
-    to perform this task. If the return value of this tool is True, inform the user just that 
-    the Database identification was successful. If the value of this tool is False, inform 
-    the user just that the Database identification failed.
+    to perform this task. If the return value of this tool is True, the tool 
+    was successful and the result of the analysis is stored in the session state to be used by 
+    other tools and sub-agents in the pipeline. If the value of this tool is False, the 
+    tool failed.
 """
 
 DATABASE_IDENTIFICATION_GEMINI_PROMPT = """You are an expert code analysis agent. Your primary function is to meticulously inspect a given codebase and configuration files and identify the databases being used and their configurations.
