@@ -1,7 +1,6 @@
 import React, { createContext, useContext, ReactNode } from "react";
 import { useChat, MessageWithAgent, ProcessedEvent } from "../hooks/useChat";
 
-// Define the shape of the context data
 interface ChatContextType {
   messages: MessageWithAgent[];
   isLoading: boolean;
