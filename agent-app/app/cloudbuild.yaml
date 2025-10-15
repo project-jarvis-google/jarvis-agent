@@ -5,6 +5,7 @@ steps:
     args:
       - '-c'
       - |
+        pwd
         make -C ../.. backend-deploy
     dir: 'agent-app/app'
 options:
