@@ -1,0 +1,12 @@
+# Create a new cloudbuild.yaml file which can help run the make command make backend-deploy that can be invoked from the app directory whenever there are any changes to the sb_agents folder here 
+steps:
+  - name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        cd ../..
+        make -C .. backend-deploy
+    dir: 'agent-app/app'
+options:
+  logging: CLOUD_LOGGING_ONLY
