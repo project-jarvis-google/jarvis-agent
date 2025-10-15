@@ -47,9 +47,7 @@ export function useChat(apiBaseUrl: string) {
   const [isLoading, setIsLoading] = useState(false);
 
   const [displayData] = useState<string | null>(null);
-  const [messageEvents] = useState<
-    Map<string, ProcessedEvent[]>
-  >(new Map());
+  const [messageEvents] = useState<Map<string, ProcessedEvent[]>>(new Map());
   const [websiteCount] = useState(0);
 
   const createSession = async () => {
@@ -60,7 +58,9 @@ export function useChat(apiBaseUrl: string) {
         headers: { "Content-Type": "application/json" },
       }
     );
-    if (!response.ok) throw new Error("Failed to create session");
+    if (!response.ok) {
+      throw new Error(`Failed to create session. Status: ${response.status}`);
+    }
     return response.json();
   };
 
@@ -103,8 +103,6 @@ export function useChat(apiBaseUrl: string) {
         },
         { type: "ai", content: "", id: aiMessageId },
       ]);
-
-     
       const messageParts = [{ text: query }];
 
       for (const file of processedFiles) {
@@ -186,8 +184,8 @@ export function useChat(apiBaseUrl: string) {
   }, []);
 
   const clearChat = useCallback(() => {
-    setMessages([]); 
-    setIsLoading(false); 
+    setMessages([]);
+    setIsLoading(false);
   }, []);
 
   return {

@@ -24,19 +24,21 @@ export function InputForm({
   const [inputValue, setInputValue] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const formRef = useRef<HTMLFormElement>(null); 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
     if (isLoading || (!inputValue.trim() && files.length === 0)) return;
     onSubmit(inputValue.trim(), files);
     setInputValue("");
     setFiles([]);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSubmit(e as any);
+      e.preventDefault(); 
+      formRef.current?.requestSubmit();
     }
   };
 
@@ -71,7 +73,8 @@ export function InputForm({
         accept="image/*,application/pdf,text/*,.csv,.doc,.docx,.xls,.xlsx"
       />
 
-      <Box component="form" onSubmit={handleSubmit}>
+      <Box component="form" onSubmit={handleSubmit} ref={formRef}>
+        {" "}
         {files.length > 0 && (
           <Stack
             direction="row"
@@ -88,7 +91,6 @@ export function InputForm({
             ))}
           </Stack>
         )}
-
         <OutlinedInput
           fullWidth
           value={inputValue}
@@ -100,7 +102,7 @@ export function InputForm({
           sx={{
             borderRadius: "28px",
             backgroundColor: "action.hover",
-            padding:'20px',
+            padding: "20px",
             "& .MuiOutlinedInput-notchedOutline": { border: "none" },
           }}
           startAdornment={
