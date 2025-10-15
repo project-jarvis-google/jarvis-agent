@@ -30,7 +30,7 @@ playground:
 # Usage: make backend [PORT=8080] - Set IAP=true to enable Identity-Aware Proxy, PORT to specify container port
 backend-deploy:
 	PROJECT_ID=$$(gcloud config get-value project) && \
-	gcloud beta run deploy jarvis-backend \
+	gcloud run deploy jarvis-backend \
 		--source . \
 		--env-vars-file=./.env.prod.yaml \
 		--update-secrets=GEMINI_API_KEY=jarvis-agent-GEMINI_API_KEY:latest \
@@ -44,7 +44,7 @@ backend-deploy:
 frontend-deploy:
 	PROJECT_ID=$$(gcloud config get-value project) && \
 	cd frontend && \
-	gcloud beta run deploy jarvis-frontend \
+	gcloud run deploy jarvis-frontend \
 	--source . \
 	--memory "4Gi" \
 	--project $$PROJECT_ID \
@@ -56,7 +56,7 @@ frontend-deploy:
 frontend-deploy-new:
 	PROJECT_ID=$$(gcloud config get-value project) && \
 	cd frontend2/vite-project && \
-	gcloud beta run deploy jarvis-frontend-new \
+	gcloud run deploy jarvis-frontend-new \
 	--source . \
 	--memory "4Gi" \
 	--project $$PROJECT_ID \
