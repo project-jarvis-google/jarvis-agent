@@ -5,7 +5,7 @@ steps:
     args:
       - '-c'
       - |
-        make -C ../../.. frontend-deploy-new
+        make -C ../.. frontend-deploy-new
     dir: 'agent-app/frontend2/vite-project'
 options:
   logging: CLOUD_LOGGING_ONLY
