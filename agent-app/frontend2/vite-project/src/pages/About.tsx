@@ -7,7 +7,6 @@ import {
   CardContent,
   Avatar,
   Link,
-  GridProps,
 } from "@mui/material";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 
@@ -57,7 +56,8 @@ const AboutPage: React.FC = () => {
         {teamMembers.map((member) => (
           <Grid
             item
-            {...({ xs: 12, sm: 6, md: 4 } as GridProps)}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            {...({ xs: 12, sm: 6, md: 4 } as any)}
             key={member.name}
           >
             <Card
