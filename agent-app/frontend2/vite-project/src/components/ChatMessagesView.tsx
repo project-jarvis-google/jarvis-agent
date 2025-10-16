@@ -39,14 +39,11 @@ interface ChatMessagesViewProps {
   isLoading: boolean;
 }
 
-// Helper function to remove large JSON tool outputs and return clean text.
 const cleanContent = (text: string): string => {
-    // Regex to find and remove markdown code fences (like ```json...```) wrapping internal data.
     const jsonCodeBlockRegex = /```(json|code|bash|text)\s*\{[\s\S]*?\n\}\s*```/g;
     
-    let cleanedText = text.replace(jsonCodeBlockRegex, '').trim();
+    const cleanedText = text.replace(jsonCodeBlockRegex, '').trim();
     
-    // If the content is now empty or still looks like raw JSON, return a helpful message.
     if (cleanedText === "" || (cleanedText.startsWith('{') && cleanedText.endsWith('}'))) {
         return "The system processed the request and generated the final report below.";
     }
@@ -62,7 +59,6 @@ const AIMessageBubble: React.FC<{ message: Message }> = ({ message }) => {
   const handleCopy = async () => {
     if (!message.content) return;
     try {
-      // Use document.execCommand for better compatibility in iframe environments
       await navigator.clipboard.writeText(message.content);
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 2000);
@@ -112,7 +108,6 @@ const AIMessageBubble: React.FC<{ message: Message }> = ({ message }) => {
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 components={{
-                  // Custom rendering for code blocks (using SyntaxHighlighter)
                   code(props) {
                     const { children, className } = props;
                     const match = /language-(\w+)/.exec(className || "");
@@ -138,7 +133,7 @@ const AIMessageBubble: React.FC<{ message: Message }> = ({ message }) => {
                       </code>
                     );
                   },
-                  a: ({ node, ...props }) => (
+                  a: ({ ...props }) => (
                     <a 
                         {...props} 
                         target="_blank" 

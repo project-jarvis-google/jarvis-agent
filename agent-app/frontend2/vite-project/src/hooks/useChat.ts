@@ -17,7 +17,30 @@ export interface MessageWithAgent {
 
 export interface ProcessedEvent {
   title: string;
-  data: any;
+  data: unknown;
+}
+
+interface AgentPart {
+  text?: string;
+  inlineData?: {
+    displayName: string;
+    data: string;
+    mimeType: string;
+  };
+  fileData?: {
+    displayName?: string;
+    fileUri: string;
+    mimeType: string;
+  };
+}
+
+interface AgentResponseChunk {
+  error?: string | { message?: string; code?: number };
+  content?: {
+    parts?: AgentPart[];
+  };
+  author?: string;
+  partial?: boolean;
 }
 
 const createLocalPreview = (file: File) =>
@@ -46,35 +69,7 @@ const base64ToBlobUrl = (base64Data: string, mimeType: string) => {
   return URL.createObjectURL(blob);
 };
 
-const readFileAsBase64OrText = (file: File) =>
-  new Promise<{ name: string; type: string; data: string }>(
-    (resolve, reject) => {
-      const reader = new FileReader();
-
-      if (file.type === "text/csv" || file.type === "text/plain") {
-        reader.readAsText(file);
-      } else {
-        reader.readAsDataURL(file);
-      }
-
-      reader.onload = () => {
-        let result = reader.result as string;
-
-        if (!file.type.startsWith("text/") && result.includes(",")) {
-          const [, base64] = result.split(",");
-          result = base64;
-        }
-
-        resolve({
-          name: file.name,
-          type: file.type,
-          data: result,
-        });
-      };
-
-      reader.onerror = (err) => reject(err);
-    }
-  );
+const generateId = () => Math.random().toString(36).substring(2, 9);
 
 export function useChat(apiBaseUrl: string) {
   const [userId, setUserId] = useState<string | null>(null);
@@ -82,12 +77,10 @@ export function useChat(apiBaseUrl: string) {
   const [appName, setAppName] = useState<string | null>(null);
   const [messages, setMessages] = useState<MessageWithAgent[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [displayData, setDisplayData] = useState<string | null>(null);
-  const [messageEvents, setMessageEvents] = useState<
-    Map<string, ProcessedEvent[]>
-  >(new Map());
-  const [websiteCount, setWebsiteCount] = useState(0);
+
   const abortControllerRef = useRef<AbortController | null>(null);
+  const isSubmittingRef = useRef(false); // 🚫 Prevent double submit
+  const hasContentBeenStreamedRef = useRef(false);
 
   const createSession = async () => {
     const response = await fetch(
@@ -102,191 +95,244 @@ export function useChat(apiBaseUrl: string) {
     return response.json();
   };
 
-  const handleSubmit = async (query: string, files: File[]) => {
-    if ((!query.trim() && files.length === 0) || isLoading) return;
-    setIsLoading(true);
+  const handleSubmit = useCallback(
+    async (query: string, files: File[]) => {
+      if ((!query.trim() && files.length === 0) || isLoading) return;
+      if (isSubmittingRef.current) return;
+      isSubmittingRef.current = true;
+      setIsLoading(true);
 
-    const aiMessageId = Date.now().toString() + "_ai";
-    const userMessageId = Date.now().toString();
+      hasContentBeenStreamedRef.current = false;
 
-    try {
-      let currentSessionId = sessionId;
-      let currentUserId = userId;
-      let currentAppName = appName;
+      const aiMessageId = generateId() + "_ai";
+      const userMessageId = generateId();
 
-      if (!currentSessionId || !currentUserId || !currentAppName) {
-        const sessionData = await createSession();
-        setUserId(sessionData.userId);
-        setSessionId(sessionData.id);
-        setAppName(sessionData.appName);
-        currentSessionId = sessionData.id;
-        currentUserId = sessionData.userId;
-        currentAppName = sessionData.appName;
-      }
+      try {
+        let currentSessionId = sessionId;
+        let currentUserId = userId;
+        let currentAppName = appName;
 
-      const displayFiles = await Promise.all(files.map(createLocalPreview));
+        if (!currentSessionId || !currentUserId || !currentAppName) {
+          const sessionData = await createSession();
+          setUserId(sessionData.userId);
+          setSessionId(sessionData.id);
+          setAppName(sessionData.appName);
+          currentSessionId = sessionData.id;
+          currentUserId = sessionData.userId;
+          currentAppName = sessionData.appName;
+        }
 
-      setMessages((prev) => [
-        ...prev,
-        {
-          type: "human",
-          content: query,
-          id: userMessageId,
-          files: displayFiles,
-        },
-        { type: "ai", content: "", id: aiMessageId },
-      ]);
+        const displayFiles = await Promise.all(files.map(createLocalPreview));
 
-      const fileParts = await Promise.all(
-        files.map(async (file) => {
+        const filePartPromises = files.map(async (file) => {
           try {
-            const fileData = await readFileAsBase64OrText(file);
+            const reader = new FileReader();
+            const dataPromise = new Promise<{
+              name: string;
+              type: string;
+              data: string;
+            }>((resolve, reject) => {
+              reader.onload = () => {
+                let result = reader.result as string;
+                if (file.type.startsWith("text/")) {
+                  const encoded = btoa(unescape(encodeURIComponent(result)));
+                  result = encoded;
+                } else if (result.includes(",")) {
+                  const [, base64] = result.split(",");
+                  result = base64;
+                }
+                resolve({ name: file.name, type: file.type, data: result });
+              };
+              reader.onerror = (err) => reject(err);
+
+              if (file.type === "text/csv" || file.type === "text/plain") {
+                reader.readAsText(file);
+              } else {
+                reader.readAsDataURL(file);
+              }
+            });
+            const fileData = await dataPromise;
             return {
               inlineData: {
                 displayName: fileData.name,
                 data: fileData.data,
-                mimeType:
-                  fileData.type === "text/csv" ? "text/csv" : fileData.type,
+                mimeType: fileData.type,
               },
             };
           } catch (err) {
             console.error(`Failed to read file ${file.name}:`, err);
             return null;
           }
-        })
-      );
-      const validFileParts = fileParts.filter(Boolean);
+        });
 
-      const messageParts = [];
-      if (query.trim()) messageParts.push({ text: query });
-      messageParts.push(...validFileParts);
+        const fileParts = await Promise.all(filePartPromises);
+        const validFileParts = fileParts.filter(Boolean);
 
-      const payload = {
-        appName: currentAppName,
-        userId: currentUserId,
-        sessionId: currentSessionId,
-        newMessage: { parts: messageParts, role: "user" },
-        streaming: true,
-      };
+        setMessages((prev) => [
+          ...prev,
+          {
+            type: "human",
+            content: query,
+            id: userMessageId,
+            files: displayFiles,
+          },
+          { type: "ai", content: "", id: aiMessageId },
+        ]);
 
-      console.log("--- Sending RUN_SSE Payload ---", payload);
+        const messageParts: AgentPart[] = [];
+        if (query.trim()) messageParts.push({ text: query });
+        messageParts.push(...(validFileParts as AgentPart[]));
 
-      abortControllerRef.current = new AbortController();
-      const response = await fetch(apiBaseUrl + `/run_sse`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-        signal: abortControllerRef.current.signal,
-      });
+        const payload = {
+          appName: currentAppName,
+          userId: currentUserId,
+          sessionId: currentSessionId,
+          newMessage: { parts: messageParts, role: "user" },
+          streaming: true,
+        };
 
-      if (!response.ok || !response.body)
-        throw new Error(`API call failed with status: ${response.status}`);
+        abortControllerRef.current = new AbortController();
+        const response = await fetch(apiBaseUrl + `/run_sse`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+          signal: abortControllerRef.current.signal,
+        });
 
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let combinedContent = "";
-      let finalAuthor = "unknown";
-      let aiFiles: DisplayFile[] = [];
+        if (!response.ok || !response.body)
+          throw new Error(`API call failed with status: ${response.status}`);
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
 
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk
-          .split("\n")
-          .filter((line) => line.startsWith("data: "));
+        let done = false;
+        while (!done) {
+          const { value, done: readerDone } = await reader.read();
+          done = readerDone;
+          
+          if (done) break;
 
-        for (const line of lines) {
-          const jsonText = line.substring(5).trim();
-          if (!jsonText) continue;
+          const chunk = decoder.decode(value, { stream: true });
+          const lines = chunk
+            .split("\n")
+            .filter((line) => line.startsWith("data: "));
 
-          try {
-            const json = JSON.parse(jsonText);
+          for (const line of lines) {
+            const jsonText = line.substring(5).trim();
+            if (!jsonText) continue;
+            try {
+              const json = JSON.parse(jsonText) as AgentResponseChunk;
 
-            if (json.error) throw new Error(json.error.message || json.error);
+              if (json.error)
+                throw new Error(
+                  (json.error as { message?: string }).message ||
+                    json.error.toString()
+                );
 
-            const textParts = json?.content?.parts
-              ?.map((p: any) => p.text)
-              .filter(Boolean)
-              .join(" ");
-            if (textParts) combinedContent += textParts;
+              const textParts = json?.content?.parts
+                ?.map((p: AgentPart) => p.text)
+                .filter(Boolean)
+                .join("");
 
-            finalAuthor = json.author || finalAuthor;
+              const shouldAppendText = !!textParts && json.partial === true;
+              const hasNewContent =
+                shouldAppendText ||
+                (json?.content?.parts &&
+                  json.content.parts.some((p) => p.fileData));
 
-            // Handle files
-            if (json?.content?.parts) {
-              json.content.parts.forEach((p: any) => {
-                if (p.fileData) {
-                  let fileUrl = p.fileData.fileUri;
-                  if (fileUrl.startsWith("data:")) {
-                    fileUrl = base64ToBlobUrl(fileUrl, p.fileData.mimeType);
-                  }
-                  aiFiles.push({
-                    name: p.fileData.displayName,
-                    type: p.fileData.mimeType,
-                    url: fileUrl,
-                  });
-                }
-              });
+              if (hasNewContent) {
+                hasContentBeenStreamedRef.current = true;
+
+                setMessages((prev) =>
+                  prev.map((m) => {
+                    if (m.id === aiMessageId) {
+                      const newContent =
+                        m.content + (shouldAppendText ? textParts : "");
+                      let newAgent = json.author || m.agent;
+                      const newFiles = [...(m.files || [])];
+
+                      if (json?.content?.parts) {
+                        json.content.parts.forEach((p: AgentPart) => {
+                          if (p.fileData) {
+                            let fileUrl = p.fileData.fileUri;
+                            if (fileUrl.startsWith("data:")) {
+                              fileUrl = base64ToBlobUrl(
+                                fileUrl,
+                                p.fileData.mimeType
+                              );
+                            }
+                            if (!newFiles.some((f) => f.url === fileUrl)) {
+                              newFiles.push({
+                                name:
+                                  p.fileData.displayName || "Generated File",
+                                type: p.fileData.mimeType,
+                                url: fileUrl,
+                              });
+                            }
+                          }
+                        });
+                      }
+
+                      if (json.author) {
+                        newAgent = json.author;
+                      }
+
+                      return {
+                        ...m,
+                        content: newContent,
+                        agent: newAgent,
+                        files: newFiles,
+                      };
+                    }
+                    return m;
+                  })
+                );
+              }
+            } catch (e) {
+              console.error("Could not parse chunk:", jsonText, e);
             }
-          } catch (e) {
-            console.error("Could not parse chunk:", jsonText);
           }
         }
+        if (!hasContentBeenStreamedRef.current) {
+          throw new Error("No valid content received from server.");
+        }
+      } catch (err: unknown) {
+        console.error("Error during handleSubmit:", err);
+        const errorMessage = err instanceof Error ? err.message : String(err);
 
-        // ------------------ Update AI message live ------------------
         setMessages((prev) =>
           prev.map((m) =>
-            m.id === aiMessageId
-              ? {
-                  ...m,
-                  content: combinedContent,
-                  agent: finalAuthor,
-                  files: aiFiles,
-                }
+            m.id === aiMessageId 
+              ? { ...m, content: `An error occurred: ${errorMessage}` }
               : m
           )
         );
+      } finally {
+        setIsLoading(false);
+        isSubmittingRef.current = false;
       }
+    },
+    [isLoading, sessionId, userId, appName, apiBaseUrl, createSession]
+  );
 
-      if (!combinedContent && aiFiles.length === 0) {
-        throw new Error("No valid content received from server.");
-      }
-    } catch (err: any) {
-      console.error("Error during handleSubmit:", err);
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === aiMessageId
-            ? { ...m, content: `An error occurred: ${err.message}` }
-            : m
-        )
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // ------------------ Cancel / clear ------------------
   const handleCancel = useCallback(() => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
       setIsLoading(false);
+      isSubmittingRef.current = false;
     }
   }, []);
 
   const clearChat = useCallback(() => {
     setMessages([]);
     setIsLoading(false);
+    isSubmittingRef.current = false;
   }, []);
 
   return {
     messages,
     isLoading,
-    displayData,
-    messageEvents,
-    websiteCount,
-    handleSubmit,
+    handleSubmit, 
     handleCancel,
     clearChat,
   };

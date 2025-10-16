@@ -1,5 +1,5 @@
 import React, { createContext, useContext, ReactNode } from "react";
-import { useChat, MessageWithAgent, ProcessedEvent } from "../hooks/useChat";
+import { useChat, MessageWithAgent } from "../hooks/useChat";
 
 interface ChatContextType {
   messages: MessageWithAgent[];
@@ -7,9 +7,6 @@ interface ChatContextType {
   handleSubmit: (query: string, files: File[]) => void;
   handleCancel: () => void;
   clearChat: () => void;
-  displayData: string | null;
-  messageEvents: Map<string, ProcessedEvent[]>;
-  websiteCount: number;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
