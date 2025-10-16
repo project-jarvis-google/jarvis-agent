@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import IO
 import logging
 
 import google.cloud.storage as storage
@@ -64,3 +65,31 @@ def upload_str_to_gcs_bucket(gcs_bucket_name: str, gcs_file_name: str, file_path
     except exceptions.GoogleAPICallError as e:
         logging.error(f"Failed to upload {file_path} to GCS bucket {gcs_bucket_name}: {e}", exc_info=True)
         return False
+
+def upload_file_to_gcs(
+    gcs_bucket_name: str,
+    gcs_file_name: str,
+    file_obj: IO,
+    file_content_type: str | None,
+) -> None:
+    """Uploads a file object to a Google Cloud Storage bucket.
+
+    Args:
+        gcs_bucket_name: The name of the GCS bucket.
+        gcs_file_name: The desired name of the file in the bucket.
+        file_obj: The file-like object to upload.
+        file_content_type: The content type of the file (e.g., 'application/pdf').
+
+    Raises:
+        google.api_core.exceptions.GoogleAPICallError: If the upload fails.
+    """
+    try:
+        storage_client = storage.Client()
+        bucket = storage_client.bucket(gcs_bucket_name)
+        blob = bucket.blob(gcs_file_name)
+        logging.info(f"Uploading {gcs_file_name} to gs://{gcs_bucket_name}/{gcs_file_name}...")
+        blob.upload_from_file(file_obj, content_type=file_content_type)
+        logging.info(f"Successfully uploaded to gs://{gcs_bucket_name}/{gcs_file_name}")
+    except exceptions.GoogleAPICallError as e:
+        logging.error(f"Failed to upload {gcs_file_name} to GCS bucket {gcs_bucket_name}: {e}", exc_info=True)
+        raise
