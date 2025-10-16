@@ -1,9 +1,11 @@
 import { useState, useCallback, useRef } from "react";
+// Import the GCS upload service
+import { uploadFileToGCS } from "../services/fileUploadService"; 
 
 export interface DisplayFile {
   name: string;
   type: string;
-  url: string;
+  url: string; 
 }
 
 export interface MessageWithAgent {
@@ -20,6 +22,8 @@ export interface ProcessedEvent {
   data: any;
 }
 
+// ------------------ Create a local preview for UI ------------------
+// This remains, as it's only for the user's local file preview.
 const createLocalPreview = (file: File) =>
   new Promise<DisplayFile>((resolve, reject) => {
     const reader = new FileReader();
@@ -34,6 +38,8 @@ const createLocalPreview = (file: File) =>
     reader.readAsDataURL(file);
   });
 
+// ------------------ Convert base64 string to Blob URL ------------------
+// This remains for handling file output from the AI response.
 const base64ToBlobUrl = (base64Data: string, mimeType: string) => {
   const base64Content = base64Data.split(",")[1] || base64Data;
   const byteCharacters = atob(base64Content);
@@ -46,35 +52,7 @@ const base64ToBlobUrl = (base64Data: string, mimeType: string) => {
   return URL.createObjectURL(blob);
 };
 
-const readFileAsBase64OrText = (file: File) =>
-  new Promise<{ name: string; type: string; data: string }>(
-    (resolve, reject) => {
-      const reader = new FileReader();
-
-      if (file.type === "text/csv" || file.type === "text/plain") {
-        reader.readAsText(file);
-      } else {
-        reader.readAsDataURL(file);
-      }
-
-      reader.onload = () => {
-        let result = reader.result as string;
-
-        if (!file.type.startsWith("text/") && result.includes(",")) {
-          const [, base64] = result.split(",");
-          result = base64;
-        }
-
-        resolve({
-          name: file.name,
-          type: file.type,
-          data: result,
-        });
-      };
-
-      reader.onerror = (err) => reject(err);
-    }
-  );
+// REMOVED: readFileAsBase64OrText is no longer needed.
 
 export function useChat(apiBaseUrl: string) {
   const [userId, setUserId] = useState<string | null>(null);
@@ -83,25 +61,21 @@ export function useChat(apiBaseUrl: string) {
   const [messages, setMessages] = useState<MessageWithAgent[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [displayData, setDisplayData] = useState<string | null>(null);
-  const [messageEvents, setMessageEvents] = useState<
-    Map<string, ProcessedEvent[]>
-  >(new Map());
+  const [messageEvents, setMessageEvents] = useState<Map<string, ProcessedEvent[]>>(new Map());
   const [websiteCount, setWebsiteCount] = useState(0);
   const abortControllerRef = useRef<AbortController | null>(null);
 
+  // ------------------ Create a session if needed ------------------
   const createSession = async () => {
-    const response = await fetch(
-      apiBaseUrl + `/apps/app/users/u_999/sessions`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      }
-    );
-    if (!response.ok)
-      throw new Error(`Failed to create session. Status: ${response.status}`);
+    const response = await fetch(apiBaseUrl + `/apps/app/users/u_999/sessions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    });
+    if (!response.ok) throw new Error(`Failed to create session. Status: ${response.status}`);
     return response.json();
   };
 
+  // ------------------ Main handleSubmit ------------------
   const handleSubmit = async (query: string, files: File[]) => {
     if ((!query.trim() && files.length === 0) || isLoading) return;
     setIsLoading(true);
@@ -110,6 +84,7 @@ export function useChat(apiBaseUrl: string) {
     const userMessageId = Date.now().toString();
 
     try {
+      // ------------------ Ensure session ------------------
       let currentSessionId = sessionId;
       let currentUserId = userId;
       let currentAppName = appName;
@@ -124,39 +99,34 @@ export function useChat(apiBaseUrl: string) {
         currentAppName = sessionData.appName;
       }
 
+      // ------------------ 1. Local file previews for UI ------------------
       const displayFiles = await Promise.all(files.map(createLocalPreview));
 
+      // ------------------ 2. GCS Upload and Payload Construction (The Revert) ------------------
+      const filePartPromises = files.map(async (file) => {
+        // --- THIS IS THE CRITICAL GCS UPLOAD CALL ---
+        const gcsUri = await uploadFileToGCS(file); 
+        
+        // Return the fileData structure required by the agent
+        return {
+          fileData: {
+            fileUri: gcsUri, // The GCS URI
+            mimeType: file.type,
+            displayName: file.name,
+          },
+        };
+      });
+      const fileParts = await Promise.all(filePartPromises);
+      const validFileParts = fileParts.filter(Boolean);
+
+      // ------------------ 3. Update messages for user ------------------
       setMessages((prev) => [
         ...prev,
-        {
-          type: "human",
-          content: query,
-          id: userMessageId,
-          files: displayFiles,
-        },
+        { type: "human", content: query, id: userMessageId, files: displayFiles },
         { type: "ai", content: "", id: aiMessageId },
       ]);
 
-      const fileParts = await Promise.all(
-        files.map(async (file) => {
-          try {
-            const fileData = await readFileAsBase64OrText(file);
-            return {
-              inlineData: {
-                displayName: fileData.name,
-                data: fileData.data,
-                mimeType:
-                  fileData.type === "text/csv" ? "text/csv" : fileData.type,
-              },
-            };
-          } catch (err) {
-            console.error(`Failed to read file ${file.name}:`, err);
-            return null;
-          }
-        })
-      );
-      const validFileParts = fileParts.filter(Boolean);
-
+      // ------------------ 4. Prepare message payload ------------------
       const messageParts = [];
       if (query.trim()) messageParts.push({ text: query });
       messageParts.push(...validFileParts);
@@ -169,8 +139,9 @@ export function useChat(apiBaseUrl: string) {
         streaming: true,
       };
 
-      console.log("--- Sending RUN_SSE Payload ---", payload);
+      console.log("--- Sending RUN_SSE Payload (GCS URI Method) ---", payload);
 
+      // ------------------ 5. Fetch with streaming ------------------
       abortControllerRef.current = new AbortController();
       const response = await fetch(apiBaseUrl + `/run_sse`, {
         method: "POST",
@@ -179,8 +150,7 @@ export function useChat(apiBaseUrl: string) {
         signal: abortControllerRef.current.signal,
       });
 
-      if (!response.ok || !response.body)
-        throw new Error(`API call failed with status: ${response.status}`);
+      if (!response.ok || !response.body) throw new Error(`API call failed with status: ${response.status}`);
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
@@ -193,9 +163,7 @@ export function useChat(apiBaseUrl: string) {
         if (done) break;
 
         const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk
-          .split("\n")
-          .filter((line) => line.startsWith("data: "));
+        const lines = chunk.split("\n").filter((line) => line.startsWith("data: "));
 
         for (const line of lines) {
           const jsonText = line.substring(5).trim();
@@ -204,21 +172,20 @@ export function useChat(apiBaseUrl: string) {
           try {
             const json = JSON.parse(jsonText);
 
+            // Error handling, already robust
             if (json.error) throw new Error(json.error.message || json.error);
 
-            const textParts = json?.content?.parts
-              ?.map((p: any) => p.text)
-              .filter(Boolean)
-              .join(" ");
+            const textParts = json?.content?.parts?.map((p: any) => p.text).filter(Boolean).join(" ");
             if (textParts) combinedContent += textParts;
 
             finalAuthor = json.author || finalAuthor;
 
-            // Handle files
+            // Handle file output (if the agent generates a file)
             if (json?.content?.parts) {
               json.content.parts.forEach((p: any) => {
                 if (p.fileData) {
                   let fileUrl = p.fileData.fileUri;
+                  // Handle data URL (Base64) output from the agent, even though input is GCS
                   if (fileUrl.startsWith("data:")) {
                     fileUrl = base64ToBlobUrl(fileUrl, p.fileData.mimeType);
                   }
@@ -239,12 +206,7 @@ export function useChat(apiBaseUrl: string) {
         setMessages((prev) =>
           prev.map((m) =>
             m.id === aiMessageId
-              ? {
-                  ...m,
-                  content: combinedContent,
-                  agent: finalAuthor,
-                  files: aiFiles,
-                }
+              ? { ...m, content: combinedContent, agent: finalAuthor, files: aiFiles }
               : m
           )
         );
@@ -253,6 +215,7 @@ export function useChat(apiBaseUrl: string) {
       if (!combinedContent && aiFiles.length === 0) {
         throw new Error("No valid content received from server.");
       }
+
     } catch (err: any) {
       console.error("Error during handleSubmit:", err);
       setMessages((prev) =>
