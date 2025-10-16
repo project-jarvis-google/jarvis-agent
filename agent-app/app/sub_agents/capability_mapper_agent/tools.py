@@ -45,7 +45,7 @@ def map_capabilities_to_inventory(
         A list of dictionaries, each containing the capability, its best
         application match, and a confidence score.
     """
-    logger.info(f"Starting capability mapping for {len(capabilities)} capabilities.")
+    logger.info("Starting capability mapping for %s capabilities.", len(capabilities))
     try:
         # --- 1. Process Application Inventory (The "Corpus") ---
         app_data = []
@@ -72,12 +72,12 @@ def map_capabilities_to_inventory(
         app_texts_for_embedding = [app["text"] for app in app_data]
 
         logger.info(
-            f"Generating embeddings for {len(app_texts_for_embedding)} applications..."
+            "Generating embeddings for %s applications...", len(app_texts_for_embedding)
         )
         app_vectors = embedding_model.get_embeddings(app_texts_for_embedding)
 
         logger.info(
-            f"Generating embeddings for {len(capabilities)} query capabilities..."
+            "Generating embeddings for %s query capabilities...", len(capabilities)
         )
         cap_vectors = embedding_model.get_embeddings(capabilities)
 
@@ -108,7 +108,7 @@ def map_capabilities_to_inventory(
         return results
 
     except Exception as e:
-        logger.error(f"Error during capability mapping: {e}", exc_info=True)
+        logger.error("Error during capability mapping: %s", e, exc_info=True)
         return [{"error": f"An exception occurred: {e}"}]
 
 
@@ -134,7 +134,7 @@ def generate_capability_report_csv(report_data: list[dict], client_name: str) ->
         return "Error: GCS_BUCKET_NAME is not configured."
 
     logger.info(
-        f"Generating CSV report for {client_name} with {len(report_data)} items."
+        "Generating CSV report for %s with %s items.", client_name, len(report_data)
     )
     try:
         filename = f"CapabilityReports/Capability-Analysis-{client_name}-{datetime.date.today()}.csv"
@@ -177,11 +177,11 @@ def generate_capability_report_csv(report_data: list[dict], client_name: str) ->
 
         public_url = f"https://storage.googleapis.com/{bucket_name}/{filename}"
 
-        logger.info(f"Uploaded CSV report to {public_url}")
+        logger.info("Uploaded CSV report to %s", public_url)
         return f"Successfully created the capability report. It is publicly accessible at: {public_url}"
 
     except Exception as e:
-        logger.error(f"Error creating or uploading CSV report: {e}", exc_info=True)
+        logger.error("Error creating or uploading CSV report: %s", e, exc_info=True)
         return f"Error: Could not create or upload the report. Error: {e}"
 
 
