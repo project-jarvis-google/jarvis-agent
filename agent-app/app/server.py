@@ -13,14 +13,14 @@
 # limitations under the License.
 """Agent App"""
 import os
-
+from google.api_core import exceptions
 import google.auth
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile, File, HTTPException
 from google.adk.cli.fast_api import get_fast_api_app
 from opentelemetry import trace
 from opentelemetry.sdk.trace import TracerProvider, export
 
-from app.utils.gcs import create_bucket_if_not_exists
+from app.utils.gcs import create_bucket_if_not_exists, upload_file_to_gcs
 from app.utils.tracing import CloudTraceLoggingSpanExporter
 
 _, project_id = google.auth.default()
@@ -28,7 +28,8 @@ allow_origins = (
     os.getenv("ALLOW_ORIGINS", "*").split(",") if os.getenv("ALLOW_ORIGINS") else "*"
 )
 
-bucket_name = f"gs://{project_id}-agent-app-logs-data"
+bucket_name = f"{project_id}-agent-app-logs-data"
+bucket_uri = "gs://" + bucket_name
 create_bucket_if_not_exists(
     bucket_name=bucket_name, project=project_id, location="us-central1"
 )
@@ -52,12 +53,35 @@ if db_host and db_pass:
 app: FastAPI = get_fast_api_app(
     agents_dir=AGENT_DIR,
     web=True,
-    artifact_service_uri=bucket_name,
+    artifact_service_uri=bucket_uri,
     allow_origins=allow_origins,
     session_service_uri=SESSION_SERVICE_URI,
 )
 app.title = "jarvis-app"
 app.description = "API for interacting with the Agent jarvis-app"
+
+@app.post("/upload-file/")
+async def upload_file_to_gcs_bucket(file: UploadFile = File(...)):
+    """
+    Uploads a file to the configured GCS bucket.
+    """
+    if not bucket_name:
+        raise HTTPException(
+            status_code=500, detail=f"{bucket_name} gcs bucket doesn't exist"
+        )
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="No file name provided.")
+
+    try:
+        upload_file_to_gcs(
+            gcs_bucket_name=bucket_name,
+            gcs_file_name=file.filename,
+            file_obj=file.file,
+            file_content_type=file.content_type,
+        )
+        return {"filename": file.filename, "content_type": file.content_type}
+    except exceptions.GoogleAPICallError as e:
+        raise HTTPException(status_code=500, detail=f"File upload failed: {e.reason}") from e
 
 # Main execution
 if __name__ == "__main__":
