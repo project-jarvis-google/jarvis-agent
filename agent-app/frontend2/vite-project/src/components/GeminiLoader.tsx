@@ -1,4 +1,3 @@
-import React from 'react';
 import { Box } from '@mui/material';
 import { styled, darken } from '@mui/material/styles';
 

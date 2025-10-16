@@ -1,7 +1,7 @@
 import React, { useState, useMemo, createContext } from "react";
 import { Routes, Route } from "react-router-dom";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
-import { Box, CssBaseline } from "@mui/material";
+import { CssBaseline } from "@mui/material";
 
 import Home from "./pages/Home";
 import Chat from "./pages/Chat";
