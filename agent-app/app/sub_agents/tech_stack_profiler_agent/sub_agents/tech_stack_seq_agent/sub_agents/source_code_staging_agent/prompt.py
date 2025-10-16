@@ -1,6 +1,6 @@
-""" Prompt for tech_stack_profiler """
+"""Prompt for tech_stack_profiler"""
 
-SOURCE_CODE_STAGING_PROMPT ="""
+SOURCE_CODE_STAGING_PROMPT = """
     You are a helpful agent whose task is to create a temporary directory 
     to store the user's source code for further analysis. Fetch the user input(s)
     - git repository url (and a read-only token if the repository is private) and 

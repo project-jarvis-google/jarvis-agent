@@ -13,15 +13,13 @@ from typing import Dict, Optional, Any
 
 MODEL = "gemini-2.5-pro"
 
-from .gcs_config import (
-    PROJECT_ID,
-    GCS_OTEL_COLLECTOR_BUCKET_NAME
-)    
+from .gcs_config import PROJECT_ID, GCS_OTEL_COLLECTOR_BUCKET_NAME
 
-def create_starter_pack( 
-    tool_context: ToolContext, # Included for signature similarity, not used in logic
+
+def create_starter_pack(
+    tool_context: ToolContext,  # Included for signature similarity, not used in logic
     otel_config_str: str,
-    note_str: str
+    note_str: str,
     # source_bucket_name: str,
     # source_folder_prefix: str,
     # destination_bucket_name: str,
@@ -45,7 +43,11 @@ def create_starter_pack(
     destination_bucket_name = GCS_OTEL_COLLECTOR_BUCKET_NAME
 
     source_folder_prefix = "otel-collector-base-files/"
-    destination_folder_prefix = "user-generated-collector-configs/" + datetime.now().strftime("%d%m%Y%H%M%S") + "-otel-collector/"
+    destination_folder_prefix = (
+        "user-generated-collector-configs/"
+        + datetime.now().strftime("%d%m%Y%H%M%S")
+        + "-otel-collector/"
+    )
 
     try:
         client = storage.Client(project=PROJECT_ID)
@@ -63,40 +65,40 @@ def create_starter_pack(
         # Check if any blobs were found
         # Use a list comprehension or generator expression to check without consuming the iterator
         # Or consume and re-list if needed. Consuming and re-listing is simpler here.
-        blob_list = list(blobs) # Consume the iterator into a list
+        blob_list = list(blobs)  # Consume the iterator into a list
 
         if not blob_list:
-             return {
+            return {
                 "status": "success",
                 "source_bucket": source_bucket_name,
                 "source_folder": source_folder_prefix,
                 "destination_bucket": destination_bucket_name,
                 "destination_folder": destination_folder_prefix,
                 "copied_count": 0,
-                "message": f"No files found with prefix '{source_folder_prefix}' in bucket '{source_bucket_name}'. No files copied."
+                "message": f"No files found with prefix '{source_folder_prefix}' in bucket '{source_bucket_name}'. No files copied.",
             }
 
         for blob in blob_list:
             # Calculate the new blob name in the destination folder
             # Ensure we only take the part of the name *after* the source prefix
-            relative_path = blob.name[len(source_folder_prefix):]
+            relative_path = blob.name[len(source_folder_prefix) :]
             destination_blob_name = destination_folder_prefix + relative_path
 
             try:
                 # Copy the blob
-                source_bucket.copy_blob(
-                    blob, destination_bucket, destination_blob_name
-                )
+                source_bucket.copy_blob(blob, destination_bucket, destination_blob_name)
                 copied_files.append(blob.name)
             except GoogleAPIError as e:
                 failed_files.append({"file": blob.name, "error": str(e)})
             except Exception as e:
-                failed_files.append({"file": blob.name, "error": f"Unexpected error: {str(e)}"})
+                failed_files.append(
+                    {"file": blob.name, "error": f"Unexpected error: {str(e)}"}
+                )
 
         total_files_processed = len(copied_files) + len(failed_files)
 
         if failed_files:
-             return {
+            return {
                 "status": "partial_success" if copied_files else "error",
                 "source_bucket": source_bucket_name,
                 "source_folder": source_folder_prefix,
@@ -105,10 +107,12 @@ def create_starter_pack(
                 "copied_count": len(copied_files),
                 "failed_count": len(failed_files),
                 "failed_files": failed_files,
-                "message": f"Copy operation completed with {len(copied_files)} successes and {len(failed_files)} failures out of {total_files_processed} files found."
+                "message": f"Copy operation completed with {len(copied_files)} successes and {len(failed_files)} failures out of {total_files_processed} files found.",
             }
         else:
-            upload_file_to_gcs(tool_context, otel_config_str, note_str, destination_folder_prefix)
+            upload_file_to_gcs(
+                tool_context, otel_config_str, note_str, destination_folder_prefix
+            )
             return {
                 "status": "success",
                 "source_bucket": source_bucket_name,
@@ -116,7 +120,7 @@ def create_starter_pack(
                 "destination_bucket": destination_bucket_name,
                 "destination_folder": destination_folder_prefix,
                 "copied_count": len(copied_files),
-                "message": f"Successfully created otel config at: gs://{source_bucket_name}+{destination_folder_prefix}."
+                "message": f"Successfully created otel config at: gs://{source_bucket_name}+{destination_folder_prefix}.",
             }
 
     except GoogleAPIError as e:
@@ -124,22 +128,22 @@ def create_starter_pack(
         return {
             "status": "error",
             "error_message": str(e),
-            "message": f"Failed to initialize client, get buckets, or list files: {str(e)}"
+            "message": f"Failed to initialize client, get buckets, or list files: {str(e)}",
         }
     except Exception as e:
         return {
             "status": "error",
             "error_message": str(e),
-            "message": f"An unexpected error occurred during setup or listing: {str(e)}"
+            "message": f"An unexpected error occurred during setup or listing: {str(e)}",
         }
 
+
 def upload_file_to_gcs(
-    tool_context: ToolContext, # Included for signature similarity, not used in logic
+    tool_context: ToolContext,  # Included for signature similarity, not used in logic
     otel_config_str: str,
     note_str: str,
     destination_blob_name: str,
 ) -> Dict[str, Any]:
-    
     """Uploads a string (expected to be YAML) as a file to a GCS bucket.
 
     Args:
@@ -152,33 +156,38 @@ def upload_file_to_gcs(
     try:
         storage_client = storage.Client(project=PROJECT_ID)
         bucket = storage_client.bucket(GCS_OTEL_COLLECTOR_BUCKET_NAME)
-        blob = bucket.blob(destination_blob_name + "otelcol-deployment/otel-config.yaml")
+        blob = bucket.blob(
+            destination_blob_name + "otelcol-deployment/otel-config.yaml"
+        )
 
         # Upload the string directly
-        blob.upload_from_string(otel_config_str, content_type='application/x-yaml')
+        blob.upload_from_string(otel_config_str, content_type="application/x-yaml")
 
         blob = bucket.blob(destination_blob_name + "otelcol-deployment/README.md")
-        blob.upload_from_string(note_str, content_type='test/markdown')
+        blob.upload_from_string(note_str, content_type="test/markdown")
 
-        print(f"Otel config data uploaded as {destination_blob_name} to bucket {GCS_OTEL_COLLECTOR_BUCKET_NAME}.")
+        print(
+            f"Otel config data uploaded as {destination_blob_name} to bucket {GCS_OTEL_COLLECTOR_BUCKET_NAME}."
+        )
 
         return {
             "status": "success",
-            "message": f"Otel config data uploaded as {destination_blob_name} to bucket {GCS_OTEL_COLLECTOR_BUCKET_NAME}."
+            "message": f"Otel config data uploaded as {destination_blob_name} to bucket {GCS_OTEL_COLLECTOR_BUCKET_NAME}.",
         }
 
     except GoogleAPIError as e:
         return {
             "status": "error",
             "error_message": str(e),
-            "message": f"Failed to upload file: {str(e)}"
+            "message": f"Failed to upload file: {str(e)}",
         }
     except Exception as e:
         return {
             "status": "error",
             "error_message": str(e),
-            "message": f"An unexpected error occurred: {str(e)}"
+            "message": f"An unexpected error occurred: {str(e)}",
         }
+
 
 otel_collector_config_agent = Agent(
     name="otel_collector_config_agent",
@@ -190,5 +199,5 @@ otel_collector_config_agent = Agent(
         """
     ),
     instruction=prompt.OTEL_COLLECTOR_CONFIG_PROMPT,
-    tools=[AgentTool(agent=otel_doc_rag_corpus_agent), create_starter_pack]
+    tools=[AgentTool(agent=otel_doc_rag_corpus_agent), create_starter_pack],
 )

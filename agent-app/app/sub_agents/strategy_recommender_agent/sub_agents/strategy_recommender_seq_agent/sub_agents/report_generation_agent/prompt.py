@@ -1,4 +1,4 @@
-REPORT_GENERATION_PROMPT ="""
+REPORT_GENERATION_PROMPT = """
 ### SYSTEM INSTRUCTION
 
 Your primary role is to call the **generate_and_save_pdf** tool to generate and save the final report in GCS, passing your final **JSON string** recommendation as the *only* argument to the `json_report_string` parameter. Your response MUST ONLY be this tool call.

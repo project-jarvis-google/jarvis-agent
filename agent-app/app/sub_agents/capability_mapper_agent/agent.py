@@ -6,23 +6,25 @@ Initializes and configures the "Business Capability Mapper" agent.
 import os
 import logging
 from google.adk.agents.llm_agent import LlmAgent
-from app.config import MODEL # Assuming MODEL is defined in your main app config
+from app.config import MODEL  # Assuming MODEL is defined in your main app config
 
 # --- Import custom tools and prompts ---
 try:
     from .tools import (
         map_capabilities_to_inventory_tool,
-        generate_capability_report_csv_tool
+        generate_capability_report_csv_tool,
     )
     from .prompt import AGENT_INSTRUCTION
 
     ALL_TOOLS = [
         map_capabilities_to_inventory_tool,
-        generate_capability_report_csv_tool
+        generate_capability_report_csv_tool,
     ]
 
 except ImportError as e:
-    logging.error(f"Failed to import tools or prompts: {e}. Ensure all files are in the correct directory.")
+    logging.error(
+        f"Failed to import tools or prompts: {e}. Ensure all files are in the correct directory."
+    )
     exit(1)
 
 logger = logging.getLogger(__name__)

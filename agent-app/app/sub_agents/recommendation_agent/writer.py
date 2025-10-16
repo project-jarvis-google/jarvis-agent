@@ -1,33 +1,34 @@
 import google.genai.types as types
-from google.adk.agents.callback_context import CallbackContext # Or ToolContext
+from google.adk.agents.callback_context import CallbackContext  # Or ToolContext
 from google.adk.models import LlmResponse
-from google.adk.artifacts import GcsArtifactService #InMemoryArtifactService
+from google.adk.artifacts import GcsArtifactService  # InMemoryArtifactService
 
 from google.cloud import storage
 from markdown_it import MarkdownIt
-from xhtml2pdf import pisa 
+from xhtml2pdf import pisa
 import io
 import json
 import os
 
-#artifactService = GcsArtifactService(bucket_name="your-gcs-bucket-for-adk-artifacts")
+# artifactService = GcsArtifactService(bucket_name="your-gcs-bucket-for-adk-artifacts")
 
 BUCKET_NAME = os.environ.get("BUCKET_NAME", "agent-cloud-service-recomendation")
+
 
 async def save_generated_report_py(text: str):
     print("LLM response - ")
     print(text)
     data_dict = json.loads(text)
 
-    data = data_dict['result']
-    destination_blob_name = data_dict['fileName']
-    
+    data = data_dict["result"]
+    destination_blob_name = data_dict["fileName"]
+
     md_parser = MarkdownIt()
     html_body = md_parser.render(data)
-    
+
     md_parser = MarkdownIt()
     html_body = md_parser.render(data)
-    
+
     html_full = f"""
     <html>
       <head>
@@ -51,7 +52,7 @@ async def save_generated_report_py(text: str):
     pdf_stream = io.BytesIO()
     pisa_status = pisa.CreatePDF(
         io.StringIO(html_full),  # The source HTML string
-        dest=pdf_stream          # The destination stream
+        dest=pdf_stream,  # The destination stream
     )
 
     # Exit if the PDF creation failed
@@ -72,9 +73,11 @@ async def save_generated_report_py(text: str):
         pdf_stream.seek(0)
 
         # Upload from the stream
-        blob.upload_from_file(pdf_stream, content_type='application/pdf')
+        blob.upload_from_file(pdf_stream, content_type="application/pdf")
 
-        print(f"✅ Successfully uploaded '{destination_blob_name}' to bucket '{BUCKET_NAME}'.")
+        print(
+            f"✅ Successfully uploaded '{destination_blob_name}' to bucket '{BUCKET_NAME}'."
+        )
         print(f"Public URL (if bucket is public): {blob.public_url}")
 
     except Exception as e:

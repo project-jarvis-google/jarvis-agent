@@ -3,11 +3,11 @@ from google.adk.tools.agent_tool import AgentTool
 from google.adk.agents import SequentialAgent
 from .config import MODEL
 from .prompt import RECCM_AGENT_PROMPT
-#from .writer import save_generated_report_py
-from google.adk.artifacts import GcsArtifactService #InMemoryArtifactService
+
+# from .writer import save_generated_report_py
+from google.adk.artifacts import GcsArtifactService  # InMemoryArtifactService
 from google.adk.tools import FunctionTool
 from ...utils.download import download_pdf_from_gcs, save_generated_report_py
-
 
 
 artifactService = GcsArtifactService(bucket_name="your-gcs-bucket-for-adk-artifacts")
@@ -17,10 +17,9 @@ recommendation_agent = LlmAgent(
     model=MODEL,
     description=("Answers user's query about service recommendation."),
     instruction=RECCM_AGENT_PROMPT,
-        #after_agent_callback=save_generated_report_py
+    # after_agent_callback=save_generated_report_py
     tools=[
         FunctionTool(func=save_generated_report_py),
-        FunctionTool(func=download_pdf_from_gcs)
+        FunctionTool(func=download_pdf_from_gcs),
     ],
-    
 )

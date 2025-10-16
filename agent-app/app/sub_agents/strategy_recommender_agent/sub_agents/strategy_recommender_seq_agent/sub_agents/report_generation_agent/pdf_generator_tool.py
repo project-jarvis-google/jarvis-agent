@@ -2,9 +2,16 @@ import json
 from google.adk.tools import FunctionTool, ToolContext
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Frame, Spacer, ListFlowable, ListItem
+from reportlab.platypus import (
+    SimpleDocTemplate,
+    Paragraph,
+    Frame,
+    Spacer,
+    ListFlowable,
+    ListItem,
+)
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.units import inch # Using inch is cleaner for margins
+from reportlab.lib.units import inch  # Using inch is cleaner for margins
 from google.genai.types import Part, Blob
 from io import BytesIO
 from google.cloud import storage
@@ -18,6 +25,7 @@ _, project_id = google.auth.default()
 
 os.environ.setdefault("GCS_RECOMMENDATION_BUCKET_NAME", "jarvis-agent")
 
+
 def _get_gcs_client():
     """Initializes and returns a Google Cloud Storage client."""
     return storage.Client()
@@ -25,14 +33,14 @@ def _get_gcs_client():
 
 def generate_and_save_pdf(json_report_string: str, tool_context: ToolContext) -> str:
     """
-    Generates a PDF report from the final JSON strategy recommendation and 
+    Generates a PDF report from the final JSON strategy recommendation and
     saves it as an ADK artifact.
     """
 
     bucket_name = os.getenv("GCS_RECOMMENDATION_BUCKET_NAME")
     if not bucket_name:
         return "Error: GCS_RECOMMENDATION_BUCKET_NAME is not configured."
-    
+
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
 
@@ -44,13 +52,15 @@ def generate_and_save_pdf(json_report_string: str, tool_context: ToolContext) ->
 
         client_name = tool_context.state.get("client_name")
         if not client_name or client_name == "N/A":
-            logger.warning("Client name not found or is 'N/A'. Using default name 'Unknown_Client'.")
+            logger.warning(
+                "Client name not found or is 'N/A'. Using default name 'Unknown_Client'."
+            )
             client_name = "Unknown_Client"
 
         # 2. --- PDF GENERATION LOGIC ---
         # Instead of actually implementing reportlab here, the core concept is:
 
-        # This is where you would use a library like reportlab to create the PDF 
+        # This is where you would use a library like reportlab to create the PDF
         # content in memory (e.g., a BytesIO object).
 
         # 2. --- PDF GENERATION LOGIC (Using ReportLab) ---
@@ -64,90 +74,143 @@ def generate_and_save_pdf(json_report_string: str, tool_context: ToolContext) ->
             leftMargin=1 * inch,
             rightMargin=1 * inch,
             topMargin=1 * inch,
-            bottomMargin=1 * inch
+            bottomMargin=1 * inch,
         )
 
         styles = getSampleStyleSheet()
 
         # Define custom styles
-        styles.add(ParagraphStyle(name='ReportTitle', fontName='Helvetica-Bold', fontSize=16, spaceAfter=20))
-        styles.add(ParagraphStyle(name='SectionHeader', fontName='Helvetica-Bold', fontSize=12, spaceBefore=15, spaceAfter=5))
-        styles.add(ParagraphStyle(name='StrategyTitle', fontName='Helvetica-Bold', fontSize=10, spaceBefore=10, spaceAfter=5))
-        styles.add(ParagraphStyle(name='Justification', fontName='Helvetica', fontSize=10, spaceAfter=15))
+        styles.add(
+            ParagraphStyle(
+                name="ReportTitle",
+                fontName="Helvetica-Bold",
+                fontSize=16,
+                spaceAfter=20,
+            )
+        )
+        styles.add(
+            ParagraphStyle(
+                name="SectionHeader",
+                fontName="Helvetica-Bold",
+                fontSize=12,
+                spaceBefore=15,
+                spaceAfter=5,
+            )
+        )
+        styles.add(
+            ParagraphStyle(
+                name="StrategyTitle",
+                fontName="Helvetica-Bold",
+                fontSize=10,
+                spaceBefore=10,
+                spaceAfter=5,
+            )
+        )
+        styles.add(
+            ParagraphStyle(
+                name="Justification", fontName="Helvetica", fontSize=10, spaceAfter=15
+            )
+        )
 
-        styles.add(ParagraphStyle(name='BulletPoint', fontName='Helvetica', fontSize=10, leftIndent=0.25 * inch, spaceAfter=3))
+        styles.add(
+            ParagraphStyle(
+                name="BulletPoint",
+                fontName="Helvetica",
+                fontSize=10,
+                leftIndent=0.25 * inch,
+                spaceAfter=3,
+            )
+        )
 
         # Build the story (the list of elements to be placed in the PDF)
         story = []
 
         # Title
         title_text = f"Strategy Recommendation Report for {client_name}"
-        story.append(Paragraph(title_text, styles['ReportTitle']))
+        story.append(Paragraph(title_text, styles["ReportTitle"]))
 
         # Executive Summary Header
-        story.append(Paragraph("Executive Summary", styles['SectionHeader']))
-        
+        story.append(Paragraph("Executive Summary", styles["SectionHeader"]))
+
         # Executive Summary Content
-        executive_summary = report_data.get('executive_summary', 'N/A')
-        story.append(Paragraph(executive_summary, styles['Justification']))
-        
+        executive_summary = report_data.get("executive_summary", "N/A")
+        story.append(Paragraph(executive_summary, styles["Justification"]))
+
         # Recommendations Header
-        story.append(Paragraph("Strategy Recommendations", styles['SectionHeader']))
+        story.append(Paragraph("Strategy Recommendations", styles["SectionHeader"]))
 
         # Loop through recommendations
-        for r in report_data.get('recommendations', []):
-            strategy = r['strategy'].upper()
-            justification_content = r['justification']
+        for r in report_data.get("recommendations", []):
+            strategy = r["strategy"].upper()
+            justification_content = r["justification"]
 
             # Strategy Title
-            story.append(Paragraph(f"Strategy: {strategy}", styles['StrategyTitle']))
-    
+            story.append(Paragraph(f"Strategy: {strategy}", styles["StrategyTitle"]))
+
             # Justification Content
-            story.append(Paragraph(f"<b>Justification:</b>", styles['Justification']))
+            story.append(Paragraph(f"<b>Justification:</b>", styles["Justification"]))
 
             if isinstance(justification_content, list):
                 # If justification is already a list of points (ideal for your goal)
-                list_items = [Paragraph(point, styles['BulletPoint']) for point in justification_content]
-                story.append(ListFlowable(list_items, bulletAnchor='middle', bulletkind='bullet', leftIndent=0.25 * inch, spaceAfter=15))
+                list_items = [
+                    Paragraph(point, styles["BulletPoint"])
+                    for point in justification_content
+                ]
+                story.append(
+                    ListFlowable(
+                        list_items,
+                        bulletAnchor="middle",
+                        bulletkind="bullet",
+                        leftIndent=0.25 * inch,
+                        spaceAfter=15,
+                    )
+                )
             else:
                 # Fallback: If justification is still a single string (as in your current JSON output)
                 # We will try to split it heuristically (e.g., by sentences)
                 # NOTE: A better approach is to change the LLM output, but this is a fallback.
-                
+
                 # Simple heuristic split (e.g., splitting by sentence or based on source data structure)
                 # If your LLM output always puts points with a newline, you can split by '\n'
-                points = justification_content.split('\n')
-                
+                points = justification_content.split("\n")
+
                 # Clean up empty lines and create bullet points
                 cleaned_points = [p.strip() for p in points if p.strip()]
-                
-                list_items = [Paragraph(point, styles['BulletPoint']) for point in cleaned_points]
-                
+
+                list_items = [
+                    Paragraph(point, styles["BulletPoint"]) for point in cleaned_points
+                ]
+
                 # Only add the ListFlowable if there are points
                 if list_items:
-                    story.append(ListFlowable(list_items, bulletAnchor='middle', leftIndent=0.25 * inch, spaceAfter=15))
+                    story.append(
+                        ListFlowable(
+                            list_items,
+                            bulletAnchor="middle",
+                            leftIndent=0.25 * inch,
+                            spaceAfter=15,
+                        )
+                    )
                 else:
                     # If splitting failed or was a single point, render as a regular paragraph
-                    story.append(Paragraph(justification_content, styles['Justification']))
-            
-            
+                    story.append(
+                        Paragraph(justification_content, styles["Justification"])
+                    )
+
             # Optional: Add a small space between items
             story.append(Spacer(1, 0.1 * inch))
 
         # Build the PDF document from the story
-        doc.build(story)  
+        doc.build(story)
 
-
-        
-# The pdf_buffer now contains the properly structured PDF data
-
+        # The pdf_buffer now contains the properly structured PDF data
 
         # 3. Create the ADK Artifact (`Part` object)
         artifact = Part(
             inline_data=Blob(
                 # Use the correct MIME type for PDF
                 mime_type="application/pdf",
-                data=pdf_buffer.getvalue()
+                data=pdf_buffer.getvalue(),
             )
         )
 
@@ -164,7 +227,7 @@ def generate_and_save_pdf(json_report_string: str, tool_context: ToolContext) ->
         blob = bucket.blob(filename)
         # Ensure you reset the buffer's cursor before uploading again if you were reading from it
         pdf_buffer.seek(0)
-        blob.upload_from_string(pdf_buffer.getvalue(), content_type='application/pdf')
+        blob.upload_from_string(pdf_buffer.getvalue(), content_type="application/pdf")
 
         public_url = f"https://storage.googleapis.com/{bucket_name}/{filename}"
         logger.info(f"Uploaded '{filename}' to public GCS bucket.")
@@ -176,10 +239,11 @@ def generate_and_save_pdf(json_report_string: str, tool_context: ToolContext) ->
         tool_context.state["client_name"] = client_name
 
         return f"Successfully created the Strategy Recommendation Report. It is publicly accessible at: {public_url}"
-    
+
     except json.JSONDecodeError:
         return "ERROR: Agent output was not valid JSON. Could not generate PDF."
     except Exception as e:
         return f"ERROR: Failed to generate or save PDF: {e}"
+
 
 generate_and_save_pdf_tool = FunctionTool(func=generate_and_save_pdf)

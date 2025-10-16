@@ -5,17 +5,22 @@ from app.utils.pdf_converter import convert_str_to_pdf
 from google.adk.agents import LlmAgent
 from google.adk.tools import ToolContext
 
-MODEL = "gemini-2.5-flash"  
+MODEL = "gemini-2.5-flash"
+
 
 # def upload_report_to_gcs_as_pdf(generated_report: str, tool_context: ToolContext) -> str:
 def upload_report_to_gcs_as_pdf(tool_context: ToolContext) -> str:
-    
     bucket_name = os.getenv("GCS_BUCKET_NAME_TECH_PROFILE")
     if not bucket_name:
         return "Error: GCS_BUCKET_NAME is not configured."
     # bucket_name = "GCS_BUCKET_NAME_TECH_PROFILE"
 
-    filename = "TechProfile/" + datetime.now().strftime("%d%m%Y%H%M%S") + "-tech-profile" + ".pdf"
+    filename = (
+        "TechProfile/"
+        + datetime.now().strftime("%d%m%Y%H%M%S")
+        + "-tech-profile"
+        + ".pdf"
+    )
 
     generated_report = tool_context.state["generated_report"]
     print("generated_report => ", generated_report)
@@ -30,15 +35,16 @@ def upload_report_to_gcs_as_pdf(tool_context: ToolContext) -> str:
         del_pdf_temp_file_after_creation=True,
         upload_pdf_to_gcs=True,
         gcs_bucket_name=bucket_name,
-        gcs_file_name=filename
+        gcs_file_name=filename,
     ).get("is_gcs_file_upload_successful")
 
     if is_gcs_upload_successful:
-        public_url = f"https://storage.googleapis.com/{bucket_name}/{filename}" 
+        public_url = f"https://storage.googleapis.com/{bucket_name}/{filename}"
         print(f"Uploaded '{filename}' to public GCS bucket.")
         return f"Successfully created the pdf report. It is publicly accessible at: {public_url}"
-    
+
     return f"Pdf report creation unsuccessful!"
+
 
 gcs_upload_tech_profile_pdf_report_agent = LlmAgent(
     name="gcs_upload_tech_profile_pdf_report_agent",
@@ -46,7 +52,7 @@ gcs_upload_tech_profile_pdf_report_agent = LlmAgent(
         """Generates a pdf report from the existing report string stored in the tool context and uploads it 
         to the GCS bucket"""
     ),
-    tools=[upload_report_to_gcs_as_pdf]
+    tools=[upload_report_to_gcs_as_pdf],
 )
 
 # if __name__ == '__main__':
@@ -64,12 +70,6 @@ gcs_upload_tech_profile_pdf_report_agent = LlmAgent(
 # | bacon  |     0 |
 # +--------+-------+
 # """, None)
-
-
-
-
-
-
 
 
 """

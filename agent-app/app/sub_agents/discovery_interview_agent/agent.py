@@ -17,7 +17,7 @@ try:
         compile_questions_to_sheet_tool,
         read_and_update_sheet_tool,
         create_final_summary_pdf_tool,
-        google_search_tool     
+        google_search_tool,
     )
     from .prompt import AGENT_INSTRUCTION
 
@@ -25,14 +25,17 @@ try:
         google_search_tool,
         compile_questions_to_sheet_tool,
         read_and_update_sheet_tool,
-        create_final_summary_pdf_tool       
+        create_final_summary_pdf_tool,
     ]
 
 except ImportError as e:
-    logging.error(f"Failed to import tools or prompts: {e}. Ensure all files are in the correct directory.")
+    logging.error(
+        f"Failed to import tools or prompts: {e}. Ensure all files are in the correct directory."
+    )
     exit(1)
 
 logger = logging.getLogger(__name__)
+
 
 # --- Function to load knowledge from local files ---
 def load_knowledge_base():
@@ -41,23 +44,33 @@ def load_knowledge_base():
     into a single string to be injected into the agent's prompt.
     """
     knowledge = {}
-    kb_path = os.path.join(os.path.dirname(__file__), 'knowledge_base')
+    kb_path = os.path.join(os.path.dirname(__file__), "knowledge_base")
     if not os.path.exists(kb_path):
-        logger.warning("knowledge_base directory not found. Agent will have no reference material.")
+        logger.warning(
+            "knowledge_base directory not found. Agent will have no reference material."
+        )
         return ""
-        
+
     for filename in os.listdir(kb_path):
-        if filename.endswith('.txt'):
-            topic = filename.replace('.txt', '').replace('_', ' ')
-            with open(os.path.join(kb_path, filename), 'r') as f:
+        if filename.endswith(".txt"):
+            topic = filename.replace(".txt", "").replace("_", " ")
+            with open(os.path.join(kb_path, filename), "r") as f:
                 knowledge[topic] = f.read()
-    
-    formatted_knowledge = "\n\n".join([f"## Reference for: {topic}\n{content}" for topic, content in knowledge.items()])
+
+    formatted_knowledge = "\n\n".join(
+        [
+            f"## Reference for: {topic}\n{content}"
+            for topic, content in knowledge.items()
+        ]
+    )
     return formatted_knowledge
+
 
 # --- "Memorize" the knowledge at startup ---
 KNOWLEDGE_INJECTION = load_knowledge_base()
-FINAL_INSTRUCTION = f"{AGENT_INSTRUCTION}\n\n--- PRE-LOADED KNOWLEDGE BASE ---\n{KNOWLEDGE_INJECTION}"
+FINAL_INSTRUCTION = (
+    f"{AGENT_INSTRUCTION}\n\n--- PRE-LOADED KNOWLEDGE BASE ---\n{KNOWLEDGE_INJECTION}"
+)
 
 # --- Define the Main Discovery Agent ---
 discovery_architect_agent = LlmAgent(
