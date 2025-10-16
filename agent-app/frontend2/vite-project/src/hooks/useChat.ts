@@ -126,7 +126,9 @@ export function useChat(apiBaseUrl: string) {
 
         const filePartPromises = files.map(async (file) => {
           try {
+            const isTextFile = file.type === "text/csv" || file.type === "text/plain";
             const reader = new FileReader();
+            
             const dataPromise = new Promise<{
               name: string;
               type: string;
@@ -134,23 +136,33 @@ export function useChat(apiBaseUrl: string) {
             }>((resolve, reject) => {
               reader.onload = () => {
                 let result = reader.result as string;
-                if (file.type.startsWith("text/")) {
-                  const encoded = btoa(unescape(encodeURIComponent(result)));
-                  result = encoded;
-                } else if (result.includes(",")) {
-                  const [, base64] = result.split(",");
-                  result = base64;
+                let base64Data: string;
+
+                if (isTextFile) {
+                  // For text files, the result is a plain string. Encode it to base64.
+                  // This is the robust way to handle UTF-8 text encoding.
+                  base64Data = btoa(unescape(encodeURIComponent(result)));
+                } else {
+                  // For binary files (PDF, image, etc.), result is a Data URL. Extract the base64 part.
+                  if (result.includes(",")) {
+                    const [, base64] = result.split(",");
+                    base64Data = base64;
+                  } else {
+                    base64Data = result;
+                  }
                 }
-                resolve({ name: file.name, type: file.type, data: result });
+                
+                resolve({ name: file.name, type: file.type, data: base64Data });
               };
               reader.onerror = (err) => reject(err);
 
-              if (file.type === "text/csv" || file.type === "text/plain") {
+              if (isTextFile) {
                 reader.readAsText(file);
               } else {
                 reader.readAsDataURL(file);
               }
             });
+            
             const fileData = await dataPromise;
             return {
               inlineData: {
