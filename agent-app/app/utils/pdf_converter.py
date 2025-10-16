@@ -17,7 +17,7 @@ def convert_str_to_pdf(
     upload_pdf_to_gcs: bool = True,
     gcs_bucket_name: str | None = None,
     gcs_file_name: str | None = None,
-) -> dict:
+) -> dict[str, str | bool | None]:
     """Converts a string to a PDF file, optionally saving it and uploading to GCS.
 
     Args:
@@ -32,7 +32,10 @@ def convert_str_to_pdf(
     Returns:
         A dictionary containing the operation result.
     """
-    result = {"temp_file_location": None, "is_gcs_file_upload_successful": False}
+    result: dict[str, str | bool | None] = {
+        "temp_file_location": None,
+        "is_gcs_file_upload_successful": False,
+    }
 
     if upload_pdf_to_gcs and (not gcs_bucket_name or not gcs_file_name):
         logger.error("GCS bucket name and file name are required for upload.")
@@ -45,7 +48,7 @@ def convert_str_to_pdf(
         if format == "markdown":
             markdown_str_to_pdf_str(data_str, pdf)
         else:
-            logger.warning(f"Unsupported format: {format}. Creating a blank PDF.")
+            logger.warning("Unsupported format: %s. Creating a blank PDF.", format)
             # Or raise ValueError(f"Unsupported format: {format}")
 
         # TODO: Upgrade python docker base image to version 3.12 for 'delete' keyword to work
@@ -53,7 +56,7 @@ def convert_str_to_pdf(
             # with tempfile.TemporaryDirectory(dir=custom_temp_path, delete=del_pdf_temp_file_after_creation) as tmpdirname:
             temp_pdf_path = f"{tmpdirname}/temp.pdf"
             pdf.output(temp_pdf_path)
-            logger.info(f"Temporary PDF created at: {temp_pdf_path}")
+            logger.info("Temporary PDF created at: %s", temp_pdf_path)
 
             if not del_pdf_temp_file_after_creation:
                 # Note: This path will be invalid after the function returns if the directory is deleted.
@@ -61,11 +64,13 @@ def convert_str_to_pdf(
                 result["temp_file_location"] = temp_pdf_path
 
             if upload_pdf_to_gcs:
+                assert gcs_bucket_name is not None
+                assert gcs_file_name is not None
                 result["is_gcs_file_upload_successful"] = upload_str_to_gcs_bucket(
                     gcs_bucket_name, gcs_file_name, temp_pdf_path, "application/pdf"
                 )
     except Exception as e:
-        logger.error(f"Failed to convert string to PDF: {e}", exc_info=True)
+        logger.error("Failed to convert string to PDF: %s", e, exc_info=True)
         result["error"] = str(e)
 
     return result
