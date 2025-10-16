@@ -116,9 +116,7 @@ async def save_generated_report_py(text: str):
 
     # Upload the in-memory PDF to GCS
     try:
-        logging.info(
-            "Initializing GCS client for upload to bucket '%s'.", BUCKET_NAME
-        )
+        logging.info("Initializing GCS client for upload to bucket '%s'.", BUCKET_NAME)
         storage_client = storage.Client()
         bucket = storage_client.bucket(BUCKET_NAME)
 
