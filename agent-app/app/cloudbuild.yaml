@@ -5,6 +5,7 @@ steps:
     args:
       - '-c'
       - |
+        make install
         make lint
     dir: 'agent-app'
     id: 'lint'
