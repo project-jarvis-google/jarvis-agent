@@ -12,11 +12,11 @@ logger = logging.getLogger(__name__)
 def convert_str_to_pdf(
     data_str: str,
     format: str,
-    custom_temp_path: str = None,
+    custom_temp_path: str | None = None,
     del_pdf_temp_file_after_creation: bool = True,
     upload_pdf_to_gcs: bool = True,
-    gcs_bucket_name: str = None,
-    gcs_file_name: str = None,
+    gcs_bucket_name: str | None = None,
+    gcs_file_name: str | None = None,
 ) -> dict:
     """Converts a string to a PDF file, optionally saving it and uploading to GCS.
 
