@@ -5,8 +5,8 @@ steps:
     args:
       - '-c'
       - |
-        make -C .. lint
-    dir: 'agent-app/app'
+        make lint
+    dir: 'agent-app'
     id: 'lint'
 
   - name: 'gcr.io/cloud-builders/gcloud'
