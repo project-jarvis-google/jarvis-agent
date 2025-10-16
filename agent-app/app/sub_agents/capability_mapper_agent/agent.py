@@ -4,10 +4,14 @@ Initializes and configures the "Business Capability Mapper" agent.
 """
 
 import logging
+from collections.abc import Callable
+from typing import Any
 
 from google.adk.agents.llm_agent import LlmAgent
+from google.adk.tools import BaseTool
+from google.adk.tools.base_toolset import BaseToolset
 
-from app.config import MODEL  # Assuming MODEL is defined in your main app config
+from app.config import MODEL
 
 # --- Import custom tools and prompts ---
 try:
@@ -17,7 +21,7 @@ try:
         map_capabilities_to_inventory_tool,
     )
 
-    ALL_TOOLS = [
+    ALL_TOOLS: list[Callable[..., Any] | BaseTool | BaseToolset] = [
         map_capabilities_to_inventory_tool,
         generate_capability_report_csv_tool,
     ]

@@ -10,7 +10,7 @@ import numpy as np
 from google.adk.tools import FunctionTool
 from google.cloud import storage
 from scipy.spatial.distance import cdist
-from vertexai.language_models import TextEmbeddingModel
+from vertexai.language_models import TextEmbeddingInput, TextEmbeddingModel
 
 # --- Setup Logging and Models ---
 logging.basicConfig(
@@ -74,12 +74,14 @@ def map_capabilities_to_inventory(
         logger.info(
             "Generating embeddings for %s applications...", len(app_texts_for_embedding)
         )
-        app_vectors = embedding_model.get_embeddings(app_texts_for_embedding)
+        app_texts: list[str | TextEmbeddingInput] = app_texts_for_embedding
+        app_vectors = embedding_model.get_embeddings(app_texts)
 
         logger.info(
             "Generating embeddings for %s query capabilities...", len(capabilities)
         )
-        cap_vectors = embedding_model.get_embeddings(capabilities)
+        cap_texts: list[str | TextEmbeddingInput] = capabilities  # type: ignore
+        cap_vectors = embedding_model.get_embeddings(cap_texts)
 
         # Convert to NumPy arrays for fast calculation
         app_vectors_np = np.array([v.values for v in app_vectors])

@@ -14,10 +14,11 @@
 """Agent App"""
 
 import os
-from google.api_core import exceptions
+
 import google.auth
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, File, HTTPException, UploadFile
 from google.adk.cli.fast_api import get_fast_api_app
+from google.api_core import exceptions
 from opentelemetry import trace
 from opentelemetry.sdk.trace import TracerProvider, export
 
@@ -26,7 +27,7 @@ from app.utils.tracing import CloudTraceLoggingSpanExporter
 
 _, project_id = google.auth.default()
 allow_origins = (
-    os.getenv("ALLOW_ORIGINS", "*").split(",") if os.getenv("ALLOW_ORIGINS") else "*"
+    os.getenv("ALLOW_ORIGINS", "*").split(",") if os.getenv("ALLOW_ORIGINS") else ["*"]
 )
 
 bucket_name = f"{project_id}-agent-app-logs-data"
@@ -82,7 +83,10 @@ async def upload_file_to_gcs_bucket(file: UploadFile = File(...)):
         )
         return {"gsutil_uri": bucket_uri + "/" + file.filename, "content_type": file.content_type}
     except exceptions.GoogleAPICallError as e:
-        raise HTTPException(status_code=500, detail=f"File upload failed: {e.reason}") from e
+        raise HTTPException(
+            status_code=500, detail=f"File upload failed: {e.reason}"
+        ) from e
+
 
 # Main execution
 if __name__ == "__main__":

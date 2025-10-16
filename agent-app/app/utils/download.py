@@ -38,11 +38,11 @@ def download_pdf_from_gcs(file_name: str, expiration_time: int = 24):
         )
         file_name += ".pdf"
 
-        expiration_time = datetime.timedelta(hours=expiration_time)
+        expiration_delta = datetime.timedelta(hours=expiration_time)
 
         signed_url = blob.generate_signed_url(
             version="v4",
-            expiration=expiration_time,
+            expiration=expiration_delta,
             method="GET",
         )
 

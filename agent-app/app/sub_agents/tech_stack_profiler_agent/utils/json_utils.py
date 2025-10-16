@@ -1,8 +1,11 @@
 import json
 import logging
+from typing import Any
 
 
-def filter_json_arr(json_arr_data: dict, desired_attributes: list):
+def filter_json_arr(
+    json_arr_data: list[dict[str, Any]], desired_attributes: list[str]
+) -> list[list[Any]]:
     return [[item[key] for key in desired_attributes] for item in json_arr_data]
 
 

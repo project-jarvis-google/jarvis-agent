@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import subprocess
+from typing import Any
 
 from google.adk.tools import ToolContext
 
@@ -37,7 +38,7 @@ def identify_databases(tool_context: ToolContext) -> bool:
     for entry in os.listdir(secure_temp_repo_dir):
         logging.info(entry)
     if "secure_temp_repo_dir" in locals() and os.path.exists(secure_temp_repo_dir):
-        databases_json_str = []
+        databases_json_str: str = "[]"
 
         try:
             is_mock_enabled = os.getenv(
@@ -102,7 +103,7 @@ def identify_databases(tool_context: ToolContext) -> bool:
 
             else:
                 gemini_env = os.environ.copy()
-                gemini_env["GEMINI_API_KEY"] = os.getenv("GEMINI_API_KEY")
+                gemini_env["GEMINI_API_KEY"] = os.getenv("GEMINI_API_KEY", "")
                 args = "-p " + '"' + DATABASE_IDENTIFICATION_GEMINI_PROMPT + '"'
                 result = subprocess.run(
                     ["/usr/local/bin/gemini", args],
@@ -119,12 +120,15 @@ def identify_databases(tool_context: ToolContext) -> bool:
             logging.info("result.stderr => %s", stderr)
             logging.info("result.stdout => %s", stdout)
 
-            databases_json_str = extract_json_arr_str(stdout)
+            extracted_json = extract_json_arr_str(stdout)
+            if extracted_json:
+                databases_json_str = extracted_json
+
             is_database_identification_successful = True
 
             # tool_context.state["databases_json_str"] = databases_json_str
 
-            databases_json = json.loads(databases_json_str)
+            databases_json: list[Any] = json.loads(databases_json_str)
             desired_databases_attributes = ["name", "configurations"]
 
             filtered_database_data = filter_json_arr(
@@ -166,8 +170,3 @@ def identify_databases(tool_context: ToolContext) -> bool:
             return is_database_identification_successful
 
     return is_database_identification_successful
-
-
-# FOR TESTING
-# if __name__ == "__main__":
-#     logging.info(identify_databases("/usr/local/google/home/cbangera/Projects/OtelAgent/otel-agent-gemini-cli-test"))
