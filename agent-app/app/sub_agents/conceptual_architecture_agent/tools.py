@@ -1,9 +1,11 @@
 import json
 import os
-import pypdf2
+
 import docx
+import pypdf2
 from langchain_core.tools import tool
 from vertexai.preview.generative_models import GenerativeModel
+
 from .prompt import ANALYSIS_PROMPT_TEMPLATE
 
 
@@ -28,7 +30,7 @@ def analyze_architecture_document(document_file_path: str) -> str:
     """
     current_dir = os.path.dirname(__file__)
     kb_path = os.path.join(current_dir, "data", "knowledge_base.json")
-    with open(kb_path, "r") as f:
+    with open(kb_path) as f:
         knowledge_base = json.load(f)
 
     try:

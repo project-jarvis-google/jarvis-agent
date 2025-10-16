@@ -1,11 +1,11 @@
+from typing import Any
+
 from vertexai.preview import rag
 
-from typing import Dict, Optional, Any
-
 from .rag_config import (
-    PROJECT_ID,
-    LOCATION,
     CORPUS_ID,
+    LOCATION,
+    PROJECT_ID,
     RAG_DEFAULT_TOP_K,
     RAG_DEFAULT_VECTOR_DISTANCE_THRESHOLD,
 )
@@ -13,9 +13,9 @@ from .rag_config import (
 
 def query_rag_corpus(
     query_text: str,
-    top_k: Optional[int] = None,
-    vector_distance_threshold: Optional[float] = None,
-) -> Dict[str, Any]:
+    top_k: int | None = None,
+    vector_distance_threshold: float | None = None,
+) -> dict[str, Any]:
     """
     Directly queries a RAG corpus using the Vertex AI RAG API.
 
@@ -90,5 +90,5 @@ def query_rag_corpus(
             "status": "error",
             "corpus_id": CORPUS_ID,
             "error_message": str(e),
-            "message": f"Failed to query corpus: {str(e)}",
+            "message": f"Failed to query corpus: {e!s}",
         }

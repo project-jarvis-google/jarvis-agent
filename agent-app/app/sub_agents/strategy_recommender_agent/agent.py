@@ -19,13 +19,12 @@ Provides Strategy Recommendation Report evaluating various "Rs" and a data-drive
 """
 
 from google.adk.agents import LlmAgent
+from google.adk.artifacts import InMemoryArtifactService
+from google.adk.runners import Runner
+from google.adk.sessions import InMemorySessionService
+
 from .prompt import STRATEGY_RECOMMENDER_PROMPT
 from .sub_agents.strategy_recommender_seq_agent import strategy_recommender_seq_agent
-from google.adk.agents import SequentialAgent
-from google.adk.agents import LlmAgent
-from google.adk.runners import Runner
-from google.adk.artifacts import InMemoryArtifactService
-from google.adk.sessions import InMemorySessionService
 
 MODEL = "gemini-2.5-flash"
 

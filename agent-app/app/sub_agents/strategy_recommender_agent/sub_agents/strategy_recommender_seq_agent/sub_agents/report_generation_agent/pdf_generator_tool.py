@@ -1,25 +1,21 @@
 import json
-from google.adk.tools import FunctionTool, ToolContext
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
-from reportlab.platypus import (
-    SimpleDocTemplate,
-    Paragraph,
-    Frame,
-    Spacer,
-    ListFlowable,
-    ListItem,
-)
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.units import inch  # Using inch is cleaner for margins
-from google.genai.types import Part, Blob
-from io import BytesIO
-from google.cloud import storage
-import os
-import google.auth
 import logging
-from app.utils.gcs import create_bucket_if_not_exists
+import os
+from io import BytesIO
 
+import google.auth
+from google.adk.tools import FunctionTool, ToolContext
+from google.cloud import storage
+from google.genai.types import Blob, Part
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+from reportlab.lib.units import inch  # Using inch is cleaner for margins
+from reportlab.platypus import (
+    ListFlowable,
+    Paragraph,
+    SimpleDocTemplate,
+    Spacer,
+)
 
 _, project_id = google.auth.default()
 
@@ -148,7 +144,7 @@ def generate_and_save_pdf(json_report_string: str, tool_context: ToolContext) ->
             story.append(Paragraph(f"Strategy: {strategy}", styles["StrategyTitle"]))
 
             # Justification Content
-            story.append(Paragraph(f"<b>Justification:</b>", styles["Justification"]))
+            story.append(Paragraph("<b>Justification:</b>", styles["Justification"]))
 
             if isinstance(justification_content, list):
                 # If justification is already a list of points (ideal for your goal)

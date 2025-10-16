@@ -14,6 +14,7 @@
 """Configs for the sub agent google_search_dummy"""
 
 import os
+
 import google.auth
 
 _, project_id = google.auth.default()

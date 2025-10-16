@@ -1,11 +1,12 @@
-from google.cloud import storage
-import os
-from markdown_it import MarkdownIt
-from xhtml2pdf import pisa
+import datetime
 import io
 import json
 import logging
-import datetime
+import os
+
+from google.cloud import storage
+from markdown_it import MarkdownIt
+from xhtml2pdf import pisa
 
 # --- Logging Configuration ---
 # This setup directs log output to the console.
@@ -140,7 +141,7 @@ async def save_generated_report_py(text: str):
         # Note: blob.public_url is only accessible if the object is publicly shared.
         logging.info("Public URL (if bucket is public): %s", blob.public_url)
 
-    except Exception as e:
+    except Exception:
         logging.error(
             "An error occurred during GCS upload for '%s'.",
             destination_blob_name,

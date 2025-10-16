@@ -1,11 +1,11 @@
-from google.cloud import storage
-from google.api_core.exceptions import GoogleAPIError
-from google.adk.tools import ToolContext
 from datetime import datetime
+from typing import Any
 
-from typing import Dict, Optional, Any
+from google.adk.tools import ToolContext
+from google.api_core.exceptions import GoogleAPIError
+from google.cloud import storage
 
-from .gcs_config import PROJECT_ID, GCS_INSTRUMENTATION_BUCKET_NAME
+from .gcs_config import GCS_INSTRUMENTATION_BUCKET_NAME, PROJECT_ID
 
 
 def copy_gcs_folder(
@@ -14,7 +14,7 @@ def copy_gcs_folder(
     # source_folder_prefix: str,
     # destination_bucket_name: str,
     # destination_folder_prefix: str
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     When user says they want a java instrumented application, perform this function and return the results.
 
@@ -77,7 +77,7 @@ def copy_gcs_folder(
                 failed_files.append({"file": blob.name, "error": str(e)})
             except Exception as e:
                 failed_files.append(
-                    {"file": blob.name, "error": f"Unexpected error: {str(e)}"}
+                    {"file": blob.name, "error": f"Unexpected error: {e!s}"}
                 )
 
         total_files_processed = len(copied_files) + len(failed_files)
@@ -110,11 +110,11 @@ def copy_gcs_folder(
         return {
             "status": "error",
             "error_message": str(e),
-            "message": f"Failed to initialize client, get buckets, or list files: {str(e)}",
+            "message": f"Failed to initialize client, get buckets, or list files: {e!s}",
         }
     except Exception as e:
         return {
             "status": "error",
             "error_message": str(e),
-            "message": f"An unexpected error occurred during setup or listing: {str(e)}",
+            "message": f"An unexpected error occurred during setup or listing: {e!s}",
         }

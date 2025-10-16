@@ -1,19 +1,18 @@
-from google.adk.agents import Agent
-from google.adk.tools.agent_tool import AgentTool
-from ..otel_doc_rag_corpus_agent import otel_doc_rag_corpus_agent
-
-from . import prompt
-
-from google.cloud import storage
-from google.api_core.exceptions import GoogleAPIError
-from google.adk.tools import ToolContext
 from datetime import datetime
+from typing import Any
 
-from typing import Dict, Optional, Any
+from google.adk.agents import Agent
+from google.adk.tools import ToolContext
+from google.adk.tools.agent_tool import AgentTool
+from google.api_core.exceptions import GoogleAPIError
+from google.cloud import storage
+
+from ..otel_doc_rag_corpus_agent import otel_doc_rag_corpus_agent
+from . import prompt
 
 MODEL = "gemini-2.5-pro"
 
-from .gcs_config import PROJECT_ID, GCS_OTEL_COLLECTOR_BUCKET_NAME
+from .gcs_config import GCS_OTEL_COLLECTOR_BUCKET_NAME, PROJECT_ID
 
 
 def create_starter_pack(
@@ -24,7 +23,7 @@ def create_starter_pack(
     # source_folder_prefix: str,
     # destination_bucket_name: str,
     # destination_folder_prefix: str
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Invoke this function when opentelemetry configurations need to be created. This function makes a copy of a folder
     in the same GCS bucket and then calls the upload_file_to_gcs function to upload the config string as a yaml file.
@@ -92,7 +91,7 @@ def create_starter_pack(
                 failed_files.append({"file": blob.name, "error": str(e)})
             except Exception as e:
                 failed_files.append(
-                    {"file": blob.name, "error": f"Unexpected error: {str(e)}"}
+                    {"file": blob.name, "error": f"Unexpected error: {e!s}"}
                 )
 
         total_files_processed = len(copied_files) + len(failed_files)
@@ -128,13 +127,13 @@ def create_starter_pack(
         return {
             "status": "error",
             "error_message": str(e),
-            "message": f"Failed to initialize client, get buckets, or list files: {str(e)}",
+            "message": f"Failed to initialize client, get buckets, or list files: {e!s}",
         }
     except Exception as e:
         return {
             "status": "error",
             "error_message": str(e),
-            "message": f"An unexpected error occurred during setup or listing: {str(e)}",
+            "message": f"An unexpected error occurred during setup or listing: {e!s}",
         }
 
 
@@ -143,7 +142,7 @@ def upload_file_to_gcs(
     otel_config_str: str,
     note_str: str,
     destination_blob_name: str,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Uploads a string (expected to be YAML) as a file to a GCS bucket.
 
     Args:
@@ -179,13 +178,13 @@ def upload_file_to_gcs(
         return {
             "status": "error",
             "error_message": str(e),
-            "message": f"Failed to upload file: {str(e)}",
+            "message": f"Failed to upload file: {e!s}",
         }
     except Exception as e:
         return {
             "status": "error",
             "error_message": str(e),
-            "message": f"An unexpected error occurred: {str(e)}",
+            "message": f"An unexpected error occurred: {e!s}",
         }
 
 

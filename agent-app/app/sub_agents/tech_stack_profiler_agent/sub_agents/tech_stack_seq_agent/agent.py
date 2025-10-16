@@ -1,10 +1,10 @@
 from google.adk.agents import SequentialAgent
 
-from .sub_agents.source_code_staging_agent import source_code_staging_agent
 from .sub_agents.parallel_codebase_analyzer_agent import (
     parallel_codebase_analyzer_agent,
 )
 from .sub_agents.report_generator_agent import report_generator_agent
+from .sub_agents.source_code_staging_agent import source_code_staging_agent
 
 MODEL = "gemini-2.5-flash"
 

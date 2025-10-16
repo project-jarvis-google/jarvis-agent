@@ -1,16 +1,16 @@
 # tools.py
-import os
-import logging
-import datetime
-import tempfile
 import csv
+import datetime
 import io
-import numpy as np
+import logging
+import os
+import tempfile
 
+import numpy as np
 from google.adk.tools import FunctionTool
 from google.cloud import storage
-from vertexai.language_models import TextEmbeddingModel
 from scipy.spatial.distance import cdist
+from vertexai.language_models import TextEmbeddingModel
 
 # --- Setup Logging and Models ---
 logging.basicConfig(

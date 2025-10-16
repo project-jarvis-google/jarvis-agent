@@ -4,7 +4,6 @@ from .sub_agents.discovery_report_strategy_recommender_agent import (
     discovery_report_strategy_recommender_agent,
 )
 
-
 MODEL = "gemini-2.5-flash"
 
 parallel_reports_analyzer_agent = ParallelAgent(

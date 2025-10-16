@@ -1,7 +1,6 @@
 from google.adk.agents import Agent
-from . import corpus_tools
 
-from . import prompt
+from . import corpus_tools, prompt
 
 MODEL = "gemini-2.5-pro"
 
