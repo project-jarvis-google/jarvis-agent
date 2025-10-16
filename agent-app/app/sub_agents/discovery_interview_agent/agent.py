@@ -8,8 +8,12 @@ the prompt file, injects a knowledge base, and registers all available tools.
 
 import logging
 import os
+from collections.abc import Callable
+from typing import Any
 
 from google.adk.agents.llm_agent import LlmAgent
+from google.adk.tools import BaseTool
+from google.adk.tools.base_toolset import BaseToolset
 
 from app.config import MODEL
 
@@ -23,7 +27,7 @@ try:
         read_and_update_sheet_tool,
     )
 
-    ALL_TOOLS = [
+    ALL_TOOLS: list[Callable[..., Any] | BaseTool | BaseToolset] = [
         google_search_tool,
         compile_questions_to_sheet_tool,
         read_and_update_sheet_tool,

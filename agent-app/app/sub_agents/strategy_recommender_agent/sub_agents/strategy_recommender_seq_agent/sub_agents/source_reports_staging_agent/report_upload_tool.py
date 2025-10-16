@@ -93,7 +93,7 @@ async def _bytes_from_any(part: gt.Part, tool_context: ToolContext) -> bytes:
     ):
         loader = getattr(tool_context, "load_artifact_bytes", None)
         if callable(loader):
-            return await loader(part.file_data.file_uri)  # type: ignore[reportUnknownVariableType]
+            return await loader(part.file_data.file_uri)
         raise ValueError(
             "file_data present but tool_context.load_artifact_bytes is unavailable."
         )

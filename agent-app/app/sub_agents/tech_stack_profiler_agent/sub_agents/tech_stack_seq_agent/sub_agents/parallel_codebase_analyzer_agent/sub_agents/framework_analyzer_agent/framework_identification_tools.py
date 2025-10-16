@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import subprocess
+from typing import Any
 
 from google.adk.tools import ToolContext
 
@@ -37,7 +38,7 @@ def identify_frameworks(tool_context: ToolContext) -> bool:
     for entry in os.listdir(secure_temp_repo_dir):
         logging.info(entry)
     if "secure_temp_repo_dir" in locals() and os.path.exists(secure_temp_repo_dir):
-        frameworks_json_str = []
+        frameworks_json_str: str = "[]"
 
         try:
             is_mock_enabled = os.getenv(
@@ -97,7 +98,7 @@ def identify_frameworks(tool_context: ToolContext) -> bool:
 
             else:
                 gemini_env = os.environ.copy()
-                gemini_env["GEMINI_API_KEY"] = os.getenv("GEMINI_API_KEY")
+                gemini_env["GEMINI_API_KEY"] = os.getenv("GEMINI_API_KEY", "")
                 args = "-p " + '"' + FRAMEWORK_IDENTIFICATION_GEMINI_PROMPT + '"'
                 result = subprocess.run(
                     ["/usr/local/bin/gemini", args],
@@ -114,12 +115,15 @@ def identify_frameworks(tool_context: ToolContext) -> bool:
             logging.info("result.stderr => %s", stderr)
             logging.info("result.stdout => %s", stdout)
 
-            frameworks_json_str = extract_json_arr_str(stdout)
+            extracted_json = extract_json_arr_str(stdout)
+            if extracted_json:
+                frameworks_json_str = extracted_json
+
             is_framework_identification_successful = True
 
             # tool_context.state["frameworks_json_str"] = frameworks_json_str
 
-            frameworks_json = json.loads(frameworks_json_str)
+            frameworks_json: list[Any] = json.loads(frameworks_json_str)
             desired_frameworks_attributes = ["name", "category"]
 
             filtered_framework_data = filter_json_arr(

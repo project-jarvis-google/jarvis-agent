@@ -59,12 +59,15 @@ def query_rag_corpus(
         results = []
         if hasattr(response, "contexts"):
             # Handle different response structures
-            contexts = response.contexts
-            if hasattr(contexts, "contexts"):
-                contexts = contexts.contexts
+            contexts_attr = response.contexts
+            context_list = (
+                contexts_attr.contexts
+                if hasattr(contexts_attr, "contexts")
+                else contexts_attr
+            )
 
             # Extract text and metadata from each context
-            for context in contexts:
+            for context in context_list:
                 result = {
                     "text": context.text if hasattr(context, "text") else "",
                     "source_uri": context.source_uri
