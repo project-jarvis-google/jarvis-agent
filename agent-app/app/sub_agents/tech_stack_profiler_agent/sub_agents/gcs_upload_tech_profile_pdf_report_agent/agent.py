@@ -1,9 +1,10 @@
 import os
-
 from datetime import datetime
-from app.utils.pdf_converter import convert_str_to_pdf
+
 from google.adk.agents import LlmAgent
 from google.adk.tools import ToolContext
+
+from app.utils.pdf_converter import convert_str_to_pdf
 
 MODEL = "gemini-2.5-flash"
 
@@ -43,7 +44,7 @@ def upload_report_to_gcs_as_pdf(tool_context: ToolContext) -> str:
         print(f"Uploaded '{filename}' to public GCS bucket.")
         return f"Successfully created the pdf report. It is publicly accessible at: {public_url}"
 
-    return f"Pdf report creation unsuccessful!"
+    return "Pdf report creation unsuccessful!"
 
 
 gcs_upload_tech_profile_pdf_report_agent = LlmAgent(

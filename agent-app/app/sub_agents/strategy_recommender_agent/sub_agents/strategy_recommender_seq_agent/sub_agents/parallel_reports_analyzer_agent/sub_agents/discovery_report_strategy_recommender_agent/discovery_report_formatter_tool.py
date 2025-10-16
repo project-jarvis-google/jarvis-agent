@@ -1,10 +1,6 @@
-import os
-import json
 import logging
-from google.adk.tools import FunctionTool
-from google.adk.tools import ToolContext
-import uuid
-from typing import Any
+
+from google.adk.tools import FunctionTool, ToolContext
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)

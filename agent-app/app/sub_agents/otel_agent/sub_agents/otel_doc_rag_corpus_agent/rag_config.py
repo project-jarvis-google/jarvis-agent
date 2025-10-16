@@ -3,7 +3,6 @@ Configuration settings for the Vertex AI RAG engine.
 """
 
 import os
-import google.auth
 
 os.environ.setdefault("VERTEX_AI_RAG_CORPUS_ID", "7782220156096217088")
 os.environ.setdefault(

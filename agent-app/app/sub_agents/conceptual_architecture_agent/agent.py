@@ -2,11 +2,12 @@ from langchain import hub
 from langchain.agents import AgentExecutor, create_react_agent
 from langchain_google_vertexai import ChatVertexAI
 
-# Step 1: Import your new tool alongside the existing one
-from app.sub_agents.google_search_dummy_agent.tools import google_search
 from app.sub_agents.conceptual_architecture_agent.tools import (
     analyze_architecture_document,
 )
+
+# Step 1: Import your new tool alongside the existing one
+from app.sub_agents.google_search_dummy_agent.tools import google_search
 
 
 # --- Agent Definition ---

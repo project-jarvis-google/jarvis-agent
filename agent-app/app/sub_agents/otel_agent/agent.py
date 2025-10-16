@@ -18,10 +18,9 @@ based on user input or return the java instrumented application gcs bucket url""
 from google.adk.agents import LlmAgent
 from google.adk.tools.agent_tool import AgentTool
 
-
-from .sub_agents.otel_doc_rag_corpus_agent import otel_doc_rag_corpus_agent
 from .sub_agents.otel_app_instrumentation_agent import otel_app_instrumentation_agent
 from .sub_agents.otel_collector_config_agent import otel_collector_config_agent
+from .sub_agents.otel_doc_rag_corpus_agent import otel_doc_rag_corpus_agent
 
 MODEL = "gemini-2.5-flash"
 

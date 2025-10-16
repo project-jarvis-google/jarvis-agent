@@ -1,26 +1,13 @@
-import os
-import google.auth
-from google.api_core import exceptions
-from google import genai
-import google.genai.types as types
-from google.adk.tools import ToolContext
-from pathlib import Path
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter
-import asyncio
-from google.adk.tools import FunctionTool
-from google.adk.agents.callback_context import CallbackContext
-from typing import Optional
-
-import base64
-from typing import Dict, Any
-from google.adk.agents import Agent
+import io
 import logging
+import os
 import uuid
 from typing import Any
-from google.genai import types as gt
+
+import google.auth
 import pdfplumber
-import io
+from google.adk.tools import FunctionTool, ToolContext
+from google.genai import types as gt
 
 _, project_id = google.auth.default()
 
@@ -132,7 +119,7 @@ def _preliminary_part_checks(parts: list[Any], rid: str) -> dict[str, Any] | Non
 # ---------------- the tool (ONE ARG, ASYNC) ----------------
 async def save_and_report_size(
     tool_context: ToolContext,
-) -> dict[str, Any]:  # noqa: PLR0911
+) -> dict[str, Any]:
     """
     Accepts binary file input (PDF preferred) and reports its size in bytes.
     Returns a dict with {status, message?, filename, size_bytes, version, rid}.

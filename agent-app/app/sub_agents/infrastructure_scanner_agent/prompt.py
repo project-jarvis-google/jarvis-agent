@@ -1,6 +1,6 @@
 """Prompt for root_agent"""
 
-AGENT_PROMPT = """
+AGENT_PROMPT = r"""
 1  Role and Primary Goal
 -------------------------
 

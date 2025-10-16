@@ -1,8 +1,8 @@
 # halt_tool.py
 
-from google.adk.tools import FunctionTool
-from google.adk.tools import ToolContext
 from typing import Any
+
+from google.adk.tools import FunctionTool, ToolContext
 
 
 def halt_workflow(tool_context: ToolContext) -> dict[str, Any]:

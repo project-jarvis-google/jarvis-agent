@@ -1,8 +1,9 @@
 import logging
 import tempfile
 
-from app.utils.gcs import upload_str_to_gcs_bucket
 from fpdf import FPDF
+
+from app.utils.gcs import upload_str_to_gcs_bucket
 
 # It's good practice to have a logger instance per module.
 logger = logging.getLogger(__name__)
