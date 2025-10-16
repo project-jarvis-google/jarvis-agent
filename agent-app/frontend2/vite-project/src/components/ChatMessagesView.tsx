@@ -39,6 +39,22 @@ interface ChatMessagesViewProps {
   isLoading: boolean;
 }
 
+// Helper function to remove large JSON tool outputs and return clean text.
+const cleanContent = (text: string): string => {
+    // Regex to find and remove markdown code fences (like ```json...```) wrapping internal data.
+    const jsonCodeBlockRegex = /```(json|code|bash|text)\s*\{[\s\S]*?\n\}\s*```/g;
+    
+    let cleanedText = text.replace(jsonCodeBlockRegex, '').trim();
+    
+    // If the content is now empty or still looks like raw JSON, return a helpful message.
+    if (cleanedText === "" || (cleanedText.startsWith('{') && cleanedText.endsWith('}'))) {
+        return "The system processed the request and generated the final report below.";
+    }
+    
+    return cleanedText;
+};
+
+
 const AIMessageBubble: React.FC<{ message: Message }> = ({ message }) => {
   const [isCopied, setIsCopied] = useState(false);
   const theme = useTheme();
@@ -46,6 +62,7 @@ const AIMessageBubble: React.FC<{ message: Message }> = ({ message }) => {
   const handleCopy = async () => {
     if (!message.content) return;
     try {
+      // Use document.execCommand for better compatibility in iframe environments
       await navigator.clipboard.writeText(message.content);
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 2000);
@@ -95,6 +112,7 @@ const AIMessageBubble: React.FC<{ message: Message }> = ({ message }) => {
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 components={{
+                  // Custom rendering for code blocks (using SyntaxHighlighter)
                   code(props) {
                     const { children, className } = props;
                     const match = /language-(\w+)/.exec(className || "");
@@ -120,9 +138,23 @@ const AIMessageBubble: React.FC<{ message: Message }> = ({ message }) => {
                       </code>
                     );
                   },
+                  a: ({ node, ...props }) => (
+                    <a 
+                        {...props} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        style={{ 
+                            color: theme.palette.primary.light, 
+                            textDecoration: 'underline',
+                            fontWeight: 'bold'
+                        }}
+                    >
+                        {props.children}
+                    </a>
+                  )
                 }}
               >
-                {message.content}
+                {cleanContent(message.content)}
               </ReactMarkdown>
             </Typography>
 
@@ -176,7 +208,7 @@ export function ChatMessagesView({
         <Stack spacing={3} sx={{ maxWidth: "md", mx: "auto" }}>
           {messages.map((message) => {
             if (message.type === "ai") {
-              return message.content ? (
+              return message.content || (message.files && message.files.length > 0) ? (
                 <AIMessageBubble key={message.id} message={message} />
               ) : null;
             }
