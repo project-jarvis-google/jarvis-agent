@@ -12,7 +12,7 @@ const shimmerAnimation = `
   }
 `;
 
-const ShimmerContainer = styled(Box)({
+const ShimmerContainer = styled(Box)(({ theme }) => ({
   position: 'relative',
   overflow: 'hidden',
   width: '100%',
@@ -27,15 +27,18 @@ const ShimmerContainer = styled(Box)({
     width: '100%',
     height: '100%',
     transform: 'translateX(-100%)',
-    backgroundImage: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent)',
+    backgroundImage: `linear-gradient(90deg, 
+      transparent, 
+      ${theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)'}, 
+      transparent)`,
     animation: 'shimmer 1.5s infinite',
   },
-});
+}));
 
 const ShimmerBar = styled('div')(({ theme }) => ({
   height: '24px',
   borderRadius: '8px',
-  backgroundColor: darken(theme.palette.action.hover, 0.2),
+  backgroundColor: darken(theme.palette.action.hover, theme.palette.mode === 'dark' ? 0.3 : 0.05),
 }));
 
 const ShimmerLoader = () => {

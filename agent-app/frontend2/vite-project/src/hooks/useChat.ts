@@ -135,7 +135,7 @@ export function useChat(apiBaseUrl: string) {
               data: string;
             }>((resolve, reject) => {
               reader.onload = () => {
-                let result = reader.result as string;
+                const result = reader.result as string;
                 let base64Data: string;
 
                 if (isTextFile) {

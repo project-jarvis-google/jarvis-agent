@@ -4,7 +4,6 @@ import {
   Grid,
   Paper,
   useTheme,
-  GridProps,
 } from "@mui/material";
 import logo from "../assets/spark-final.png";
 import { motion } from "framer-motion";
@@ -94,7 +93,8 @@ export function WelcomeScreen() {
         {suggestionPrompts.map((prompt, index) => (
           <Grid
             item
-            {...({ xs: 12, sm: 6, md: 3 } as GridProps)}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            {...({ xs: 12, sm: 6, md: 3 } as any)}
             key={prompt}
             sx={{
               width: {
