@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Agent App"""
+
 import os
 from google.api_core import exceptions
 import google.auth
@@ -86,4 +87,5 @@ async def upload_file_to_gcs_bucket(file: UploadFile = File(...)):
 # Main execution
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)

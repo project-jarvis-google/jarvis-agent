@@ -4,6 +4,7 @@ from google.adk.tools import FunctionTool
 from google.adk.tools import ToolContext
 from typing import Any
 
+
 def halt_workflow(tool_context: ToolContext) -> dict[str, Any]:
     """
     Explicitly signals the SequentialAgent to halt the workflow.
@@ -15,7 +16,8 @@ def halt_workflow(tool_context: ToolContext) -> dict[str, Any]:
     # We will use a unique string status that the coordinator can intercept if needed.
     return {
         "status": "HALT_WORKFLOW",
-        "message": "File not uploaded. Workflow halted by staging agent."
+        "message": "File not uploaded. Workflow halted by staging agent.",
     }
+
 
 halt_workflow_tool = FunctionTool(func=halt_workflow)

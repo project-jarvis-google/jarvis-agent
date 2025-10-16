@@ -35,7 +35,7 @@ def get_final_report_instruction(context):
     1. The instruction to call the tool (if data isn't prepared).
     2. The instruction to generate the final JSON (if data is prepared).
     """
-    
+
     # Attempt to retrieve the prompt set by the previous tool
     prepared_prompt = context.state.get("final_report_prompt")
 

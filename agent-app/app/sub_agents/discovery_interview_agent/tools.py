@@ -11,16 +11,23 @@ from google.cloud import storage
 from google.adk.agents import Agent
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
+
 
 def _get_gcs_client():
     """Initializes and returns a Google Cloud Storage client."""
     return storage.Client()
 
+
 # --- Tool 1: Questionnaire Generation ---
 
-def compile_questions_to_sheet(client_name: str, topic: str, questions: list[str]) -> str:
+
+def compile_questions_to_sheet(
+    client_name: str, topic: str, questions: list[str]
+) -> str:
     """
     Creates a CSV file with discovery questions, uploads it to a GCS bucket,
     and returns a public URL for the file.
@@ -37,12 +44,14 @@ def compile_questions_to_sheet(client_name: str, topic: str, questions: list[str
     bucket_name = os.getenv("GCS_BUCKET_NAME")
     if not bucket_name:
         return "Error: GCS_BUCKET_NAME is not configured."
-        
+
     try:
         filename = f"Questionarre/Questionnaire-{client_name}-{topic}.csv"
-        
+
         # Use a temporary file to build the CSV
-        with tempfile.NamedTemporaryFile(mode='w+', delete=False, suffix=".csv", newline='', encoding='utf-8') as tmp:
+        with tempfile.NamedTemporaryFile(
+            mode="w+", delete=False, suffix=".csv", newline="", encoding="utf-8"
+        ) as tmp:
             writer = csv.writer(tmp)
             writer.writerow(["Discovery Questions"])
             writer.writerow(["Generated on:", str(datetime.date.today())])
@@ -56,12 +65,12 @@ def compile_questions_to_sheet(client_name: str, topic: str, questions: list[str
         storage_client = _get_gcs_client()
         bucket = storage_client.bucket(bucket_name)
         blob = bucket.blob(filename)
-        blob.upload_from_filename(tmp_path, content_type='text/csv')
-        
+        blob.upload_from_filename(tmp_path, content_type="text/csv")
+
         os.remove(tmp_path)
 
         public_url = f"https://storage.googleapis.com/{bucket_name}/{filename}"
-        
+
         logger.info(f"Uploaded '{filename}' to public GCS bucket.")
         return f"Successfully created the questionnaire. It is publicly accessible at: {public_url}"
 
@@ -69,7 +78,9 @@ def compile_questions_to_sheet(client_name: str, topic: str, questions: list[str
         logger.error(f"Error creating or uploading CSV file: {e}", exc_info=True)
         return f"Error: Could not create or upload the questionnaire. Error: {e}"
 
+
 # --- Tool 2: Analyze and Update Sheet ---
+
 
 def read_and_update_sheet_from_attachment(
     filename: str,
@@ -98,20 +109,19 @@ def read_and_update_sheet_from_attachment(
         data = list(reader)
         # 3. Add Analysis Data in Memory
         if data:
-            data[0].extend(['Category', 'Tag'])
+            data[0].extend(["Category", "Tag"])
             for item in analysis_data:
-                row_index = item['row'] - 1
+                row_index = item["row"] - 1
                 if 0 <= row_index < len(data):
-                    data[row_index].extend([
-                        item.get('classification', 'N/A'),
-                        item.get('tags', 'N/A')
-                    ])
+                    data[row_index].extend(
+                        [item.get("classification", "N/A"), item.get("tags", "N/A")]
+                    )
 
         # 4. Write Modified Data to a New CSV in Memory
         output = io.StringIO()
         writer = csv.writer(output)
         writer.writerows(data)
-        updated_csv_content = output.getvalue().encode('utf-8')
+        updated_csv_content = output.getvalue().encode("utf-8")
         # 5. Upload Updated CSV to GCS
         # First, get the base name of the file without its extension.
         base_filename = os.path.splitext(filename)[0]
@@ -121,7 +131,7 @@ def read_and_update_sheet_from_attachment(
         storage_client = _get_gcs_client()
         bucket = storage_client.bucket(bucket_name)
         blob = bucket.blob(gcs_path)
-        blob.upload_from_string(updated_csv_content, content_type='text/csv')
+        blob.upload_from_string(updated_csv_content, content_type="text/csv")
 
         # 6. Return Public URL
         public_url = f"https://storage.googleapis.com/{bucket_name}/{gcs_path}"
@@ -131,7 +141,9 @@ def read_and_update_sheet_from_attachment(
         logger.error(f"Error processing and uploading CSV file: {e}", exc_info=True)
         return f"Error: Could not analyze or upload the file. Error: {e}"
 
+
 # --- Tool 3: Final Summary PDF Generation ---
+
 
 def create_final_summary_pdf(
     client_name: str,
@@ -166,41 +178,45 @@ def create_final_summary_pdf(
     bucket_name = os.getenv("GCS_BUCKET_NAME")
     if not bucket_name:
         return "Error: GCS_BUCKET_NAME is not configured."
-        
+
     try:
         filename = f"Summary/Discovery Summary-{client_name}-{topic}.pdf"
-        
+
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
             doc = SimpleDocTemplate(tmp.name)
             styles = getSampleStyleSheet()
             story = []
 
             # --- Build the PDF Content ---
-            story.append(Paragraph(f"Discovery Summary: {client_name}", styles['h1']))
-            story.append(Spacer(1, 0.2*inch))
-            story.append(Paragraph("Client and Interview Details", styles['h2']))
-            story.append(Paragraph(f"<b>Client:</b> {client_name}", styles['BodyText']))
-            story.append(Paragraph(f"<b>Date:</b> {interview_date}", styles['BodyText']))
-            story.append(Paragraph(f"<b>Attendees:</b> {attendees}", styles['BodyText']))
-            story.append(Spacer(1, 0.2*inch))
+            story.append(Paragraph(f"Discovery Summary: {client_name}", styles["h1"]))
+            story.append(Spacer(1, 0.2 * inch))
+            story.append(Paragraph("Client and Interview Details", styles["h2"]))
+            story.append(Paragraph(f"<b>Client:</b> {client_name}", styles["BodyText"]))
+            story.append(
+                Paragraph(f"<b>Date:</b> {interview_date}", styles["BodyText"])
+            )
+            story.append(
+                Paragraph(f"<b>Attendees:</b> {attendees}", styles["BodyText"])
+            )
+            story.append(Spacer(1, 0.2 * inch))
 
-            story.append(Paragraph("Executive Summary", styles['h2']))
-            story.append(Paragraph(executive_summary, styles['BodyText']))
-            story.append(Spacer(1, 0.2*inch))
+            story.append(Paragraph("Executive Summary", styles["h2"]))
+            story.append(Paragraph(executive_summary, styles["BodyText"]))
+            story.append(Spacer(1, 0.2 * inch))
 
-            story.append(Paragraph("Identified Pain Points", styles['h2']))
+            story.append(Paragraph("Identified Pain Points", styles["h2"]))
             for pp in pain_points:
-                story.append(Paragraph(f"• {pp}", styles['Bullet']))
-            story.append(Spacer(1, 0.2*inch))
+                story.append(Paragraph(f"• {pp}", styles["Bullet"]))
+            story.append(Spacer(1, 0.2 * inch))
 
-            story.append(Paragraph("Desired Business Outcomes", styles['h2']))
+            story.append(Paragraph("Desired Business Outcomes", styles["h2"]))
             for out in desired_outcomes:
-                story.append(Paragraph(f"• {out}", styles['Bullet']))
-            story.append(Spacer(1, 0.2*inch))
+                story.append(Paragraph(f"• {out}", styles["Bullet"]))
+            story.append(Spacer(1, 0.2 * inch))
 
-            story.append(Paragraph("Referenced GCP Solutions", styles['h2']))
+            story.append(Paragraph("Referenced GCP Solutions", styles["h2"]))
             for solution in gcp_solutions:
-                story.append(Paragraph(f"• {solution}", styles['Bullet']))
+                story.append(Paragraph(f"• {solution}", styles["Bullet"]))
 
             doc.build(story)
             tmp_path = tmp.name
@@ -209,8 +225,8 @@ def create_final_summary_pdf(
         storage_client = _get_gcs_client()
         bucket = storage_client.bucket(bucket_name)
         blob = bucket.blob(filename)
-        blob.upload_from_filename(tmp_path, content_type='application/pdf')
-        
+        blob.upload_from_filename(tmp_path, content_type="application/pdf")
+
         os.remove(tmp_path)
 
         public_url = f"https://storage.googleapis.com/{bucket_name}/{filename}"
@@ -221,10 +237,11 @@ def create_final_summary_pdf(
         logger.error(f"Error creating or uploading PDF document: {e}", exc_info=True)
         return f"Error: Could not create or upload the summary PDF. Error: {e}"
 
+
 # --- Tool Registration ---
 search_agent = Agent(
-    model='gemini-2.0-flash',
-    name='SearchAgent',
+    model="gemini-2.0-flash",
+    name="SearchAgent",
     instruction="You're a specialist in Google Search",
     tools=[google_search],
 )

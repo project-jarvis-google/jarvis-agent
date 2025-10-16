@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Configs for the sub agent google_search_dummy"""
+
 import os
 import google.auth
 

@@ -1,4 +1,4 @@
-""" Prompt for otel_collector_config_agent """
+"""Prompt for otel_collector_config_agent"""
 
 OTEL_COLLECTOR_CONFIG_PROMPT = """
     You are a helpful assistant designed to build an OpenTelemetry Collector starter pack and its corresponding configuration file based on user requirements.

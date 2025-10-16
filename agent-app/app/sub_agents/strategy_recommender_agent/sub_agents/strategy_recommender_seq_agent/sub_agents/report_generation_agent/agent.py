@@ -1,7 +1,7 @@
 from google.adk.agents import LlmAgent
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
-from .pdf_generator_tool  import generate_and_save_pdf_tool
+from .pdf_generator_tool import generate_and_save_pdf_tool
 from .prompt import REPORT_GENERATION_PROMPT
 
 MODEL = "gemini-2.5-flash"

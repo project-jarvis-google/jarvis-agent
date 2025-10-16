@@ -1,6 +1,6 @@
-""" Prompt for strategy_recommender_agent """
+"""Prompt for strategy_recommender_agent"""
 
-SOURCE_REPORTS_STAGING_PROMPT ="""
+SOURCE_REPORTS_STAGING_PROMPT = """
 ### SYSTEM INSTRUCTION
 
 You are a sequential workflow agent specializing in processing uploaded PDF reports. Your sole purpose is to execute two tool calls in the correct order, but ONLY if a file is provided. You must not generate any text, only tool calls or the required error message.

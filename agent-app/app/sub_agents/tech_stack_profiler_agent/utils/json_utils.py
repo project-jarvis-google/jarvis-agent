@@ -1,8 +1,10 @@
 import json
 import logging
 
+
 def filter_json_arr(json_arr_data: dict, desired_attributes: list):
     return [[item[key] for key in desired_attributes] for item in json_arr_data]
+
 
 def extract_json_arr_str(gemini_output: str) -> str | None:
     """
@@ -10,7 +12,7 @@ def extract_json_arr_str(gemini_output: str) -> str | None:
 
     It finds the first opening square bracket '[' and the last closing square bracket ']'
     to identify the boundaries of the JSON string.
- 
+
     Args:
         gemini_output: The output from gemini cli
 
@@ -19,13 +21,13 @@ def extract_json_arr_str(gemini_output: str) -> str | None:
     """
 
     # Find the start of the JSON object
-    start_index = gemini_output.find('[')
+    start_index = gemini_output.find("[")
     if start_index == -1:
         logging.error("Error: Could not find the start of a JSON array object ('[').")
         return None
 
     # Find the end of the JSON object
-    end_index = gemini_output.rfind(']')
+    end_index = gemini_output.rfind("]")
     if end_index == -1:
         logging.error("Error: Could not find the end of a JSON array object (']').")
         return None

@@ -1,4 +1,5 @@
 """Main Agent for the sub agent google_search_dummy"""
+
 from google.adk.agents import Agent
 from google.adk.tools import google_search
 from .prompt import GOOGLE_SEARCH_PROMPT

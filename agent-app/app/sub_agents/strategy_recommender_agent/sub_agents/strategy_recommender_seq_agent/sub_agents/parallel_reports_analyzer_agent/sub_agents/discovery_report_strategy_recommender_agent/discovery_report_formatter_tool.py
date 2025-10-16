@@ -82,6 +82,7 @@ Example:
 }
 """
 
+
 def _extract_client_name(full_text: str) -> str:
     """Finds the client name based on the 'Client:' marker."""
     client_marker = "Client: "
@@ -91,8 +92,8 @@ def _extract_client_name(full_text: str) -> str:
         start_index += len(client_marker)
 
         # Find possible end points for the client name
-        end_of_line = full_text.find('\n', start_index)
-        date_marker_pos = full_text.find('Date:', start_index)
+        end_of_line = full_text.find("\n", start_index)
+        date_marker_pos = full_text.find("Date:", start_index)
 
         # Filter out any markers that weren't found
         possible_ends = [p for p in (end_of_line, date_marker_pos) if p != -1]
@@ -122,13 +123,11 @@ def analyze_discovery_results(tool_context: ToolContext) -> bool:
         A string indicating that the data has been successfully formatted.
     """
 
-    
     logger.info("Starting discovery report data formatting.")
 
     is_report_formatted = False
 
     try:
-
         # The context is passed as a dictionary, so we access its 'state' key.
         summary_text = tool_context.state.get("last_pdf_text")
         if not summary_text:
@@ -136,7 +135,6 @@ def analyze_discovery_results(tool_context: ToolContext) -> bool:
             logger.error(message)
             return is_report_formatted
 
-    
         # 2. Extract Client Name from the full text
         client_name = _extract_client_name(summary_text)
 
@@ -146,46 +144,38 @@ def analyze_discovery_results(tool_context: ToolContext) -> bool:
             "continuous string. Do not add any conversational text or explanation. "
             "Maintain the exact content of the original sections, only adding the required headers.\n\n"
             "**Client Name**: " + client_name + "\n"
-            
             "**REPORT SECTIONS (Extract from the text below and format)**:\n\n"
-            
             "**Executive Summary**\n"
             "**Pain Points**\n"
             "**Desired Outcomes**\n\n"
-            
             "--- SOURCE TEXT ---\n"
             f"{summary_text}\n\n"
             "--- END SOURCE TEXT ---\n\n"
-            
             "**FINAL REPORT STRING FORMAT**:\n"
             "Client Name: [Extracted Name]\n"
             "Executive Summary:\n[Full Executive Summary Text]\n"
             "Pain Points:\n[Full Identified Pain Points Text]\n"
             "Desired Outcomes:\n[Full Desired Business Outcomes Text]\n\n"
             "Generate ONLY the content for the FINAL REPORT STRING FORMAT."
-            
         )
 
         final_report_prompt = DISCOVERY_REPORT_GEMINI_PROMPT + "\n\n" + summary_prompt
-    
+
         tool_context.state["final_report_prompt"] = final_report_prompt
 
         tool_context.state["client_name"] = client_name
-        
 
         is_report_formatted = True
 
-         # 3. Return a success message indicating the prompt is ready
+        # 3. Return a success message indicating the prompt is ready
         return is_report_formatted
-
-        
 
     except Exception as e:
-        logger.error(f"An unexpected error occurred during data formatting: {e}", exc_info=True)
+        logger.error(
+            f"An unexpected error occurred during data formatting: {e}", exc_info=True
+        )
         # 'rid' might not be defined if the error happened before its assignment.
         return is_report_formatted
-    
-
 
 
 report_from_context_tool = FunctionTool(func=analyze_discovery_results)
