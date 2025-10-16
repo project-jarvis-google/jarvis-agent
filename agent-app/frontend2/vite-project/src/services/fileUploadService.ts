@@ -23,6 +23,7 @@ export async function uploadFileToGCS(fileObject: File): Promise<string> {
         const errorBody = await response.json();
         errorDetails += `. Details: ${JSON.stringify(errorBody)}`;
     } catch (e) {
+        console.error("Failed to parse error response body as JSON.", e);
     }
     throw new Error(`File upload failed: ${errorDetails}`);
   }
@@ -37,3 +38,5 @@ export async function uploadFileToGCS(fileObject: File): Promise<string> {
   
   return gcsUri; 
 }
+
+export default uploadFileToGCS;
