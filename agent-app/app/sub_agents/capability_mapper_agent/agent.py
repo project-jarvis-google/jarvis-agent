@@ -3,7 +3,6 @@
 Initializes and configures the "Business Capability Mapper" agent.
 """
 
-import os
 import logging
 from google.adk.agents.llm_agent import LlmAgent
 from app.config import MODEL  # Assuming MODEL is defined in your main app config
@@ -23,7 +22,8 @@ try:
 
 except ImportError as e:
     logging.error(
-        f"Failed to import tools or prompts: {e}. Ensure all files are in the correct directory."
+        "Failed to import tools or prompts: %s. Ensure all files are in the correct directory.",
+        e,
     )
     exit(1)
 

@@ -8,7 +8,6 @@ import logging
 import datetime
 
 # --- Logging Configuration ---
-# Configure the logging module to output messages with a timestamp, log level, and the message itself.
 # This setup directs log output to the console.
 logging.basicConfig(
     level=logging.INFO,
@@ -22,7 +21,7 @@ BUCKET_NAME = os.environ.get("BUCKET_NAME", "agent-cloud-service-recomendation")
 
 def download_pdf_from_gcs(file_name: str, expiration_time: int = 24):
     try:
-        logging.info(f"Initializing GCS client to download '{file_name}'.")
+        logging.info("Initializing GCS client to download '%s'.", file_name)
         storage_client = storage.Client()
 
         # Get the bucket and blob (file)
@@ -31,7 +30,10 @@ def download_pdf_from_gcs(file_name: str, expiration_time: int = 24):
 
         # Download the file to the specified local path
         logging.info(
-            f"Starting download of '{file_name}' from bucket '{BUCKET_NAME}' with expiration time '{expiration_time}'."
+            "Starting download of '%s' from bucket '%s' with expiration time '%s'.",
+            file_name,
+            BUCKET_NAME,
+            expiration_time,
         )
         file_name += ".pdf"
 
@@ -44,14 +46,16 @@ def download_pdf_from_gcs(file_name: str, expiration_time: int = 24):
         )
 
         logging.info(
-            f"Successfully generated signed url for '{file_name}' from bucket '{BUCKET_NAME}'."
+            "Successfully generated signed url for '%s' from bucket '%s'.",
+            file_name,
+            BUCKET_NAME,
         )
         return signed_url
 
     except Exception as e:
         # Log the exception with traceback information for better debugging
         logging.error(
-            f"Failed to generate signed '{file_name} because {e}.", exc_info=True
+            "Failed to generate signed '%s' because %s.", file_name, e, exc_info=True
         )
 
 
@@ -68,10 +72,10 @@ async def save_generated_report_py(text: str):
         data = data_dict["result"]
         destination_blob_name = data_dict["fileName"]
     except json.JSONDecodeError as e:
-        logging.error("Failed to parse input JSON string.", exc_info=True)
+        logging.error("Failed to parse input JSON stringz; %s", e, exc_info=True)
         return
     except KeyError as e:
-        logging.error(f"Missing expected key in JSON: {e}", exc_info=True)
+        logging.error("Missing expected key in JSON: %s", e, exc_info=True)
         return
 
     logging.info("Converting Markdown to HTML.")
@@ -104,14 +108,16 @@ async def save_generated_report_py(text: str):
 
     # Exit if the PDF creation failed
     if pisa_status.err:
-        logging.error(f"Error creating PDF with xhtml2pdf: {pisa_status.err}")
+        logging.error("Error creating PDF with xhtml2pdf: %s", pisa_status.err)
         return
 
     logging.info("PDF created successfully in memory.")
 
     # Upload the in-memory PDF to GCS
     try:
-        logging.info(f"Initializing GCS client for upload to bucket '{BUCKET_NAME}'.")
+        logging.info(
+            "Initializing GCS client for upload to bucket '%s'.", BUCKET_NAME
+        )
         storage_client = storage.Client()
         bucket = storage_client.bucket(BUCKET_NAME)
 
@@ -123,18 +129,21 @@ async def save_generated_report_py(text: str):
         # Reset the stream's position to the beginning before uploading
         pdf_stream.seek(0)
 
-        logging.info(f"Uploading '{destination_blob_name}' to GCS.")
+        logging.info("Uploading '%s' to GCS.", destination_blob_name)
         blob.upload_from_file(pdf_stream, content_type="application/pdf")
 
         logging.info(
-            f"Successfully uploaded '{destination_blob_name}' to bucket '{BUCKET_NAME}'."
+            "Successfully uploaded '%s' to bucket '%s'.",
+            destination_blob_name,
+            BUCKET_NAME,
         )
         # Note: blob.public_url is only accessible if the object is publicly shared.
-        logging.info(f"Public URL (if bucket is public): {blob.public_url}")
+        logging.info("Public URL (if bucket is public): %s", blob.public_url)
 
     except Exception as e:
         logging.error(
-            f"An error occurred during GCS upload for '{destination_blob_name}'.",
+            "An error occurred during GCS upload for '%s'.",
+            destination_blob_name,
             exc_info=True,
         )
     finally:

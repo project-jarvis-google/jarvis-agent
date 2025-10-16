@@ -46,5 +46,5 @@ def extract_json_arr_str(gemini_output: str) -> str | None:
 
         return json_str
     except json.JSONDecodeError as e:
-        logging.error(f"Error: Failed to parse the extracted text as JSON. {e}")
+        logging.error("Error: Failed to parse the extracted text as JSON. %s", e)
         return None

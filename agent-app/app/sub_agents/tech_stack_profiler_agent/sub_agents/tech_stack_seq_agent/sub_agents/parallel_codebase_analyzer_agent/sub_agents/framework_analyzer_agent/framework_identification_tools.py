@@ -139,7 +139,9 @@ def identify_frameworks(tool_context: ToolContext) -> bool:
 
             # tool_context.state["filtered_framework_data"] = filtered_framework_data
 
-            # tool_context.state["filtered_framework_data_md_table"] = list_of_dict_to_md_table(filtered_framework_data, 50)
+            # tool_context.state["filtered_framework_data_md_table"] = list_of_dict_to_md_table(
+            #     filtered_framework_data, 50
+            # )
 
             for entry in os.listdir(secure_temp_repo_dir):
                 logging.info(entry)
@@ -147,22 +149,17 @@ def identify_frameworks(tool_context: ToolContext) -> bool:
             # logging.info("Temporary directory cleaned up in identify_frameworks.")
         except subprocess.CalledProcessError as e:
             logging.error("CalledProcessError Exception encountered !!!")
-            logging.error(f"Error occurred: {e}")
-            logging.error(f"Error output (stderr): {e.stderr}")
-            logging.error(f"Command that failed: {e.cmd}")
-            logging.error(f"Return code: {e.returncode}")
+            logging.error("Error occurred: %s", e)
+            logging.error("Error output (stderr): %s", e.stderr)
+            logging.error("Command that failed: %s", e.cmd)
+            logging.error("Return code: %s", e.returncode)
             return is_framework_identification_successful
         except subprocess.TimeoutExpired as e:
             logging.error("TimeoutExpired Exception encountered !!!")
-            logging.error(f"Error occurred: {e}")
-            logging.error(f"Error output (stdout): {e.stdout}")
-            logging.error(f"Error output (stderr): {e.stderr}")
-            logging.error(f"Command that failed: {e.cmd}")
+            logging.error("Error occurred: %s", e)
+            logging.error("Error output (stdout): %s", e.stdout)
+            logging.error("Error output (stderr): %s", e.stderr)
+            logging.error("Command that failed: %s", e.cmd)
             return is_framework_identification_successful
 
     return is_framework_identification_successful
-
-
-# FOR TESTING
-# if __name__ == "__main__":
-#     logging.info(identify_frameworks("/usr/local/google/home/cbangera/Projects/OtelAgent/otel-agent-gemini-cli-test"))
