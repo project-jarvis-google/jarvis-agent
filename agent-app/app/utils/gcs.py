@@ -33,14 +33,14 @@ def create_bucket_if_not_exists(bucket_name: str, project: str, location: str) -
         bucket_name = bucket_name[5:]
     try:
         storage_client.get_bucket(bucket_name)
-        logging.info(f"Bucket {bucket_name} already exists")
+        logging.info("Bucket %s already exists", bucket_name)
     except exceptions.NotFound:
         bucket = storage_client.create_bucket(
             bucket_name,
             location=location,
             project=project,
         )
-        logging.info(f"Created bucket {bucket.name} in {bucket.location}")
+        logging.info("Created bucket %s in %s", bucket.name, bucket.location)
 
 
 def upload_str_to_gcs_bucket(
@@ -62,13 +62,21 @@ def upload_str_to_gcs_bucket(
         bucket = storage_client.bucket(gcs_bucket_name)
         blob = bucket.blob(gcs_file_name)
         logging.info(
-            f"Uploading {file_path} to gs://{gcs_bucket_name}/{gcs_file_name}..."
+            "Uploading %s to gs://%s/%s...", file_path, gcs_bucket_name, gcs_file_name
         )
         blob.upload_from_filename(file_path, content_type=file_content_type)
-        logging.info(f"Successfully uploaded to gs://{gcs_bucket_name}/{gcs_file_name}")
+        logging.info(
+            "Successfully uploaded to gs://%s/%s", gcs_bucket_name, gcs_file_name
+        )
         return True
     except exceptions.GoogleAPICallError as e:
-        logging.error(f"Failed to upload {file_path} to GCS bucket {gcs_bucket_name}: {e}", exc_info=True)
+        logging.error(
+            "Failed to upload %s to GCS bucket %s: %s",
+            file_path,
+            gcs_bucket_name,
+            e,
+            exc_info=True,
+        )
         return False
 
 def upload_file_to_gcs(

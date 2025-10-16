@@ -152,17 +152,17 @@ def identify_databases(tool_context: ToolContext) -> bool:
             # logging.info("Temporary directory cleaned up in identify_databases.")
         except subprocess.CalledProcessError as e:
             logging.error("CalledProcessError Exception encountered !!!")
-            logging.error(f"Error occurred: {e}")
-            logging.error(f"Error output (stderr): {e.stderr}")
-            logging.error(f"Command that failed: {e.cmd}")
-            logging.error(f"Return code: {e.returncode}")
+            logging.error("Error occurred: %s", e)
+            logging.error("Error output (stderr): %s", e.stderr)
+            logging.error("Command that failed: %s", e.cmd)
+            logging.error("Return code: %s", e.returncode)
             return is_database_identification_successful
         except subprocess.TimeoutExpired as e:
             logging.error("TimeoutExpired Exception encountered !!!")
-            logging.error(f"Error occurred: {e}")
-            logging.error(f"Error output (stdout): {e.stdout}")
-            logging.error(f"Error output (stderr): {e.stderr}")
-            logging.error(f"Command that failed: {e.cmd}")
+            logging.error("Error occurred: %s", e)
+            logging.error("Error output (stdout): %s", e.stdout)
+            logging.error("Error output (stderr): %s", e.stderr)
+            logging.error("Command that failed: %s", e.cmd)
             return is_database_identification_successful
 
     return is_database_identification_successful
