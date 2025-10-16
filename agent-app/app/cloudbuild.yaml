@@ -5,7 +5,20 @@ steps:
     args:
       - '-c'
       - |
+        make -C .. lint
+    dir: 'agent-app/app'
+    id: 'lint'
+
+  - name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
         make -C .. backend-deploy
     dir: 'agent-app/app'
+    id: 'deploy-backend'
+    waitFor:
+      - lint
+
 options:
   logging: CLOUD_LOGGING_ONLY

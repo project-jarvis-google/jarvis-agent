@@ -5,7 +5,20 @@ steps:
     args:
       - '-c'
       - |
+        make -C ../.. lint
+    dir: 'agent-app/frontend2/vite-project'
+    id: 'lint'
+
+  - name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
         make -C ../.. frontend-deploy-new
     dir: 'agent-app/frontend2/vite-project'
+    id: 'deploy-frontend'
+    waitFor:
+      - lint
+
 options:
   logging: CLOUD_LOGGING_ONLY
