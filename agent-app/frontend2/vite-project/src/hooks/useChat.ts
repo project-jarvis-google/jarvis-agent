@@ -79,7 +79,7 @@ export function useChat(apiBaseUrl: string) {
   const [isLoading, setIsLoading] = useState(false);
 
   const abortControllerRef = useRef<AbortController | null>(null);
-  const isSubmittingRef = useRef(false); // 🚫 Prevent double submit
+  const isSubmittingRef = useRef(false); 
   const hasContentBeenStreamedRef = useRef(false);
 
   const createSession = async () => {
