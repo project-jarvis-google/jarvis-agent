@@ -12,11 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Agent App"""
+
 import os
-from google.api_core import exceptions
+
 import google.auth
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, File, HTTPException, UploadFile
 from google.adk.cli.fast_api import get_fast_api_app
+from google.api_core import exceptions
 from opentelemetry import trace
 from opentelemetry.sdk.trace import TracerProvider, export
 
@@ -25,7 +27,7 @@ from app.utils.tracing import CloudTraceLoggingSpanExporter
 
 _, project_id = google.auth.default()
 allow_origins = (
-    os.getenv("ALLOW_ORIGINS", "*").split(",") if os.getenv("ALLOW_ORIGINS") else "*"
+    os.getenv("ALLOW_ORIGINS", "*").split(",") if os.getenv("ALLOW_ORIGINS") else ["*"]
 )
 
 bucket_name = f"{project_id}-agent-app-logs-data"
@@ -60,6 +62,7 @@ app: FastAPI = get_fast_api_app(
 app.title = "jarvis-app"
 app.description = "API for interacting with the Agent jarvis-app"
 
+
 @app.post("/upload-file")
 async def upload_file_to_gcs_bucket(file: UploadFile = File(...)):
     """
@@ -79,11 +82,18 @@ async def upload_file_to_gcs_bucket(file: UploadFile = File(...)):
             file_obj=file.file,
             file_content_type=file.content_type,
         )
-        return {"gsutil_uri": bucket_uri + "/" + file.filename, "content_type": file.content_type}
+        return {
+            "gsutil_uri": bucket_uri + "/" + file.filename,
+            "content_type": file.content_type,
+        }
     except exceptions.GoogleAPICallError as e:
-        raise HTTPException(status_code=500, detail=f"File upload failed: {e.reason}") from e
+        raise HTTPException(
+            status_code=500, detail=f"File upload failed: {e.reason}"
+        ) from e
+
 
 # Main execution
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)

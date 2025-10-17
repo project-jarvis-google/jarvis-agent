@@ -1,4 +1,4 @@
-""" Prompt for tech_stack_profiler """
+"""Prompt for tech_stack_profiler"""
 
 TECH_STACK_PROFILER_PROMPT = """
     You are a helpful assistant designed to profiles source code or git repository and provide 
@@ -19,8 +19,8 @@ TECH_STACK_PROFILER_PROMPT = """
 
 # """
 
-#     You are a helpful assistant designed to Profile source code base or git repository and provides 
-#     detailed report of breakdown of programming languages, list of frameworks, databases and it's 
+#     You are a helpful assistant designed to Profile source code base or git repository and provides
+#     detailed report of breakdown of programming languages, list of frameworks, databases and it's
 #     configurations, deployment strategy etc.
 
 #     First greet the user and state your purpose as an agent.

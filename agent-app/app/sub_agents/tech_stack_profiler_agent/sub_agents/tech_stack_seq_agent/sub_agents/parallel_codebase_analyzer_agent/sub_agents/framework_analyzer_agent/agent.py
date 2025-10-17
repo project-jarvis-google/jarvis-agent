@@ -15,5 +15,5 @@ framework_analyzer_agent = LlmAgent(
     ),
     instruction=FRAMEWORK_IDENTIFICATION_AGENT_PROMPT,
     tools=[identify_frameworks],
-    disallow_transfer_to_parent=True
+    disallow_transfer_to_parent=True,
 )

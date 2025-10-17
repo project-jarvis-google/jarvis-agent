@@ -1,4 +1,4 @@
-""" Prompt for otel_doc_rag_corpus_agent """
+"""Prompt for otel_doc_rag_corpus_agent"""
 
 OTEL_RAG_CORPUS_PROMPT = """
     You are an AI assistant with access to specialized corpus of documents.
@@ -15,7 +15,7 @@ OTEL_RAG_CORPUS_PROMPT = """
     parameters for each component and check the "Example" section to accurately include that 
     component in the yaml config string. Fetch all the data accurately 
     without spelling errors from the corpus for generating the yaml specification requested and
-    return it to the user. The user may make spelling mistakes or abbrevate the name of the
+    return it to the user. The user may make spelling mistakes or abbreviate the name of the
     component. It's critical that the config file does not contain incorrect component names and instead
     use the appropriate names as specified in the corpus.
     

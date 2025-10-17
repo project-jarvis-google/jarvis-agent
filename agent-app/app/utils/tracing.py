@@ -105,8 +105,8 @@ class CloudTraceLoggingSpanExporter(CloudTraceSpanExporter):
         """
         if not self.storage_client.bucket(self.bucket_name).exists():
             logging.warning(
-                f"Bucket {self.bucket_name} not found. "
-                "Unable to store span attributes in GCS."
+                "Bucket %s not found. Unable to store span attributes in GCS.",
+                self.bucket_name,
             )
             return "GCS bucket not found"
 

@@ -16,5 +16,5 @@ database_analyzer_agent = LlmAgent(
     ),
     instruction=DATABASE_ANALYZER_PROMPT,
     tools=[identify_databases],
-    disallow_transfer_to_parent=True
+    disallow_transfer_to_parent=True,
 )

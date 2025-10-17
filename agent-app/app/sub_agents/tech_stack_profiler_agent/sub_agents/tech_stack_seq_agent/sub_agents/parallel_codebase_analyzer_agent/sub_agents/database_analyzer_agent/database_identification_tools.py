@@ -1,16 +1,20 @@
-import os
-import subprocess
 import json
 import logging
+import os
+import subprocess
+from typing import Any
 
-from app.utils.pandas_utils import list_of_dict_to_md_table
 from google.adk.tools import ToolContext
 
-from app.sub_agents.tech_stack_profiler_agent.utils.json_utils import filter_json_arr, extract_json_arr_str
+from app.sub_agents.tech_stack_profiler_agent.utils.json_utils import (
+    extract_json_arr_str,
+    filter_json_arr,
+)
+
 from .prompt import DATABASE_IDENTIFICATION_GEMINI_PROMPT
 
-def identify_databases(tool_context: ToolContext) -> bool:
 
+def identify_databases(tool_context: ToolContext) -> bool:
     # tool_context.state["filtered_database_data"] = "filtered_database_sample_data"
 
     # return True
@@ -19,21 +23,30 @@ def identify_databases(tool_context: ToolContext) -> bool:
 
     secure_temp_repo_dir = tool_context.state["secure_temp_repo_dir"]
 
-    logging.info("inside identify_databases secure_temp_repo_dir => %s", secure_temp_repo_dir)
+    logging.info(
+        "inside identify_databases secure_temp_repo_dir => %s", secure_temp_repo_dir
+    )
 
-    logging.info("in identify_databases 'secure_temp_repo_dir' in locals() => %s", ('secure_temp_repo_dir' in locals()))
-    logging.info("in identify_databases os.path.exists => %s", os.path.exists(secure_temp_repo_dir))
+    logging.info(
+        "in identify_databases 'secure_temp_repo_dir' in locals() => %s",
+        ("secure_temp_repo_dir" in locals()),
+    )
+    logging.info(
+        "in identify_databases os.path.exists => %s",
+        os.path.exists(secure_temp_repo_dir),
+    )
     for entry in os.listdir(secure_temp_repo_dir):
         logging.info(entry)
-    if 'secure_temp_repo_dir' in locals() and os.path.exists(secure_temp_repo_dir):
-        databases_json_str = []
+    if "secure_temp_repo_dir" in locals() and os.path.exists(secure_temp_repo_dir):
+        databases_json_str: str = "[]"
 
         try:
-
-            is_mock_enabled = os.getenv("ENABLE_DATABASE_IDENTIFICATION_MOCK_DATA", "False")
+            is_mock_enabled = os.getenv(
+                "ENABLE_DATABASE_IDENTIFICATION_MOCK_DATA", "False"
+            )
             if is_mock_enabled == "True":
                 logging.info("is_mock_enabled => %s", is_mock_enabled)
-                stdout = '''
+                stdout = """
                 ```json
                 [
                 {
@@ -83,35 +96,55 @@ def identify_databases(tool_context: ToolContext) -> bool:
                 }
                 ]
                 ```
-                '''
-                stderr = '''
+                """
+                stderr = """
 
-                '''
+                """
 
             else:
-                gemini_env = os.environ.copy()  
-                gemini_env["GEMINI_API_KEY"] = os.getenv("GEMINI_API_KEY")
-                args = "-p " + "\"" + DATABASE_IDENTIFICATION_GEMINI_PROMPT + "\""
-                result = subprocess.run(["/usr/local/bin/gemini", args], timeout=120, env=gemini_env, cwd=secure_temp_repo_dir, capture_output=True, text=True, check=True)
+                gemini_env = os.environ.copy()
+                gemini_env["GEMINI_API_KEY"] = os.getenv("GEMINI_API_KEY", "")
+                args = "-p " + '"' + DATABASE_IDENTIFICATION_GEMINI_PROMPT + '"'
+                result = subprocess.run(
+                    ["/usr/local/bin/gemini", args],
+                    timeout=120,
+                    env=gemini_env,
+                    cwd=secure_temp_repo_dir,
+                    capture_output=True,
+                    text=True,
+                    check=True,
+                )
                 stderr = result.stderr
                 stdout = result.stdout
 
             logging.info("result.stderr => %s", stderr)
             logging.info("result.stdout => %s", stdout)
 
-            databases_json_str = extract_json_arr_str(stdout)
+            extracted_json = extract_json_arr_str(stdout)
+            if extracted_json:
+                databases_json_str = extracted_json
+
             is_database_identification_successful = True
 
             # tool_context.state["databases_json_str"] = databases_json_str
 
-            databases_json = json.loads(databases_json_str)
+            databases_json: list[Any] = json.loads(databases_json_str)
             desired_databases_attributes = ["name", "configurations"]
-            
-            filtered_database_data = filter_json_arr(databases_json, desired_databases_attributes)
 
-            filtered_database_data_final_str = '\n\n'.join(['\n'.join(map(str, inner_list)) for inner_list in filtered_database_data])
+            filtered_database_data = filter_json_arr(
+                databases_json, desired_databases_attributes
+            )
 
-            tool_context.state["filtered_database_data_final_str"] = filtered_database_data_final_str
+            filtered_database_data_final_str = "\n\n".join(
+                [
+                    "\n".join(map(str, inner_list))
+                    for inner_list in filtered_database_data
+                ]
+            )
+
+            tool_context.state["filtered_database_data_final_str"] = (
+                filtered_database_data_final_str
+            )
 
             # tool_context.state["filtered_database_data"] = filtered_database_data
 
@@ -123,21 +156,17 @@ def identify_databases(tool_context: ToolContext) -> bool:
             # logging.info("Temporary directory cleaned up in identify_databases.")
         except subprocess.CalledProcessError as e:
             logging.error("CalledProcessError Exception encountered !!!")
-            logging.error(f"Error occurred: {e}")
-            logging.error(f"Error output (stderr): {e.stderr}")
-            logging.error(f"Command that failed: {e.cmd}")
-            logging.error(f"Return code: {e.returncode}")
+            logging.error("Error occurred: %s", e)
+            logging.error("Error output (stderr): %s", e.stderr)
+            logging.error("Command that failed: %s", e.cmd)
+            logging.error("Return code: %s", e.returncode)
             return is_database_identification_successful
         except subprocess.TimeoutExpired as e:
             logging.error("TimeoutExpired Exception encountered !!!")
-            logging.error(f"Error occurred: {e}")
-            logging.error(f"Error output (stdout): {e.stdout}")
-            logging.error(f"Error output (stderr): {e.stderr}")
-            logging.error(f"Command that failed: {e.cmd}")
+            logging.error("Error occurred: %s", e)
+            logging.error("Error output (stdout): %s", e.stdout)
+            logging.error("Error output (stderr): %s", e.stderr)
+            logging.error("Command that failed: %s", e.cmd)
             return is_database_identification_successful
 
     return is_database_identification_successful
-
-#FOR TESTING
-# if __name__ == "__main__":
-#     logging.info(identify_databases("/usr/local/google/home/cbangera/Projects/OtelAgent/otel-agent-gemini-cli-test"))

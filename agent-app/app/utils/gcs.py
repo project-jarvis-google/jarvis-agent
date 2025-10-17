@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import IO
 import logging
+from typing import IO
 
 import google.cloud.storage as storage
 from google.api_core import exceptions
@@ -33,16 +33,19 @@ def create_bucket_if_not_exists(bucket_name: str, project: str, location: str) -
         bucket_name = bucket_name[5:]
     try:
         storage_client.get_bucket(bucket_name)
-        logging.info(f"Bucket {bucket_name} already exists")
+        logging.info("Bucket %s already exists", bucket_name)
     except exceptions.NotFound:
         bucket = storage_client.create_bucket(
             bucket_name,
             location=location,
             project=project,
         )
-        logging.info(f"Created bucket {bucket.name} in {bucket.location}")
+        logging.info("Created bucket %s in %s", bucket.name, bucket.location)
 
-def upload_str_to_gcs_bucket(gcs_bucket_name: str, gcs_file_name: str, file_path: str, file_content_type: str) -> bool:
+
+def upload_str_to_gcs_bucket(
+    gcs_bucket_name: str, gcs_file_name: str, file_path: str, file_content_type: str
+) -> bool:
     """Uploads a file to a Google Cloud Storage bucket.
 
     Args:
@@ -58,13 +61,24 @@ def upload_str_to_gcs_bucket(gcs_bucket_name: str, gcs_file_name: str, file_path
         storage_client = storage.Client()
         bucket = storage_client.bucket(gcs_bucket_name)
         blob = bucket.blob(gcs_file_name)
-        logging.info(f"Uploading {file_path} to gs://{gcs_bucket_name}/{gcs_file_name}...")
+        logging.info(
+            "Uploading %s to gs://%s/%s...", file_path, gcs_bucket_name, gcs_file_name
+        )
         blob.upload_from_filename(file_path, content_type=file_content_type)
-        logging.info(f"Successfully uploaded to gs://{gcs_bucket_name}/{gcs_file_name}")
+        logging.info(
+            "Successfully uploaded to gs://%s/%s", gcs_bucket_name, gcs_file_name
+        )
         return True
     except exceptions.GoogleAPICallError as e:
-        logging.error(f"Failed to upload {file_path} to GCS bucket {gcs_bucket_name}: {e}", exc_info=True)
+        logging.error(
+            "Failed to upload %s to GCS bucket %s: %s",
+            file_path,
+            gcs_bucket_name,
+            e,
+            exc_info=True,
+        )
         return False
+
 
 def upload_file_to_gcs(
     gcs_bucket_name: str,
@@ -87,9 +101,22 @@ def upload_file_to_gcs(
         storage_client = storage.Client()
         bucket = storage_client.bucket(gcs_bucket_name)
         blob = bucket.blob(gcs_file_name)
-        logging.info(f"Uploading {gcs_file_name} to gs://{gcs_bucket_name}/{gcs_file_name}...")
+        logging.info(
+            "Uploading %s to gs://%s/%s...",
+            gcs_file_name,
+            gcs_bucket_name,
+            gcs_file_name,
+        )
         blob.upload_from_file(file_obj, content_type=file_content_type)
-        logging.info(f"Successfully uploaded to gs://{gcs_bucket_name}/{gcs_file_name}")
+        logging.info(
+            "Successfully uploaded to gs://%s/%s", gcs_bucket_name, gcs_file_name
+        )
     except exceptions.GoogleAPICallError as e:
-        logging.error(f"Failed to upload {gcs_file_name} to GCS bucket {gcs_bucket_name}: {e}", exc_info=True)
+        logging.error(
+            "Failed to upload %s to GCS bucket %s: %s",
+            gcs_file_name,
+            gcs_bucket_name,
+            e,
+            exc_info=True,
+        )
         raise
