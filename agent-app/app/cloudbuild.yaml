@@ -5,11 +5,19 @@ steps:
     args:
       - '-c'
       - |
-        uv --version
         make install
+        make lint-codespell
+    dir: 'agent-app'
+    id: 'codespell-check'
+
+  - name: 'ghcr.io/astral-sh/uv:debian'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
         make lint-backend
     dir: 'agent-app'
-    id: 'lint'
+    id: 'backend-lint-check'
 
   - name: 'gcr.io/cloud-builders/gcloud'
     entrypoint: 'bash'
@@ -20,7 +28,8 @@ steps:
     dir: 'agent-app/app'
     id: 'deploy-backend'
     waitFor:
-      - lint
+      - codespell-check
+      - backend-lint-check
 
 options:
   logging: CLOUD_LOGGING_ONLY

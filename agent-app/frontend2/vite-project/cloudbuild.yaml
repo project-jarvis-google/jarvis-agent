@@ -5,11 +5,19 @@ steps:
     args:
       - '-c'
       - |
-        uv --version
         make install
+        make lint-codespell
+    dir: 'agent-app'
+    id: 'codespell-check'
+
+  - name: 'node'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
         make lint-frontend
     dir: 'agent-app'
-    id: 'lint'
+    id: 'frontend-lint-check'
 
   - name: 'gcr.io/cloud-builders/gcloud'
     entrypoint: 'bash'
@@ -20,7 +28,8 @@ steps:
     dir: 'agent-app/frontend2/vite-project'
     id: 'deploy-frontend'
     waitFor:
-      - lint
+      - codespell-check
+      - frontend-lint-check
 
 options:
   logging: CLOUD_LOGGING_ONLY
