@@ -91,7 +91,7 @@ exclude = [".venv"]
 
 [tool.codespell]
 ignore-words-list = "rouge"
-skip = "./locust_env/*,uv.lock,.venv,./frontend,**/*.ipynb,**/package.json,**/package-lock.json,**/node_modules/**"
+skip = "./locust_env/*,uv.lock,.venv,./frontend,**/*.ipynb,**/package.json,**/package-lock.json,**/node_modules/**,./frontend2/vite-project/dist/**"
 
 
 [build-system]

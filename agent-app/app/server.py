@@ -62,6 +62,7 @@ app: FastAPI = get_fast_api_app(
 app.title = "jarvis-app"
 app.description = "API for interacting with the Agent jarvis-app"
 
+
 @app.post("/upload-file")
 async def upload_file_to_gcs_bucket(file: UploadFile = File(...)):
     """
@@ -81,7 +82,10 @@ async def upload_file_to_gcs_bucket(file: UploadFile = File(...)):
             file_obj=file.file,
             file_content_type=file.content_type,
         )
-        return {"gsutil_uri": bucket_uri + "/" + file.filename, "content_type": file.content_type}
+        return {
+            "gsutil_uri": bucket_uri + "/" + file.filename,
+            "content_type": file.content_type,
+        }
     except exceptions.GoogleAPICallError as e:
         raise HTTPException(
             status_code=500, detail=f"File upload failed: {e.reason}"
