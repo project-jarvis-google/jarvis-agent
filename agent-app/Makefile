@@ -1,6 +1,13 @@
+# Version variables
+NODE_VERSION=20
+UV_VERSION=0.6.12
+NVM_VERSION=v0.39.3
+
 # Install dependencies using uv package manager
 install:
-	@command -v uv >/dev/null 2>&1 || { echo "uv is not installed. Installing uv..."; curl -LsSf https://astral.sh/uv/0.6.12/install.sh | sh; source $HOME/.local/bin/env; }
+	@command -v uv >/dev/null 2>&1 || { echo "uv is not installed. Installing uv..."; curl -LsSf https://astral.sh/uv/$(UV_VERSION)/install.sh | sh; source $HOME/.local/bin/env; }
+	@command -v npm >/dev/null 2>&1 || { echo "npm is not installed. Installing nvm and Node.js v$(NODE_VERSION)..."; curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/$(NVM_VERSION)/install.sh | bash; export NVM_DIR="$$HOME/.nvm"; [ -s "$$NVM_DIR/nvm.sh" ] && . "$$NVM_DIR/nvm.sh"; nvm install $(NODE_VERSION); nvm use $(NODE_VERSION); }
+
 	uv sync --dev --extra jupyter && npm --prefix frontend install
 
 # Start the ADK API server and React frontend development server simultaneously
@@ -86,7 +93,7 @@ lint:
 	uv run mypy .
 
 checks-github:
-	@command -v uv >/dev/null 2>&1 || { echo "uv is not installed. Installing uv..."; curl -LsSf https://astral.sh/uv/0.6.12/install.sh | sh; }
+	@command -v uv >/dev/null 2>&1 || { echo "uv is not installed. Installing uv..."; curl -LsSf https://astral.sh/uv/$(UV_VERSION)/install.sh | sh; }
 	uv sync --dev --extra jupyter && npm --prefix frontend install
 
 checks-pylint:
