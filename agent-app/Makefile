@@ -1,9 +1,9 @@
-.PHONY: install dev dev-backend dev-frontend playground backend-deploy frontend-deploy frontend-deploy-new local-backend setup-dev-env test lint lint-frontend lint-backend checks-github checks-pylint
+.PHONY: install dev dev-backend dev-frontend playground backend-deploy frontend-deploy frontend-deploy-new local-backend setup-dev-env test lint lint-codespell lint-frontend lint-backend checks-github checks-pylint
 
 # Install dependencies using uv package manager
 install:
 	@command -v uv >/dev/null 2>&1 || { echo "uv is not installed. Installing uv..."; curl -LsSf https://astral.sh/uv/0.6.12/install.sh | sh; }
-	uv sync --dev --extra jupyter --extra lint && npm --prefix frontend install
+	uv sync --dev --extra jupyter --extra lint && npm --prefix frontend2/vite-project install
 
 # Start the ADK API server and React frontend development server simultaneously
 dev:
@@ -81,14 +81,16 @@ test:
 	uv run pytest tests/unit && uv run pytest tests/integration
 
 # Run code quality checks (codespell, ruff, mypy)
-lint: lint-frontend lint-backend
+lint: lint-codespell lint-frontend lint-backend
+
+lint-codespell:
+	uv run codespell
 
 lint-frontend:
-	uv run codespell
+	npm --prefix frontend2/vite-project install
 	npm --prefix frontend2/vite-project run lint
 
 lint-backend:
-	uv run codespell
 	uv run ruff check . --diff
 	uv run ruff format . --check --diff
 	uv run mypy .
