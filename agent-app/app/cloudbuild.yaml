@@ -6,6 +6,7 @@ steps:
       - '-c'
       - |
         uv --version
+        make install
         make lint
     dir: 'agent-app'
     id: 'lint'
