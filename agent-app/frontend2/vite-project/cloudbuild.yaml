@@ -7,7 +7,7 @@ steps:
       - |
         uv --version
         make install
-        make lint
+        make lint-frontend
     dir: 'agent-app'
     id: 'lint'
 
