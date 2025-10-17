@@ -24,7 +24,7 @@ steps:
     args:
       - '-c'
       - |
-        [[ "$BRANCH_NAME" == "main" ]] && make -C .. backend-deploy
+        [[ "$BRANCH_NAME" == "main" ]] && make -C .. backend-deploy || echo "Skipping deployment on non-main branch" && exit 0
     dir: 'agent-app/app'
     id: 'deploy-backend'
     waitFor:
