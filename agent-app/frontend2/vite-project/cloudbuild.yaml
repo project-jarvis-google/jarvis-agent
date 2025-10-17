@@ -25,7 +25,7 @@ steps:
     args:
       - '-c'
       - |
-        make -C ../.. frontend-deploy-new
+        [[ "$BRANCH_NAME" == "main" ]] && make -C ../.. frontend-deploy-new
     dir: 'agent-app/frontend2/vite-project'
     id: 'deploy-frontend'
     waitFor:
