@@ -18,6 +18,7 @@ steps:
         make lint-frontend
     dir: 'agent-app'
     id: 'frontend-lint-check'
+    waitFor: ['-']
 
   - name: 'gcr.io/cloud-builders/gcloud'
     entrypoint: 'bash'
