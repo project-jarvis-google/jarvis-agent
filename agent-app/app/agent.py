@@ -40,9 +40,9 @@ from .sub_agents.strategy_recommender_agent import strategy_recommender_agent
 from .sub_agents.tech_stack_profiler_agent import tech_stack_profiler
 from .tools import (
     transfer_to_capability_mapper_agent_tool,
+    transfer_to_detailed_architecture_design_agent_tool,
     transfer_to_discovery_agent_tool,
     transfer_to_strategy_recommender_agent_tool,
-    transfer_to_detailed_architecture_design_agent_tool,
 )
 
 root_agent = LlmAgent(
@@ -54,10 +54,10 @@ root_agent = LlmAgent(
         AgentTool(agent=mosaic_rag_agent_presales),
         AgentTool(agent=tech_stack_profiler),
         AgentTool(agent=infra_scanner_agent),
-        transfer_to_discovery_agent_tool,
         transfer_to_capability_mapper_agent_tool,
-        transfer_to_strategy_recommender_agent_tool,
         transfer_to_detailed_architecture_design_agent_tool,
+        transfer_to_discovery_agent_tool,
+        transfer_to_strategy_recommender_agent_tool,
         AgentTool(agent=compliance_agent),
         AgentTool(agent=otel_coordinator),
     ],
