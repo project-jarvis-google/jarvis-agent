@@ -14,5 +14,6 @@ ROOT_AGENT_PROMPT = """
       7. If user asks for any kind of infrastructure scanning, analyzing and categorizing infrastructure components, mapping on-premises reesources to Google Cloud services and generating migration insights and cost estimates, please call tool 'infra_scanner_agent' to transfer control to infrastructure scanner sub-agent.
       8. If the user asks any questions about Opentelemetry framework or asks to create an opentelemetry collector starter pack with configurations based on user input or if the user requests for a java instrumented application,
          call the "otel_coordinator" sub-agent.
-      9. else use 'google_search_dummy_agent'
+      9. If the user asks for assistance in creating a Detailed Architecture Design based on some conceptual ideas or thoughts to help plan the implementation then call the 'detailed_architecture_design_agent' sub-agent.
+      10. else use 'google_search_dummy_agent'
     """
