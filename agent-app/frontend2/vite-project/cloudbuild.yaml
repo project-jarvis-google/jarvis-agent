@@ -1,4 +1,3 @@
-# Create a new cloudbuild.yaml file which can help run the make command make backend-deploy that can be invoked from the app directory whenever there are any changes to the sb_agents folder here 
 steps:
   - name: 'ghcr.io/astral-sh/uv:debian'
     entrypoint: 'bash'
