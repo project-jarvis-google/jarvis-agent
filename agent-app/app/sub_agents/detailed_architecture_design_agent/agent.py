@@ -6,7 +6,8 @@ to produce a comprehensive architecture design.
 """
 
 from google.adk.agents import Agent
-from google.adk.tools.agent_tool import AgentTool
+from google.adk.planners import BuiltInPlanner
+from google.genai import types
 
 from .config import MODEL
 from .prompt import DETAILED_ARCHITECTURE_DESIGN_AGENT_PROMPT
@@ -25,7 +26,10 @@ detailed_architecture_design_agent = Agent(
         By orchestrating this entire workflow, the Detailed Architecture Parent Agent streamlines the creation of a complete and implementable architecture, from high-level concepts to detailed infrastructure and service design.
     """,
     instruction=DETAILED_ARCHITECTURE_DESIGN_AGENT_PROMPT,
-    tools=[
-        AgentTool(agent=component_design_agent),
-    ],
+    planner=BuiltInPlanner(
+          thinking_config=types.ThinkingConfig(
+              thinking_budget=2048
+          )
+      ),
+      sub_agents=[component_design_agent],
 )
