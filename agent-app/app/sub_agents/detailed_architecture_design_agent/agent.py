@@ -11,7 +11,10 @@ from google.genai import types
 
 from .config import MODEL
 from .prompt import DETAILED_ARCHITECTURE_DESIGN_AGENT_PROMPT
+from .sub_agents.api_apec_agent import api_spec_agent
 from .sub_agents.component_design_agent import component_design_agent
+from .sub_agents.deployment_architect_agent import deployment_architect_agent
+from .sub_agents.dfd_agent import dfd_agent
 
 detailed_architecture_design_agent = Agent(
     name="detailed_architecture_design_agent",
@@ -26,10 +29,11 @@ detailed_architecture_design_agent = Agent(
         By orchestrating this entire workflow, the Detailed Architecture Parent Agent streamlines the creation of a complete and implementable architecture, from high-level concepts to detailed infrastructure and service design.
     """,
     instruction=DETAILED_ARCHITECTURE_DESIGN_AGENT_PROMPT,
-    planner=BuiltInPlanner(
-          thinking_config=types.ThinkingConfig(
-              thinking_budget=2048
-          )
-      ),
-      sub_agents=[component_design_agent],
+    planner=BuiltInPlanner(thinking_config=types.ThinkingConfig(thinking_budget=2048)),
+    sub_agents=[
+        component_design_agent,
+        api_spec_agent,
+        deployment_architect_agent,
+        dfd_agent,
+    ],
 )
