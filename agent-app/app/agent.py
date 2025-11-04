@@ -35,6 +35,7 @@ from .sub_agents.otel_agent import otel_coordinator
 from .sub_agents.recommendation_agent import recommendation_agent
 from .sub_agents.strategy_recommender_agent import strategy_recommender_agent
 from .sub_agents.tech_stack_profiler_agent import tech_stack_profiler
+from .sub_agents.business_logic_extraction_agent import business_logic_extraction_agent
 from .tools import (
     transfer_to_capability_mapper_agent_tool,
     transfer_to_discovery_agent_tool,
@@ -55,6 +56,7 @@ root_agent = LlmAgent(
         transfer_to_strategy_recommender_agent_tool,
         AgentTool(agent=compliance_agent),
         AgentTool(agent=otel_coordinator),
+        AgentTool(agent=business_logic_extraction_agent),
     ],
     # -- This is the key step to link the agents ---
     sub_agents=[
