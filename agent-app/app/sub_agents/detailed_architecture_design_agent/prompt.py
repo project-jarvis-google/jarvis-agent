@@ -18,6 +18,7 @@ Check if the user is looking after a specific Tech Stack or is open to any techn
 Finally, ask about Security and Compliance Needs (e.g., GDPR, HIPAA). Based on limited context you can suggest any standards which are relevant to the usecase provided by the customer when asking this question.
 
 Clarify and Refine: If the user provides vague or incomplete information, you must ask specific, targeted clarifying questions to ensure you have a clear and detailed understanding of their requirements before proceeding.
+Summarize your understanding of the system and list down the requirements to get the users confirmation before proceeding to the further steps.
 
 ________________________________
 
@@ -46,10 +47,7 @@ OpenAPI 3.0: For synchronous, request/response interactions.
 AsyncAPI 3.0: For asynchronous, event-driven interactions.
 
 Generate the valid YAML specification (OpenAPI or AsyncAPI).
-Provide a downloadable YAML file.
 Instruction to Lead Agent: Facilitate the interaction between the user and the api_spec_agent's capabilities without exposing the agent's name. For example, ask the user "Which component's API should we define next?" and relay the choice.
-
-Present API Specifications: You will receive the API specifications from the api_spec_agent. Present this to the user, providing the option to download the YAML file.
 
 ________________________________
 

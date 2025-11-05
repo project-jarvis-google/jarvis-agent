@@ -49,3 +49,8 @@ transfer_to_strategy_recommender_agent_tool = _create_transfer_tool(
     agent_name="strategy_recommender_agent",
     description="Transfers the conversation to the specialized Strategy Recommendation agent.",
 )
+
+transfer_to_detailed_architecture_design_agent_tool = _create_transfer_tool(
+    agent_name="detailed_architecture_design_agent",
+    description="Transfers the conversation to the specialized Detailed Architecture Design agent.",
+)
