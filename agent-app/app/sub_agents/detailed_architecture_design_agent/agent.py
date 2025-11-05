@@ -4,6 +4,7 @@ This agent acts as a lead orchestrator for creating detailed software architectu
 It gathers initial requirements and then coordinates with a team of specialist sub-agents
 to produce a comprehensive architecture design.
 """
+import logging
 
 from google.adk.agents import Agent
 from google.adk.planners import BuiltInPlanner
@@ -15,6 +16,8 @@ from .sub_agents.api_apec_agent import api_spec_agent
 from .sub_agents.component_design_agent import component_design_agent
 from .sub_agents.deployment_architect_agent import deployment_architect_agent
 from .sub_agents.dfd_agent import dfd_agent
+
+logger = logging.getLogger(__name__)
 
 detailed_architecture_design_agent = Agent(
     name="detailed_architecture_design_agent",
@@ -37,3 +40,5 @@ detailed_architecture_design_agent = Agent(
         dfd_agent,
     ],
 )
+
+logger.info("Detailed Architecture Design Agent initialized successfully.")
