@@ -37,11 +37,11 @@ DFD PRINCIPLES & DIAGRAMMING STANDARDS (PlantUML): You MUST ensure the generated
         *   **NO** direct data flows between External Entities.
         *   **NO** direct data flows from an External Entity to a Data Store or vice-versa; data must pass through a Process (Component).
 6.  **Comprehensive Data Flow Labeling:** Every arrow representing a data flow MUST be clearly and concisely labeled to indicate the type of data being transferred. Examples: "User Credentials," "New Order Details," "Payment Token," "Session ID," "Product Catalog Update."
-7.  **Explicit and Labeled Data Stores:** All significant data stores MUST be explicitly represented and clearly labeled with descriptive names using the `ContainerDb()` macro. Examples: "User DB," "Order DB," "Product Cache," "Audit Logs."
+7.  **Explicit and Labeled Data Stores:** All significant data stores MUST be explicitly represented and clearly labeled with descriptive names using the `ContainerDb()` macro. Examples: "User DB," "Order DB," "Product Cache," "Audit Logs.", Additionally, add some details on the type of data that may be residing in such stores.
 8.  **PII/Sensitive Data Identification and Flagging:**
     *   **Identify:** Based on NFRs and common knowledge, identify data flows and data stores containing PII or sensitive data.
     *   **Visual Flagging on Flows:** Data flows carrying PII or sensitive data MUST be visually distinguished using PlantUML arrow styling (e.g., color `#red` or `[red]`, line style `bold`) AND by adding a stereotype like `<<PII>>` or `<<Sensitive>>` to the flow label. Example: `AuthService -[#red,bold]-> UserDB : User Credentials <<PII>>`
-    *   **Visual Flagging on Stores:** Visually mark Data Stores containing PII or sensitive data by adding a stereotype to the label within the C4 macro. Example: `ContainerDb(userDB, "User DB <<PII>>", "PostgreSQL")`
+    *   **Visual Flagging on Stores:** Visually mark Data Stores containing PII or sensitive data by adding a stereotype to the label within the C4 macro and using indicative colors for the respective macro if allowed. Example: `ContainerDb(userDB, "User DB <<PII>>", "PostgreSQL")`.
 9.  **PlantUML Syntax:** Use standard PlantUML syntax for relationships (arrows) and styling, even though nodes are defined with C4 macros.
 
 TASK & EXECUTION WORKFLOW: You MUST follow this exact sequence:
@@ -55,6 +55,7 @@ Step 1: Context Analysis and Data Flow Identification
 
 Step 2: DFD Design & PlantUML Code Generation Request
 
+*   Notify the user about the high level dataflow that we are planning and paralelly start the plantuml diagramming process as mentioned below.
 *   Based on the analysis, design the Level 1 DFD internally.
 *   Formulate the DFD design requirements. Call the `plantuml_diagramming_agent` with these requirements to generate the PlantUML diagram code. You must pass sufficient details for the `plantuml_diagramming_agent` to produce code compliant with the "DFD PRINCIPLES & DIAGRAMMING STANDARDS", including:
     *   The elements to be included (External Entities, Processes/Components, Data Stores) using appropriate C4 macros.
