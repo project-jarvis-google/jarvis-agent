@@ -21,16 +21,12 @@ from app.config import MODEL
 try:
     from .prompt import AGENT_INSTRUCTION
     from .tools import (
-        compile_questions_to_sheet_tool,
         create_final_summary_pdf_tool,
         google_search_tool,
-        read_and_update_sheet_tool,
     )
 
     ALL_TOOLS: list[Callable[..., Any] | BaseTool | BaseToolset] = [
         google_search_tool,
-        compile_questions_to_sheet_tool,
-        read_and_update_sheet_tool,
         create_final_summary_pdf_tool,
     ]
 
@@ -75,7 +71,14 @@ def load_knowledge_base():
 # --- "Memorize" the knowledge at startup ---
 KNOWLEDGE_INJECTION = load_knowledge_base()
 FINAL_INSTRUCTION = (
-    f"{AGENT_INSTRUCTION}\n\n--- PRE-LOADED KNOWLEDGE BASE ---\n{KNOWLEDGE_INJECTION}"
+    f"""{AGENT_INSTRUCTION}\n\n
+        --- PRE-LOADED KNOWLEDGE BASE ---\n
+        <GROUNDING_SOURCE_TRUTH>
+            IMPORTANT: The following content is your ONLY acceptable agenda. 
+            You are prohibited from skipping any bullet point listed within these sections.
+            {KNOWLEDGE_INJECTION}
+        </GROUNDING_SOURCE_TRUTH>
+    """
 )
 
 # --- Define the Main Discovery Agent ---
