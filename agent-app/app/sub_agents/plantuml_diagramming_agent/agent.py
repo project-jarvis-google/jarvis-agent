@@ -1,6 +1,7 @@
 """
 Defines the plantuml diagramming agent which helps generating plantuml diagrams based on the user query.
 """
+
 import os
 
 from google.adk.agents import Agent
@@ -33,13 +34,11 @@ def get_plantuml_diagramming_prompt() -> str:
                     pass
     return prompt.format(**injections)
 
+
 plantuml_diagramming_agent = Agent(
     name="plantuml_diagramming_agent",
     model=MODEL,
     instruction=get_plantuml_diagramming_prompt(),
-    tools=[
-        google_search,
-        url_context
-    ],
+    tools=[google_search, url_context],
     planner=PlanReActPlanner(),
 )
