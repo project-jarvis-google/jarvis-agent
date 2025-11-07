@@ -120,27 +120,9 @@ def identify_databases(tool_context: ToolContext) -> bool:
             logging.info("result.stderr => %s", stderr)
             logging.info("result.stdout => %s", stdout)
 
-            extracted_json = extract_json_arr_str(stdout)
-            if extracted_json:
-                databases_json_str = extracted_json
+            filtered_database_data_final_str= filter_and_format_data(stdout)
 
             is_database_identification_successful = True
-
-            # tool_context.state["databases_json_str"] = databases_json_str
-
-            databases_json: list[Any] = json.loads(databases_json_str)
-            desired_databases_attributes = ["name", "configurations"]
-
-            filtered_database_data = filter_json_arr(
-                databases_json, desired_databases_attributes
-            )
-
-            filtered_database_data_final_str = "\n\n".join(
-                [
-                    "\n".join(map(str, inner_list))
-                    for inner_list in filtered_database_data
-                ]
-            )
 
             tool_context.state["filtered_database_data_final_str"] = (
                 filtered_database_data_final_str
@@ -170,3 +152,32 @@ def identify_databases(tool_context: ToolContext) -> bool:
             return is_database_identification_successful
 
     return is_database_identification_successful
+
+def filter_and_format_data(stdout: str) -> str:
+
+    filtered_database_data_final_str = "NO DATA FOUND"
+
+    try:
+        extracted_json = extract_json_arr_str(stdout)
+        if extracted_json:
+            databases_json_str = extracted_json
+
+        # tool_context.state["databases_json_str"] = databases_json_str
+
+        databases_json: list[Any] = json.loads(databases_json_str)
+        desired_databases_attributes = ["name", "configurations"]
+
+        filtered_database_data = filter_json_arr(
+            databases_json, desired_databases_attributes
+        )
+
+        filtered_database_data_final_str = "\n\n".join(
+            [
+                "\n".join(map(str, inner_list))
+                for inner_list in filtered_database_data
+            ]
+        )
+    except Exception as e:
+        logging.error(f"Exception encountered !!! {e}")
+
+    return filtered_database_data_final_str
