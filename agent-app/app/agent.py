@@ -65,6 +65,6 @@ root_agent = LlmAgent(
         recommendation_agent,
         capability_mapper_agent,
         strategy_recommender_agent,
-        detailed_architecture_design_agent
+        detailed_architecture_design_agent,
     ],
 )
