@@ -14,6 +14,7 @@ def fetch_source_code_from_git_repo(
 ) -> bool:
     sourceCodeStored = False
     custom_temp_path = os.getenv("CUSTOM_TEMP_PATH")
+    secure_temp_repo_dir = None
     logging.info("git_repo_url => %s", git_repo_url)
     logging.info("access_token => %s", access_token)
     try:
@@ -26,18 +27,11 @@ def fetch_source_code_from_git_repo(
         logging.info("url_with_token => %s", url_with_token)
         Repo.clone_from(url_with_token, secure_temp_repo_dir)
     except Exception as e:
-        logging.error("Exception occurred: %s", e)
-        logging.error(
-            "except 'secure_temp_repo_dir' in locals() => %s",
-            ("secure_temp_repo_dir" in locals()),
-        )
-        logging.error(
-            "except os.path.exists => %s", os.path.exists(secure_temp_repo_dir)
-        )
-        if "secure_temp_repo_dir" in locals() and os.path.exists(secure_temp_repo_dir):
+        logging.error("Exception occurred during source code fetching: %s", e)
+        if secure_temp_repo_dir and os.path.exists(secure_temp_repo_dir):
             shutil.rmtree(secure_temp_repo_dir)
             logging.info("Temporary directory cleaned up due to exception.")
-        return sourceCodeStored
+        raise RuntimeError(f"Failed to fetch source code: {e}") from e
 
     logging.info(
         "outside 'secure_temp_repo_dir' in locals() => %s",
@@ -52,6 +46,12 @@ def fetch_source_code_from_git_repo(
 
     sourceCodeStored = True
     tool_context.state["secure_temp_repo_dir"] = secure_temp_repo_dir
+
+    print("#####################")
+    print(custom_temp_path)
+    print("this is completed")
+    print(sourceCodeStored)
+    print("#####################")
 
     return sourceCodeStored
 

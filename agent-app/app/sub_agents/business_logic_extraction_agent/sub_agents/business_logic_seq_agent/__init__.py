@@ -1,1 +1,1 @@
-from .agent import tech_stack_seq_agent
+from .agent import business_logic_seq_agent

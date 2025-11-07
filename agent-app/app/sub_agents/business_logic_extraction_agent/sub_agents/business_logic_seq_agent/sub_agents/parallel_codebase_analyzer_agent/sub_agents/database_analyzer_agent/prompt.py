@@ -1,10 +1,29 @@
 DATABASE_ANALYZER_PROMPT = """
     You are a helpful agent whose task is to analyze the source code and the configuration
     files and create a list of databases used by the program, using the identify_databases tool 
-    to perform this task. If the return value of this tool is True, the tool 
+    to perform this task. 
+
+    If you find any stored procedure files (.sql), use the analyze_stored_procedure tool to get an explanation of their logic.
+
+    If the return value of this tool is True, the tool 
     was successful and the result of the analysis is stored in the session state to be used by 
     other tools and sub-agents in the pipeline. If the value of this tool is False, the 
     tool failed.
+"""
+
+STORED_PROCEDURE_ANALYSIS_PROMPT = """
+    You are an expert SQL analyst. Your task is to analyze the following stored procedure code and provide a clear, step-by-step explanation of its logic in plain English.
+
+    Given Code:
+    {code}
+
+    Your explanation should cover:
+    1.  The overall purpose of the stored procedure.
+    2.  The inputs it takes and the outputs it returns.
+    3.  A step-by-step description of the logic, including any loops, conditions, or data manipulations.
+    4.  Any tables that are being read from or written to.
+
+    Provide only the explanation, without any introductory or concluding phrases.
 """
 
 DATABASE_IDENTIFICATION_GEMINI_PROMPT = """You are an expert code analysis agent. Your primary function is to meticulously inspect a given codebase and configuration files and identify the databases being used and their configurations.

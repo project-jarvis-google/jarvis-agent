@@ -11,8 +11,46 @@ from app.sub_agents.tech_stack_profiler_agent.utils.json_utils import (
     filter_json_arr,
 )
 
-from .prompt import DATABASE_IDENTIFICATION_GEMINI_PROMPT
+from .prompt import DATABASE_IDENTIFICATION_GEMINI_PROMPT, STORED_PROCEDURE_ANALYSIS_PROMPT
 
+def analyze_stored_procedure(tool_context: ToolContext, file_path: str) -> bool:
+    """
+    Analyzes a stored procedure and provides a step-by-step explanation of its logic.
+    """
+    try:
+        with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+            stored_procedure_code = f.read()
+
+        gemini_env = os.environ.copy()
+        gemini_env["GEMINI_API_KEY"] = os.getenv("GEMINI_API_KEY", "")
+        
+        prompt = STORED_PROCEDURE_ANALYSIS_PROMPT.format(code=stored_procedure_code)
+        args = "-p " + '"' + prompt + '"'
+        
+        result = subprocess.run(
+            ["/usr/local/bin/gemini", args],
+            timeout=120,
+            env=gemini_env,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        
+        explanation = result.stdout
+        
+        if "stored_procedure_explanations" not in tool_context.state:
+            tool_context.state["stored_procedure_explanations"] = []
+            
+        tool_context.state["stored_procedure_explanations"].append({
+            "file_path": file_path,
+            "explanation": explanation
+        })
+        
+        return True
+
+    except Exception as e:
+        logging.error("Error analyzing stored procedure %s: %s", file_path, e)
+        return False
 
 def identify_databases(tool_context: ToolContext) -> bool:
     # tool_context.state["filtered_database_data"] = "filtered_database_sample_data"

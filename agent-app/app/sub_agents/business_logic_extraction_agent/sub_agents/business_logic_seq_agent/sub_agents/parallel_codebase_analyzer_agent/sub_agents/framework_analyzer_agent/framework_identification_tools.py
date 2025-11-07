@@ -21,7 +21,10 @@ def identify_frameworks(tool_context: ToolContext) -> bool:
 
     is_framework_identification_successful = False
 
-    secure_temp_repo_dir = tool_context.state["secure_temp_repo_dir"]
+    secure_temp_repo_dir = tool_context.state.get("secure_temp_repo_dir")
+    if not secure_temp_repo_dir:
+        logging.error("secure_temp_repo_dir not found in tool_context.state. Source code not staged.")
+        return False
 
     logging.info(
         "inside identify_frameworks secure_temp_repo_dir => %s", secure_temp_repo_dir
