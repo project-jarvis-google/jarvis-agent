@@ -173,7 +173,7 @@ def filter_and_format_data(stdout: str) -> str:
         formatted_blocks = []
         for item in filtered_framework_data:
             name, category, version, description = item
-            formatted_blocks.append(f"#### {name}\nCATEGORY: {category}\nDESCRIPTION: {description}\nVERSION: {version}")
+            formatted_blocks.append(f"####{name}\nCATEGORY: {category}\nDESCRIPTION: {description}\nVERSION: {version}")
         filtered_framework_data_final_str = "\n\n".join(formatted_blocks)
     except Exception as e:
         logging.error(f"Exception encountered !!! {e}")
