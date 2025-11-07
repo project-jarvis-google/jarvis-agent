@@ -38,8 +38,6 @@ def identify_databases(tool_context: ToolContext) -> bool:
     for entry in os.listdir(secure_temp_repo_dir):
         logging.info(entry)
     if "secure_temp_repo_dir" in locals() and os.path.exists(secure_temp_repo_dir):
-        databases_json_str: str = "[]"
-
         try:
             is_mock_enabled = os.getenv(
                 "ENABLE_DATABASE_IDENTIFICATION_MOCK_DATA", "False"

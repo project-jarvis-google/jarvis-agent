@@ -39,8 +39,6 @@ def identify_technical_aspects(tool_context: ToolContext) -> bool:
     for entry in os.listdir(secure_temp_repo_dir):
         logging.info(entry)
     if "secure_temp_repo_dir" in locals() and os.path.exists(secure_temp_repo_dir):
-        frameworks_json_str: str = "[]"
-
         try:
             is_mock_enabled = os.getenv(
                 "ENABLE_FRAMEWORK_IDENTIFICATION_MOCK_DATA", "False"
@@ -185,7 +183,7 @@ def filter_and_format_data(stdout: str) -> str:
 
 
 if __name__ == "__main__":
-    str = filter_and_format_data("""
+    string = filter_and_format_data("""
     ```json
     [
     {
@@ -331,4 +329,4 @@ if __name__ == "__main__":
     ]
     ```
     """)
-    logging.info(f"filter and format str => {str}")
+    logging.info(f"filter and format str => {string}")
