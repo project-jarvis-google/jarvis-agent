@@ -120,7 +120,7 @@ def identify_databases(tool_context: ToolContext) -> bool:
             logging.info("result.stderr => %s", stderr)
             logging.info("result.stdout => %s", stdout)
 
-            filtered_database_data_final_str= filter_and_format_data(stdout)
+            filtered_database_data_final_str = filter_and_format_data(stdout)
 
             is_database_identification_successful = True
 
@@ -153,8 +153,8 @@ def identify_databases(tool_context: ToolContext) -> bool:
 
     return is_database_identification_successful
 
-def filter_and_format_data(stdout: str) -> str:
 
+def filter_and_format_data(stdout: str) -> str:
     filtered_database_data_final_str = "NO DATA FOUND"
 
     try:
@@ -172,10 +172,7 @@ def filter_and_format_data(stdout: str) -> str:
         )
 
         filtered_database_data_final_str = "\n\n".join(
-            [
-                "\n".join(map(str, inner_list))
-                for inner_list in filtered_database_data
-            ]
+            ["\n".join(map(str, inner_list)) for inner_list in filtered_database_data]
         )
     except Exception as e:
         logging.error(f"Exception encountered !!! {e}")
