@@ -70,8 +70,7 @@ def load_knowledge_base():
 
 # --- "Memorize" the knowledge at startup ---
 KNOWLEDGE_INJECTION = load_knowledge_base()
-FINAL_INSTRUCTION = (
-    f"""{AGENT_INSTRUCTION}\n\n
+FINAL_INSTRUCTION = f"""{AGENT_INSTRUCTION}\n\n
         --- PRE-LOADED KNOWLEDGE BASE ---\n
         <GROUNDING_SOURCE_TRUTH>
             IMPORTANT: The following content is your ONLY acceptable agenda. 
@@ -79,7 +78,7 @@ FINAL_INSTRUCTION = (
             {KNOWLEDGE_INJECTION}
         </GROUNDING_SOURCE_TRUTH>
     """
-)
+
 
 # --- Define the Main Discovery Agent ---
 discovery_architect_agent = LlmAgent(
