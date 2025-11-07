@@ -12,9 +12,18 @@
 # Application Components
 
 ## Backend
+- Technology stack for backend
 - Suitability of the backend services for containerization.
 - Details of any scheduled batch processes, including their triggers (e.g., cron, Windows Scheduler), schedules, and I/O formats.
 - Architecture and development/testing setup for any messaging components (e.g., RabbitMQ, Kafka).
 
 ## Frontend
 - The primary technology stack used for the front-end.
+
+## Database
+- Which databases are being used by application
+- where are the databases hosted.
+
+
+## CI/CD
+- Any CI/CD tools being used
