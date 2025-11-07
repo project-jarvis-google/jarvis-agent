@@ -7,12 +7,10 @@ from google.adk.agents import Agent
 from google.adk.planners import PlanReActPlanner
 from google.adk.tools.google_search_tool import google_search
 from google.adk.tools.url_context_tool import url_context
-from google.adk.tools.agent_tool import AgentTool
-
-from ...utils.diagram_tools import plantuml_tool
 
 from .config import MODEL
 from .prompt import AGENT_PROMPT
+
 
 def get_plantuml_diagramming_prompt() -> str:
     """Loads content from data files and injects it into placeholders within the AGENT_PROMPT."""
@@ -26,7 +24,7 @@ def get_plantuml_diagramming_prompt() -> str:
             file_path = os.path.join(data_dir, filename)
             if os.path.isfile(file_path):
                 try:
-                    with open(file_path, "r", encoding="utf-8") as f:
+                    with open(file_path, encoding="utf-8") as f:
                         content = f.read()
                     var_name = os.path.splitext(filename)[0]
                     injections[var_name] = content

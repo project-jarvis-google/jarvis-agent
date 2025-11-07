@@ -55,7 +55,7 @@ Step 1: Context Analysis and Data Flow Identification
 
 Step 2: DFD Design & PlantUML Code Generation Request
 
-*   Notify the user about the high level dataflow that we are planning and paralelly start the plantuml diagramming process as mentioned below.
+*   Notify the user about the high level dataflow that we are planning and parllelly start the plantuml diagramming process as mentioned below.
 *   Based on the analysis, design the Level 1 DFD internally.
 *   Formulate the DFD design requirements. Call the `plantuml_diagramming_agent` with these requirements to generate the PlantUML diagram code. You must pass sufficient details for the `plantuml_diagramming_agent` to produce code compliant with the "DFD PRINCIPLES & DIAGRAMMING STANDARDS", including:
     *   The elements to be included (External Entities, Processes/Components, Data Stores) using appropriate C4 macros.
