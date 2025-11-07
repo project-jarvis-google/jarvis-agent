@@ -24,7 +24,8 @@ def identify_technical_aspects(tool_context: ToolContext) -> bool:
     secure_temp_repo_dir = tool_context.state["secure_temp_repo_dir"]
 
     logging.info(
-        "inside identify_technical_aspects secure_temp_repo_dir => %s", secure_temp_repo_dir
+        "inside identify_technical_aspects secure_temp_repo_dir => %s",
+        secure_temp_repo_dir,
     )
 
     logging.info(
@@ -150,8 +151,8 @@ def identify_technical_aspects(tool_context: ToolContext) -> bool:
 
     return is_analysis_successful
 
-def filter_and_format_data(stdout: str) -> str:
 
+def filter_and_format_data(stdout: str) -> str:
     filtered_framework_data_final_str = "NO DATA FOUND"
 
     try:
@@ -173,14 +174,17 @@ def filter_and_format_data(stdout: str) -> str:
         formatted_blocks = []
         for item in filtered_framework_data:
             name, category, version, description = item
-            formatted_blocks.append(f"####{name}\nCATEGORY: {category}\nDESCRIPTION: {description}\nVERSION: {version}")
+            formatted_blocks.append(
+                f"####{name}\nCATEGORY: {category}\nDESCRIPTION: {description}\nVERSION: {version}"
+            )
         filtered_framework_data_final_str = "\n\n".join(formatted_blocks)
     except Exception as e:
         logging.error(f"Exception encountered !!! {e}")
 
     return filtered_framework_data_final_str
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     str = filter_and_format_data("""
     ```json
     [
@@ -327,4 +331,4 @@ if __name__ == '__main__':
     ]
     ```
     """)
-    print(str)
+    logging.info(f"filter and format str => {str}")
