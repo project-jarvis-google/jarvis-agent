@@ -25,5 +25,6 @@ ROOT_AGENT_PROMPT = """
           b. The user explicitly chose to start with the detailed architecture in point 10.
           This agent helps in specifying the exact technologies, configurations, and intricate details required for implementation.
       12. Use the 'application_portfolio_analyzer' agent to help the user with any application or server details related queries and to create an application portfolio report.
-      13. else use 'google_search_dummy_agent'
+      13. If the user asks about database discovery or database profiling please delegate the task to the following agent `data_model_discovery_agent`.
+      14. else use 'google_search_dummy_agent'
     """
