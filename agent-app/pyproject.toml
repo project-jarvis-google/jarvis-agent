@@ -14,6 +14,8 @@ dependencies = [
     "uvicorn~=0.34.0",
     "psycopg2-binary>=2.9.10",
     "google-genai~=1.41.0",
+    "mysql-connector-python",
+    "pyodbc",
     "GitPython>=3.1.45",
     "google-cloud-storage",
     "reportlab",
@@ -28,7 +30,6 @@ dependencies = [
     "scipy~=1.15.0",
     "pygithub~=2.8.1",
     "googlesearch-python"
-
 ]
 
 requires-python = ">=3.10,<3.14"
