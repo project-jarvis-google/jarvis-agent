@@ -1,22 +1,22 @@
 # tools.py
-import os
-import logging
+import csv
 import datetime
 import re
 import io
-import csv
+import logging
+import os
 import tempfile
-from typing import Optional
 
+from github import Github, GithubException
 from google.adk.tools import FunctionTool
 from google.cloud import storage
-from github import Github, GithubException
-
-# --- ReportLab Imports (Same as before) ---
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.units import inch
+
+# --- ReportLab Imports (Same as before) ---
+from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer
+
+# --- ReportLab Imports ---
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 def _get_gcs_client():
     return storage.Client()
 
-def _get_github_client(token: Optional[str] = None):
+def _get_github_client(token: str | None = None):
     """
     Returns a GitHub client. If token is provided, it's authenticated.
     If not, it's unauthenticated (rate-limited, public only).
@@ -132,7 +132,7 @@ def read_csv_data(filename: str, file_content: str) -> str:
         return f"Error reading CSV: {e}"
 
 # --- UPDATED FUNCTION ---
-def scan_github_repo(repo_name: str, github_token: Optional[str] = None, specific_file_path: Optional[str] = None) -> str:
+def scan_github_repo(repo_name: str, github_token: str | None = None, specific_file_path: str | None = None) -> str:
     """
     Scans a GitHub repository for compliance documentation.
     Args:
