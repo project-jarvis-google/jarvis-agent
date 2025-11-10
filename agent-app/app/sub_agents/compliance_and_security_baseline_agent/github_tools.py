@@ -1,6 +1,7 @@
 # github_tools.py
-import os
 import logging
+import os
+
 from github import Github, GithubException
 from google.adk.tools import FunctionTool
 
@@ -34,7 +35,7 @@ def fetch_repo_compliance_context(repo_name: str, specific_file_path: str = None
             # Truncate huge files to prevent context window overflow
             if len(decoded) > 30000:
                 decoded = decoded[:30000] + "\n...[TRUNCATED]..."
-                
+
             return f"### CONTENT OF {specific_file_path} in {repo_name} ###\n\n{decoded}"
         except GithubException as e:
             if e.status == 404:
@@ -45,7 +46,7 @@ def fetch_repo_compliance_context(repo_name: str, specific_file_path: str = None
     target_files = ["README.md", "SECURITY.md", "ARCHITECTURE.md", "docs/compliance.md"]
     found_content = []
     found_content.append(f"# Compliance Scan for Repo: {repo.full_name}")
-    
+
     files_found = 0
     for file_path in target_files:
         try:
