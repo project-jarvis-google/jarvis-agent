@@ -1,29 +1,41 @@
-# tool.py
+# tools.py
 import os
 import logging
 import datetime
 import re
 import io
 import csv
-import tempfile # Added for the new function
+import tempfile
+from typing import Optional
 
 from google.adk.tools import FunctionTool
 from google.cloud import storage
-from reportlab.lib.pagesizes import letter
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.lib.units import inch
+from github import Github, GithubException
 
-# --- ReportLab Imports ---
-from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer
+# --- ReportLab Imports (Same as before) ---
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.units import inch
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# --- NEW: Helper function from Agent 1 ---
+# =========================================
+# HELPER FUNCTIONS
+# =========================================
+
 def _get_gcs_client():
-    """Initializes and returns a Google Cloud Storage client."""
     return storage.Client()
 
+def _get_github_client(token: Optional[str] = None):
+    """
+    Returns a GitHub client. If token is provided, it's authenticated.
+    If not, it's unauthenticated (rate-limited, public only).
+    """
+    if token:
+        return Github(token)
+    return Github()
 
 # --- NEW: Helper function from Agent 1 ---
 def _get_gcs_client():
@@ -32,37 +44,27 @@ def _get_gcs_client():
 
 
 def _convert_markdown_to_flowables(markdown_text: str):
-    """
-    Converts a markdown string into a list of ReportLab Flowable objects.
-    Handles headers, bold, italics, and lists.
-    """
+    # ... (Keep exact same implementation as previous version) ...
     story = []
     styles = getSampleStyleSheet()
+    styles['h1'].fontSize = 18
+    styles['h1'].leading = 22
+    styles['h2'].fontSize = 14
+    styles['h2'].leading = 18
+    styles['BodyText'].leading = 14
+    styles['BodyText'].spaceAfter = 6
 
-    # Add some basic styling for readability
-    styles["h1"].fontSize = 18
-    styles["h1"].leading = 22
-    styles["h2"].fontSize = 14
-    styles["h2"].leading = 18
-    styles["BodyText"].leading = 14
-    styles["BodyText"].spaceAfter = 6
-
-    # Helper to convert markdown bold/italic to reportlab's <b>/<i> tags
     def format_text(text):
-        text = re.sub(r"\*\*(.*?)\*\*", r"<b>\1</b>", text)
-        # Regex to handle italics without accidentally matching list asterisks
-        text = re.sub(r"(?<!\*)\*([^\*]+)\*(?!\*)", r"<i>\1</i>", text)
+        text = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', text)
+        text = re.sub(r'(?<!\*)\*([^\*]+)\*(?!\*)', r'<i>\1</i>', text)
         return text
 
     lines = markdown_text.split("\n")
     for line in lines:
         stripped_line = line.strip()
-
-        if not stripped_line:
-            continue
-
-        if stripped_line.startswith("# "):
-            story.append(Paragraph(format_text(stripped_line[2:]), styles["h1"]))
+        if not stripped_line: continue
+        if stripped_line.startswith('# '):
+            story.append(Paragraph(format_text(stripped_line[2:]), styles['h1']))
             story.append(Spacer(1, 0.2 * inch))
         elif stripped_line.startswith("## "):
             story.append(Paragraph(format_text(stripped_line[2:]), styles["h2"]))
@@ -82,39 +84,26 @@ def _convert_markdown_to_flowables(markdown_text: str):
             story.append(Spacer(1, 0.25 * inch))
         else:
             story.append(Paragraph(format_text(line), styles['BodyText']))
-
     return story
 
+# =========================================
+# CORE TOOL FUNCTIONS
+# =========================================
 
-# --- MODIFIED FUNCTION ---
-def _create_gcs_file_and_get_link(report_markdown: str) -> str:
-    """Generates a PDF from markdown, uploads to GCS, and returns a public URL."""
-    
+def generate_pdf_report(report_markdown: str) -> str:
+    # ... (Keep exact same implementation as previous version) ...
     bucket_name = os.getenv("GCS_BUCKET_NAME")
     if not bucket_name:
         return "Error: GCS_BUCKET_NAME environment variable is not set."
-    if not report_markdown or len(report_markdown.strip()) < 50:
-        return "Error: Tool was called with empty or invalid report text."
+    if not report_markdown or "compliance" not in report_markdown.lower():
+         return "Error: Report appears empty. Ensure analysis is complete before generating PDF."
 
     try:
         storage_client = _get_gcs_client()
         bucket = storage_client.bucket(bucket_name)
-    except Exception as e:
-        return f"Error: Failed to connect to GCS. Check credentials. Details: {e}"
-
-    try:
-        app_name_match = re.search(r"Application:\s*\*\*(.*?)\*\*", report_markdown, re.IGNORECASE)
-        if not app_name_match:
-            app_name_match = re.search(
-                r"Report\s*-\s*(.*)", report_markdown, re.IGNORECASE
-            )
-
-        app_name_str = app_name_match.group(1).strip() if app_name_match else "Report"
-        safe_app_name = re.sub(r"[^a-zA-Z0-9_-]", "", app_name_str.replace(" ", "_"))
         timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-        pdf_blob_name = f"compliance-reports/{safe_app_name}_{timestamp}.pdf"
+        pdf_blob_name = f"compliance-reports/Report_{timestamp}.pdf"
 
-        # Using a temporary file for consistency with Agent 1
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
             doc = SimpleDocTemplate(tmp.name, pagesize=letter)
             story = _convert_markdown_to_flowables(report_markdown)
@@ -125,77 +114,74 @@ def _create_gcs_file_and_get_link(report_markdown: str) -> str:
         pdf_blob.upload_from_filename(tmp_path, content_type='application/pdf')
         os.remove(tmp_path)
 
-        # --- MODIFICATION START: Changed link generation ---
-        # Replaced the signed URL with a direct public URL, like in Agent 1.
-        public_url = f"https://storage.googleapis.com/{bucket_name}/{pdf_blob_name}"
-        logger.info(f"Uploaded '{pdf_blob_name}' to public GCS bucket.")
-        return f"Successfully created the compliance report. It is publicly accessible at: {public_url}"
-        # --- MODIFICATION END ---
-        
+        return f"https://storage.googleapis.com/{bucket_name}/{pdf_blob_name}"
     except Exception as e:
-        logger.error(f"Failed to generate or upload report: {e}", exc_info=True)
-        return (
-            f"Error: An unexpected error occurred during PDF generation. Details: {e}"
-        )
+        logger.error(f"Failed to generate report: {e}", exc_info=True)
+        return f"Error generating PDF: {e}"
 
-
-# --- NEW FUNCTION: To match the CSV processing pattern of Agent 1 ---
-def process_and_upload_csv(filename: str, file_content: str) -> str:
-    """
-    Reads CSV content from a string, adds a processing date column, uploads the
-    updated CSV to GCS, and returns a public URL.
-
-    Args:
-        filename: The name of the file being processed.
-        file_content: The string content of the uploaded file.
-
-    Returns:
-        A string containing the public URL of the processed CSV file or an error message.
-    """
-    bucket_name = os.getenv("GCS_BUCKET_NAME", "jarvis-agent")
-    if not bucket_name:
-        return "Error: GCS_BUCKET_NAME environment variable is not set."
-
-    logger.info(f"Received request to process and re-upload file '{filename}'.")
+def read_csv_data(filename: str, file_content: str) -> str:
+    # ... (Keep exact same implementation as previous version) ...
     try:
-        # 1. Read the CSV from the input string
-        reader = csv.reader(io.StringIO(file_content))
-        data = list(reader)
-
-        # 2. Add new data (example: adding a processing date)
-        if data:
-            data[0].append('ProcessedDate') # Add header
-            processing_date = str(datetime.date.today())
-            for row in data[1:]: # Skip header row
-                row.append(processing_date)
-
-        # 3. Write modified data to a new in-memory CSV
+        f = io.StringIO(file_content)
+        reader = csv.reader(f)
+        csv_data = list(reader)
         output = io.StringIO()
-        writer = csv.writer(output)
-        writer.writerows(data)
-        updated_csv_content = output.getvalue().encode('utf-8')
-
-        # 4. Upload the new CSV to GCS
-        base_filename = os.path.splitext(filename)[0]
-        processed_filename = f"{base_filename}_processed.csv"
-        gcs_path = f"processed-csvs/{processed_filename}"
-
-        storage_client = _get_gcs_client()
-        bucket = storage_client.bucket(bucket_name)
-        blob = bucket.blob(gcs_path)
-        blob.upload_from_string(updated_csv_content, content_type='text/csv')
-
-        # 5. Return the public URL, just like in Agent 1
-        public_url = f"https://storage.googleapis.com/{bucket_name}/{gcs_path}"
-        logger.info(f"Successfully uploaded processed CSV to {public_url}")
-        return f"The file has been processed. The updated CSV is publicly accessible at: {public_url}"
-
+        csv.writer(output).writerows(csv_data)
+        return f"Successfully read '{filename}'. Content:\n\n{output.getvalue()}"
     except Exception as e:
-        logger.error(f"Error processing and uploading CSV file: {e}", exc_info=True)
-        return f"Error: Could not process or upload the file. Error: {e}"
+        return f"Error reading CSV: {e}"
 
+# --- UPDATED FUNCTION ---
+def scan_github_repo(repo_name: str, github_token: Optional[str] = None, specific_file_path: Optional[str] = None) -> str:
+    """
+    Scans a GitHub repository for compliance documentation.
+    Args:
+        repo_name: "owner/repo"
+        github_token: Optional personal access token for private repos.
+        specific_file_path: Optional path to a specific file to read.
+    """
+    try:
+        g = _get_github_client(github_token)
+        if "github.com/" in repo_name:
+             repo_name = repo_name.split("github.com/")[-1].strip("/")
+        repo = g.get_repo(repo_name)
+    except GithubException as e:
+        if e.status == 404:
+             return "STATUS: REPO_NOT_FOUND_OR_PRIVATE. If this is a private repo, ask the user for a 'github_token'."
+        if e.status == 401:
+             return "STATUS: AUTH_FAILED. The provided github_token was invalid."
+        return f"Error connecting to GitHub: {e}"
+    except Exception as e:
+        return f"Unexpected error: {e}"
 
-# --- Tool Definitions ---
-# Your original csv_reader_tool is now replaced by the more capable process_and_upload_csv
-create_gcs_file_tool = FunctionTool(_create_gcs_file_and_get_link)
-process_and_upload_csv_tool = FunctionTool(process_and_upload_csv)
+    # MODE 1: Specific File
+    if specific_file_path:
+        try:
+            content = repo.get_contents(specific_file_path).decoded_content.decode('utf-8')
+            if len(content) > 30000: content = content[:30000] + "\n...[TRUNCATED]..."
+            return f"### CONTENT OF {specific_file_path} in {repo_name} ###\n\n{content}"
+        except GithubException as e:
+            if e.status == 404:
+                return f"STATUS: FILE_NOT_FOUND. The file '{specific_file_path}' does not exist."
+            return f"Error fetching file: {e}"
+
+    # MODE 2: Default Scan
+    target_files = ["README.md", "SECURITY.md", "ARCHITECTURE.md", "docs/compliance.md"]
+    found_content = [f"# Compliance Scan for Repo: {repo.full_name}"]
+    files_found = 0
+    for file_path in target_files:
+        try:
+            content = repo.get_contents(file_path).decoded_content.decode('utf-8')
+            if len(content) > 15000: content = content[:15000] + "\n...[TRUNCATED]..."
+            found_content.append(f"\n## File: {file_path}\n{content}")
+            files_found += 1
+        except GithubException: continue
+
+    if files_found == 0:
+        return "STATUS: NO_STANDARD_DOCS_FOUND. Do not generate report. Ask user for a specific file path."
+
+    return "\n".join(found_content)
+
+pdf_tool = FunctionTool(generate_pdf_report)
+csv_tool = FunctionTool(read_csv_data)
+github_tool = FunctionTool(scan_github_repo)
