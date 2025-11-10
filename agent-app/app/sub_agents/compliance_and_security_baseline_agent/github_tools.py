@@ -18,7 +18,7 @@ def _get_github_client():
 
 # --- UPDATED SIGNATURE: added optional specific_file_path ---
 def fetch_repo_compliance_context(
-    repo_name: str, specific_file_path: str = None
+    repo_name: str, specific_file_path: str | None = None
 ) -> str:
     """
     Fetches compliance-relevant files from a GitHub repository.

@@ -5,6 +5,7 @@ import re
 import io
 import logging
 import os
+import re
 import tempfile
 
 from github import Github, GithubException
