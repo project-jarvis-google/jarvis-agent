@@ -42,7 +42,6 @@ def _get_github_client(token: str | None = None):
 
 
 def _convert_markdown_to_flowables(markdown_text: str):
-    # ... (Keep exact same implementation as previous version) ...
     story = []
     styles = getSampleStyleSheet()
     styles["h1"].fontSize = 18
@@ -92,7 +91,6 @@ def _convert_markdown_to_flowables(markdown_text: str):
 
 
 def generate_pdf_report(report_markdown: str) -> str:
-    # ... (Keep exact same implementation as previous version) ...
     bucket_name = os.getenv("GCS_BUCKET_NAME")
     if not bucket_name:
         return "Error: GCS_BUCKET_NAME environment variable is not set."
@@ -122,7 +120,6 @@ def generate_pdf_report(report_markdown: str) -> str:
 
 
 def read_csv_data(filename: str, file_content: str) -> str:
-    # ... (Keep exact same implementation as previous version) ...
     try:
         f = io.StringIO(file_content)
         reader = csv.reader(f)
@@ -134,7 +131,6 @@ def read_csv_data(filename: str, file_content: str) -> str:
         return f"Error reading CSV: {e}"
 
 
-# --- UPDATED FUNCTION ---
 def scan_github_repo(
     repo_name: str,
     github_token: str | None = None,
@@ -147,6 +143,11 @@ def scan_github_repo(
         github_token: Optional personal access token for private repos.
         specific_file_path: Optional path to a specific file to read.
     """
+    bucket_name = os.getenv("GCS_BUCKET_NAME", "jarvis-agent")
+    if not bucket_name:
+        return "Error: GCS_BUCKET_NAME environment variable is not set."
+
+    logger.info(f"Scanning repo: '{repo_name}'. Specific file: '{specific_file_path}'")
     try:
         g = _get_github_client(github_token)
         if "github.com/" in repo_name:
