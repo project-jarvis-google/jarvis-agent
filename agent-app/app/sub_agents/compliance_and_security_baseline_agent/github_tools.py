@@ -16,7 +16,6 @@ def _get_github_client():
     return Github(token)
 
 
-# --- UPDATED SIGNATURE: added optional specific_file_path ---
 def fetch_repo_compliance_context(
     repo_name: str, specific_file_path: str | None = None
 ) -> str:
@@ -31,7 +30,6 @@ def fetch_repo_compliance_context(
     except Exception as e:
         return f"Error connecting to GitHub: {e}"
 
-    # --- MODE 1: Specific File Requested by User ---
     if specific_file_path:
         try:
             file_content = repo.get_contents(specific_file_path)

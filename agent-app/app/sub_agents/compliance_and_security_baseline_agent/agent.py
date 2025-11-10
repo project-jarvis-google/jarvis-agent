@@ -3,8 +3,6 @@ from google.adk.agents import Agent
 
 from ...config import MODEL
 from .prompt import COMPLIANCE_AGENT_PROMPT
-
-# Import the renamed tools
 from .tools import csv_tool, github_tool, pdf_tool
 
 compliance_agent = Agent(
