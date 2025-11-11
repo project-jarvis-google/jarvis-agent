@@ -7,6 +7,7 @@ import logging
 import os
 import re
 import tempfile
+from typing import Optional
 
 from github import Github, GithubException
 from google.adk.tools import FunctionTool
@@ -133,8 +134,8 @@ def read_csv_data(filename: str, file_content: str) -> str:
 
 def scan_github_repo(
     repo_name: str,
-    github_token: str | None = None,
-    specific_file_path: str | None = None,
+    github_token: Optional[str] = None,  # noqa: UP045
+    specific_file_path: Optional[str] = None,  # noqa: UP045
 ) -> str:
     """
     Scans a GitHub repository for compliance documentation.
