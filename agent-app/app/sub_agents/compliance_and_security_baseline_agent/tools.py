@@ -53,8 +53,8 @@ def _convert_markdown_to_flowables(markdown_text: str):
     styles["BodyText"].spaceAfter = 6
 
     def format_text(text):
-        text = re.sub(r"\\(.?)\\*", r"<b>\1</b>", text)
-        text = re.sub(r"(?<!\)\([^\]+)\(?!\*)", r"<i>\1</i>", text)
+        text = re.sub(r"\*\*(.*?)\*\*", r"<b>\1</b>", text)
+        text = re.sub(r"(?<!\*)\*([^\*]+)\*(?!\*)", r"<i>\1</i>", text)
         return text
 
     lines = markdown_text.split("\n")
