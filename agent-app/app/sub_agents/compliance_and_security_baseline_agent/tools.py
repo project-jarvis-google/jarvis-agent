@@ -1,7 +1,6 @@
 # tools.py
 import csv
 import datetime
-import re
 import io
 import logging
 import os
@@ -13,6 +12,7 @@ from github import Github, GithubException
 from google.adk.tools import FunctionTool
 from google.cloud import storage
 from reportlab.lib.pagesizes import letter
+from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch
 
 # --- ReportLab Imports (Same as before) ---
@@ -53,8 +53,8 @@ def _convert_markdown_to_flowables(markdown_text: str):
     styles["BodyText"].spaceAfter = 6
 
     def format_text(text):
-        text = re.sub(r"\*\*(.*?)\*\*", r"<b>\1</b>", text)
-        text = re.sub(r"(?<!\*)\*([^\*]+)\*(?!\*)", r"<i>\1</i>", text)
+        text = re.sub(r"\\(.?)\\*", r"<b>\1</b>", text)
+        text = re.sub(r"(?<!\)\([^\]+)\(?!\*)", r"<i>\1</i>", text)
         return text
 
     lines = markdown_text.split("\n")
