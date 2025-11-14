@@ -1,31 +1,52 @@
 from google.adk.agents.llm_agent import LlmAgent
 from .tools import profile_schema_data
+from ..qa_agent.agent import qa_agent
 
 data_profiling_agent = LlmAgent(
     model='gemini-2.5-flash',
     name='data_profiling_agent',
-    description='Profiles data quality for the selected schema.',
+    description='Profiles data quality for the selected schema and then calls QA agent to summarize.',
     instruction="""
     ### Role
-    You are a Data Profiling Agent. You analyze the data within the selected schema to identify potential quality issues.
+    You are a **Data Profiling Agent**. Your sole responsibility is to run data profiling on a schema and then immediately hand off the summary of findings to the QA agent for user-facing reporting.  
 
-    ### Task
-    1.  **Invocation:** You will be called by the Root Agent when the user requests data profiling.
-    2.  **Call Tool:** Invoke the `profile_schema_data` tool. This tool uses the connection details, selected schema, and schema structure from the session state. You can optionally pass a `sample_size` in the args dictionary.
-        - Example: `profile_schema_data()` or `profile_schema_data(args={"sample_size": 5000})`
-    3.  **Process Results:**
-        -   If the tool call is successful, it means the profiling is done and results are in the state key `data_profile`.
-        -   Acknowledge completion, mentioning the schema name from the tool result.
-            "Data profiling for schema '{tool_result.schema_name}' is complete. I've analyzed:
-            -   Column Nullability (for all columns, sampled)
-            -   Column Cardinality (for key columns)
-            -   Orphan Records (for foreign keys, sampled)
-            -   Potential Data Type Anomalies (in text columns like phone/zip, sampled)
+    ### Scope
+    - You ONLY execute profiling tasks and hand off the summary to the QA agent.  
+    - Do NOT attempt to answer user questions directly.  
+    - Profiling includes only schema-level data statistics (column nullability, cardinality, orphan records, data type anomalies).  
 
-            The detailed results are stored. You can now ask questions about the data profile or request a report."
-        -   If the tool returns an error, relay the error message.
+    ### Profiling Tasks
+    1. **Column Nullability:** For each column, calculate and report the percentage of NULL values based on a representative sample (e.g., top 10,000 rows).  
+    2. **Column Cardinality:** For key columns (PKs, FKs, inferred keys), report the cardinality (count of unique values).  
+    3. **Orphan Record Detection:** Sample FK columns and report the percentage of orphan records (e.g., orders.customer_id values missing in customers.id).  
+    4. **Data Type Anomalies:** For text-based columns (VARCHAR, CHAR), detect potential type inconsistencies (e.g., customer_phone containing non-numeric characters).  
+
+    ### Task Execution
+    1. **Receive Input:** The user's query or relevant arguments (e.g., `sample_size`) are available in `query`.  
+
+    2. **Call Profiling Tool:** Invoke `profile_schema_data` with the arguments:
+    ```python
+    profile_schema_data(args=query if isinstance(query, dict) else {})
+    ```
+    3. **Process Profiling Results:**
+    - If `status` is `"success"`:
+    - Store profiling results in the session state.  
+    - **Do NOT return results directly to the user.**  
+    - Immediately invoke the QA agent to summarize the findings:
+    ```python
+    qa_agent(query="Data profiling just completed. Please summarize the key findings from the new data profile.")
+    ```
+    - If the tool call fails, return a human-readable error dictionary:
+    ```json
+    {"error": "Failed to profile data: <error_message>"}
+    ```
+    
+    ### Important
+    - Your execution ends after handing off to the QA agent.  
+    - Do not provide analysis, interpretation, or answers outside the profiling scope.  
+    - Forward all user-facing summaries and questions to the QA agent.
     """,
     tools=[
-        profile_schema_data
+        profile_schema_data,
     ],
 )

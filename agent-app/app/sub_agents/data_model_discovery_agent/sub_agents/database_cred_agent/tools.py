@@ -137,11 +137,3 @@ async def validate_db_connection(connection_details: Dict[str, Any], tool_contex
         if "db_creds_temp" in tool_context.state:
             del tool_context.state["db_creds_temp"]
         return {"status": "error", "message": f"Connection/Schema fetch failed for {db_type}: {e}"}
-
-    finally:
-        if conn:
-            try:
-                conn.close()
-                logger.info(f"{db_type.upper()} connection closed.")
-            except Exception as e:
-                logger.error(f"Error closing {db_type} connection: {e}")
