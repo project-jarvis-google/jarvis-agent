@@ -28,6 +28,9 @@ from .sub_agents.common_utility_agent.mosaic_rag_agent_presales import (
     mosaic_rag_agent_presales,
 )
 from .sub_agents.compliance_and_security_baseline_agent import compliance_agent
+from .sub_agents.detailed_architecture_design_agent import (
+    detailed_architecture_design_agent,
+)
 from .sub_agents.discovery_interview_agent import discovery_architect_agent
 from .sub_agents.google_search_dummy_agent import google_search_dummy_agent
 from .sub_agents.infrastructure_scanner_agent import infra_scanner_agent
@@ -52,8 +55,8 @@ root_agent = LlmAgent(
         AgentTool(agent=mosaic_rag_agent_presales),
         AgentTool(agent=tech_stack_profiler),
         AgentTool(agent=infra_scanner_agent),
-        transfer_to_discovery_agent_tool,
         transfer_to_capability_mapper_agent_tool,
+        transfer_to_discovery_agent_tool,
         transfer_to_strategy_recommender_agent_tool,
         AgentTool(agent=compliance_agent),
         AgentTool(agent=otel_coordinator),
@@ -64,6 +67,7 @@ root_agent = LlmAgent(
         recommendation_agent,
         capability_mapper_agent,
         strategy_recommender_agent,
+        detailed_architecture_design_agent,
         data_model_discovery_agent
     ],
 )

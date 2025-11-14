@@ -79,7 +79,10 @@ def convert_str_to_pdf(
 def markdown_str_to_pdf_str(data_str: str, pdf: FPDF):
     """Parses a markdown-like string and adds it to the PDF object."""
     for line in data_str.splitlines():
-        if line.startswith("###"):
+        if line.startswith("####"):
+            pdf.set_font("Arial", style="B", size=13)
+            text = line.replace("####", "").strip()
+        elif line.startswith("###"):
             pdf.set_font("Arial", style="B", size=15)
             text = line.replace("###", "").strip()
         elif line.startswith("##"):
