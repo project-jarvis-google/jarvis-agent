@@ -26,16 +26,20 @@ def _get_db_connection(metadata: Dict[str, Any], password: str) -> Any:
     else:
         raise ValueError(f"Unsupported database type: {db_type}")
 
-async def profile_schema_data(tool_context: ToolContext, args: Dict[str, Any] = None) -> Dict[str, Any]:
+async def profile_schema_data(tool_context: ToolContext, args: Dict[str, Any]) -> Dict[str, Any]:
     """
     Profiles the data in the selected schema based on the schema structure.
     Calculates nullability, cardinality, orphan records, and type anomalies.
+    Sets a flag on successful completion.
     """
+    if not isinstance(args, dict):
+        return {"error": "Invalid arguments. Expected a dictionary for args."}
+
     db_conn_state = tool_context.state.get("db_connection")
     db_creds = tool_context.state.get("db_creds_temp")
     schema_name = tool_context.state.get("selected_schema")
     schema_structure = tool_context.state.get("schema_structure")
-    sample_size = args.get("sample_size", 10000) if args else 10000
+    sample_size = args.get("sample_size", 10000)
 
     if not db_conn_state or db_conn_state.get("status") != "connected": return {"error": "DB not connected."}
     if not db_creds: return {"error": "DB credentials not found."}
@@ -61,6 +65,7 @@ async def profile_schema_data(tool_context: ToolContext, args: Dict[str, Any] = 
             return {"error": f"Profiling for {db_type} not implemented."}
 
         tool_context.state["data_profile"] = profile_results
+        tool_context.state["profiling_just_completed"] = True # Set the flag
         logger.info(f"Data profiling results for '{schema_name}' saved to session state.")
 
         return {
@@ -75,3 +80,4 @@ async def profile_schema_data(tool_context: ToolContext, args: Dict[str, Any] = 
         if conn:
             try: conn.close()
             except Exception as e: logger.error(f"Error closing {db_type} connection: {e}")
+            

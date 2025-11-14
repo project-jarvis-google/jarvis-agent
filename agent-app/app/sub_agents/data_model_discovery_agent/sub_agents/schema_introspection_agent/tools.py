@@ -62,7 +62,6 @@ async def get_schema_details(tool_context: ToolContext, args: Dict[str, Any]) ->
         return {"error": "schema_name not provided in args or is empty."}
     schema_name = str(schema_name).strip()
 
-    # ... (state checks as before) ...
     db_conn_state = tool_context.state.get("db_connection")
     db_creds = tool_context.state.get("db_creds_temp")
 
