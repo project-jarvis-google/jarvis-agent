@@ -1,1 +1,1 @@
-from .agent import gemini_cli_analyzer_agent
+from .agent import gemini_cli_analyzer_agent as gemini_cli_analyzer_agent

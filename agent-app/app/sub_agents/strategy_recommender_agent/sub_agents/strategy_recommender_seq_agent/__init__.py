@@ -1,1 +1,1 @@
-from .agent import strategy_recommender_seq_agent
+from .agent import strategy_recommender_seq_agent as strategy_recommender_seq_agent

@@ -1,1 +1,1 @@
-from .agent import source_reports_staging_agent
+from .agent import source_reports_staging_agent as source_reports_staging_agent
