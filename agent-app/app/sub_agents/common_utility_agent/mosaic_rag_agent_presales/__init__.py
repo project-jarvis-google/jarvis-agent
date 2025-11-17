@@ -1,3 +1,3 @@
 """Init for the sub agent google_search_dummy"""
 
-from .agent import mosaic_rag_agent_presales
+from .agent import mosaic_rag_agent_presales as mosaic_rag_agent_presales

@@ -1,1 +1,1 @@
-from .agent import recommendation_agent
+from .agent import recommendation_agent as recommendation_agent

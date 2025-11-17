@@ -1,1 +1,1 @@
-from .agent import language_identifier_agent
+from .agent import language_identifier_agent as language_identifier_agent
