@@ -1,1 +1,3 @@
-from .agent import discovery_report_strategy_recommender_agent as discovery_report_strategy_recommender_agent
+from .agent import (
+    discovery_report_strategy_recommender_agent as discovery_report_strategy_recommender_agent,
+)
