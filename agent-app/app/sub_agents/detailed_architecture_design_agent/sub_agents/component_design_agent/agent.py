@@ -5,8 +5,8 @@ Defines the Component Design Agent, an LLM agent responsible for breaking down a
 from google.adk.agents import Agent
 from google.adk.tools.agent_tool import AgentTool
 
-from .....utils.diagram_tools import plantuml_tool
-from ....plantuml_diagramming_agent import plantuml_diagramming_agent
+from app.utils.diagram_tools import plantuml_tool
+from app.sub_agents.plantuml_diagramming_agent import plantuml_diagramming_agent
 from .config import MODEL
 from .prompt import AGENT_PROMPT
 
