@@ -1,4 +1,4 @@
-""" Prompt for tech_stack_profiler """
+"""Prompt for tech_stack_profiler"""
 
 APPLICATION_PORTFOLIO_ANALYZER_PROMPT = """
     Use the csv_data_analyzer_agent agent to help the user with any application or server details

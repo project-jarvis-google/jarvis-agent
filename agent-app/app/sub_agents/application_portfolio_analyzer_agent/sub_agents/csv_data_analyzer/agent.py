@@ -2,17 +2,13 @@ from google.adk.agents import LlmAgent
 
 from .prompt import APPLICATION_PORTFOLIO_CSV_DATA_ANALYZER_PROMPT
 
-from google.adk.runners import Runner
-from google.adk.artifacts import InMemoryArtifactService 
-from google.adk.sessions import InMemorySessionService
-
 MODEL = "gemini-2.5-flash"
 
 csv_data_analyzer_agent = LlmAgent(
     name="csv_data_analyzer_agent",
     model=MODEL,
     description=(
-    """ 
+        """ 
         Analyzes the data inside the application portfolio csv file and provides useful insights.
     """
     ),
