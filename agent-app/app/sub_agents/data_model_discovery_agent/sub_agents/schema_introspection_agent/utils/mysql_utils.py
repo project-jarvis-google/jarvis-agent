@@ -138,7 +138,6 @@ def _extract_json_content(text: str) -> str:
     else:
         extracted = text.strip()
 
-    # Try to pretty format if valid JSON
     try:
         parsed = json.loads(extracted)
         return json.dumps(parsed, indent=4)
@@ -158,17 +157,17 @@ def _analyze_with_llm(schema_name: str, db_type: str, schema_details: Dict[str, 
     logger.info(f"Sending prompt to LLM for {db_type} relationship analysis.")
     generated_text = ""
     try:
-        logger.info(f"****** Custom_LLM_Request: {prompt}")
+        logger.debug(f"****** Custom_LLM_Request: {prompt}")
         response = client.models.generate_content(
             model=MODEL,
             contents=[types.Part.from_text(text=prompt)],
         )
         generated_text = response.candidates[0].content.parts[0].text
-        logger.info(f"****** Raw LLM Response: {generated_text}")
+        logger.debug(f"****** Raw LLM Response: {generated_text}")
 
-        # 🔹 Extract JSON content (handles ```json blocks)
+        # handles ```json blocks
         cleaned_json = _extract_json_content(generated_text)
-        logger.info(f"****** Cleaned JSON Extracted from LLM Response:\n{cleaned_json}")
+        logger.debug(f"****** Cleaned JSON Extracted from LLM Response:\n{cleaned_json}")
 
         # Parse the cleaned JSON
         llm_output = json.loads(cleaned_json)
@@ -275,8 +274,8 @@ def get_mysql_schema_details(conn: Any, schema_name: str) -> Dict[str, Any]:
     logger.info(f"Found {len(details['inferred_relationships'])} potential inferred relationships.")
     logger.info(f"Found {len(details['anomalies'])} potential relationship anomalies.")
 
-    logger.info("************************")
+    logger.debug("************************")
     logger.info(details)
-    logger.info("************************")
+    logger.debug("************************")
     
     return details

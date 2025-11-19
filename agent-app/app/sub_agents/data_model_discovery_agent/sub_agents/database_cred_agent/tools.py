@@ -2,7 +2,6 @@ from google.adk.tools import ToolContext
 import logging
 from typing import Dict, Any, List
 
-# Import database connectors
 import psycopg2
 import mysql.connector
 import pyodbc
@@ -23,7 +22,7 @@ def _get_schemas(conn: Any, db_type: str) -> List[str]:
             schemas = [row[0] for row in cursor.fetchall()]
         elif db_type == "mysql":
             cursor.execute("SHOW DATABASES;")
-            # Filter out default mysql databases
+            # Filtering out default mysql databases
             default_dbs = {'information_schema', 'mysql', 'performance_schema', 'sys'}
             schemas = [row[0] for row in cursor.fetchall() if row[0] not in default_dbs]
         elif db_type == "mssql":

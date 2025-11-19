@@ -177,7 +177,7 @@ def root_agent_instruction(ctx: ReadonlyContext) -> str:
     - Recall `schema_introspection_agent` and pass the schema name '{selected_schema}' as the input to it to ensure the structure is loaded.
     - Example AgentTool Call: `schema_introspection_agent("{selected_schema}")`
          """
-    else: # Should ideally not be reached if states are managed well
+    else:
         return base_instruction + """
     **Current Task:** Determine the next step based on the conversation history and session state. If unsure, ask the user for clarification.
         """
