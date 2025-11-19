@@ -1,15 +1,17 @@
 from google.adk.agents.llm_agent import LlmAgent
+
+from app.config import MODEL
+
 from .tools import get_schema_details
-import json
 
 schema_introspection_agent = LlmAgent(
-    model="gemini-2.5-flash",
+    model=MODEL,
     name="schema_introspection_agent",
     description="Introspects the selected database schema to discover tables, columns, constraints, relationships, indexes, and views.",
     instruction="""
     ### Role
     You are a **Database Schema Introspection Agent**. Your sole task is to fetch and summarize the schema structure of a database.  
-    
+
     ### Scope
     - You can only report **schema-level information**: tables, columns, constraints, indexes, foreign keys, inferred relationships, and anomalies.  
     - Do **not** answer questions about data content, queries, or performance. Forward all other questions to the QA agent using:  

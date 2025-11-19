@@ -1,9 +1,11 @@
 from google.adk.agents.llm_agent import LlmAgent
+
+from app.config import MODEL
+
 from .tools import validate_db_connection
 
-
 database_cred_agent = LlmAgent(
-    model="gemini-2.5-flash",
+    model=MODEL,
     name="database_cred_agent",
     description="A helpful assistant that collects and validates database connection details, and lists available schemas.",
     instruction="""

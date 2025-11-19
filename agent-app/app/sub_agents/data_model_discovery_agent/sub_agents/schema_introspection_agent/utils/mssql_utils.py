@@ -1,13 +1,13 @@
-import logging
-from typing import Dict, Any, List
-import psycopg2
 import json
+import logging
 import os
 import re
+from typing import Any
+
+import google.auth
 from google import genai
 from google.api_core import exceptions
 from google.genai import types
-import google.auth
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
@@ -48,7 +48,7 @@ else:
     )
 
 
-def _execute_query(conn: Any, query: str) -> List[Dict[str, Any]]:
+def _execute_query(conn: Any, query: str) -> list[dict[str, Any]]:
     """Executes a SQL query and returns results as a list of dicts for PostgreSQL."""
     cursor = conn.cursor()
     try:
@@ -56,14 +56,14 @@ def _execute_query(conn: Any, query: str) -> List[Dict[str, Any]]:
         if cursor.description:
             columns = [desc[0] for desc in cursor.description]
             rows = cursor.fetchall()
-            return [dict(zip(columns, row)) for row in rows]
+            return [dict(zip(columns, row, strict=False)) for row in rows]
         return []
     finally:
         cursor.close()
 
 
 def _construct_llm_prompt(
-    schema_name: str, db_type: str, schema_details: Dict[str, Any]
+    schema_name: str, db_type: str, schema_details: dict[str, Any]
 ) -> str:
     """Constructs a prompt for the LLM to analyze relationships and anomalies with formatted JSON."""
     tables_context = {}
@@ -146,8 +146,8 @@ def _extract_json_content(text: str) -> str:
 
 
 def _analyze_with_llm(
-    schema_name: str, db_type: str, schema_details: Dict[str, Any]
-) -> Dict[str, List[Dict[str, Any]]]:
+    schema_name: str, db_type: str, schema_details: dict[str, Any]
+) -> dict[str, list[dict[str, Any]]]:
     """Calls an LLM to get inferred relationships and anomalies."""
     if not client:
         logger.error("GenAI Client not initialized. Skipping LLM analysis.")
@@ -202,7 +202,7 @@ def _analyze_with_llm(
         }
 
 
-def get_postgres_schema_details(conn: Any, schema_name: str) -> Dict[str, Any]:
+def get_postgres_schema_details(conn: Any, schema_name: str) -> dict[str, Any]:
     details = {
         "tables": {},
         "views": {},

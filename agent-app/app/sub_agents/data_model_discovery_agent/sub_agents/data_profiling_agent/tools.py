@@ -1,20 +1,22 @@
 import logging
-from typing import Dict, Any
-from google.adk.tools import ToolContext
-import psycopg2
+from typing import Any
+
 import mysql.connector
+import psycopg2
 import pyodbc
+from google.adk.tools import ToolContext
+
 from .utils import (
-    postgres_profiling_utils,
-    mysql_profiling_utils,
     mssql_profiling_utils,
+    mysql_profiling_utils,
+    postgres_profiling_utils,
 )
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 
-def _get_db_connection(metadata: Dict[str, Any], password: str) -> Any:
+def _get_db_connection(metadata: dict[str, Any], password: str) -> Any:
     db_type = metadata.get("db_type")
     host = metadata.get("host")
     port = int(metadata.get("port"))
@@ -39,8 +41,8 @@ def _get_db_connection(metadata: Dict[str, Any], password: str) -> Any:
 
 
 async def profile_schema_data(
-    tool_context: ToolContext, args: Dict[str, Any]
-) -> Dict[str, Any]:
+    tool_context: ToolContext, args: dict[str, Any]
+) -> dict[str, Any]:
     """
     Profiles the data in the selected schema based on the schema structure.
     Calculates nullability, cardinality, orphan records, and type anomalies.
@@ -103,9 +105,7 @@ async def profile_schema_data(
         }
     except Exception as e:
         logger.error(f"Error during data profiling: {e}", exc_info=True)
-        return {
-            "error": f"Failed to profile data for {db_type} ({schema_name}): {str(e)}"
-        }
+        return {"error": f"Failed to profile data for {db_type} ({schema_name}): {e!s}"}
     finally:
         if conn:
             try:

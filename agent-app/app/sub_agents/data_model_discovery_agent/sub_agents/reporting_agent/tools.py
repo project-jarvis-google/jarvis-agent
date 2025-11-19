@@ -1,16 +1,16 @@
-import logging
-from typing import Dict, Any, List
-from google.adk.tools import ToolContext
 import json
-import yaml
+import logging
+from typing import Any
+
+from google.adk.tools import ToolContext
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 
 async def generate_summary_report(
-    tool_context: ToolContext, args: Dict[str, Any]
-) -> Dict[str, Any]:
+    tool_context: ToolContext, args: dict[str, Any]
+) -> dict[str, Any]:
     """
     Generates a high-level summary report of the database analysis.
 
@@ -89,12 +89,6 @@ async def generate_summary_report(
     return {"status": "success", "report_text": report}
 
 
-import json
-import logging
-
-logger = logging.getLogger(__name__)
-
-
 async def export_full_report(tool_context: ToolContext, args: dict) -> dict:
     """
     Exports the full schema structure and data profile as a clean JSON report.
@@ -166,12 +160,12 @@ async def export_full_report(tool_context: ToolContext, args: dict) -> dict:
 
     except Exception as e:
         logger.error(f"Error generating JSON report: {e}", exc_info=True)
-        return {"status": "error", "error": f"Failed to generate JSON report: {str(e)}"}
+        return {"status": "error", "error": f"Failed to generate JSON report: {e!s}"}
 
 
 async def generate_erd_script(
-    tool_context: ToolContext, args: Dict[str, Any]
-) -> Dict[str, Any]:
+    tool_context: ToolContext, args: dict[str, Any]
+) -> dict[str, Any]:
     """
     Generates a complete, valid Mermaid ER Diagram script.
 
@@ -236,8 +230,8 @@ async def generate_erd_script(
     def format_column(
         table_name: str,
         col_name: str,
-        col_info: Dict[str, Any],
-        constraints_info: List[Dict[str, Any]],
+        col_info: dict[str, Any],
+        constraints_info: list[dict[str, Any]],
     ) -> str:
         """Format a column entry with proper constraints for Mermaid."""
         dtype = sanitize_datatype(col_info.get("type", "text"))

@@ -1,12 +1,10 @@
 import logging
-from typing import Dict, Any, List
-import psycopg2
-from decimal import Decimal
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
-def _execute_query(conn: Any, query: str) -> List[Dict[str, Any]]:
+def _execute_query(conn: Any, query: str) -> list[dict[str, Any]]:
     """Executes a SQL query and returns results as a list of dicts for PostgreSQL."""
     cursor = conn.cursor()
     try:
@@ -15,7 +13,7 @@ def _execute_query(conn: Any, query: str) -> List[Dict[str, Any]]:
         if cursor.description:
             columns = [desc[0] for desc in cursor.description]
             rows = cursor.fetchall()
-            return [dict(zip(columns, row)) for row in rows]
+            return [dict(zip(columns, row, strict=False)) for row in rows]
         return []
     finally:
         cursor.close()
@@ -24,9 +22,9 @@ def _execute_query(conn: Any, query: str) -> List[Dict[str, Any]]:
 def profile_postgres_data(
     conn: Any,
     schema_name: str,
-    schema_structure: Dict[str, Any],
+    schema_structure: dict[str, Any],
     sample_size: int = 10000,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     profile_results = {
         "nullability": {},
         "cardinality": {},
