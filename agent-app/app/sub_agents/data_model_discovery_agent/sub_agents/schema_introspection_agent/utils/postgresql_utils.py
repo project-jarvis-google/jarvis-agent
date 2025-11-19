@@ -24,7 +24,7 @@ if not GOOGLE_CLOUD_PROJECT:
 
 GOOGLE_CLOUD_LOCATION = os.environ.get("GOOGLE_CLOUD_LOCATION", "us-central1")
 GOOGLE_GENAI_USE_VERTEXAI = os.environ.get("GOOGLE_GENAI_USE_VERTEXAI", "True").lower() in ("true", "1")
-MODEL = os.environ.get("MODEL", "gemini-1.5-pro")
+MODEL = os.environ.get("MODEL", "gemini-2.5-pro")
 
 client = None
 if GOOGLE_CLOUD_PROJECT:
@@ -145,16 +145,16 @@ def _analyze_with_llm(schema_name: str, db_type: str, schema_details: Dict[str, 
     logger.info(f"Sending prompt to LLM for {db_type} relationship analysis.")
     generated_text = ""
     try:
-        # logger.info(f"****** Custom_LLM_Request: {prompt}")
+        logger.debug(f"****** Custom_LLM_Request: {prompt}")
         response = client.models.generate_content(
             model=MODEL,
             contents=[types.Part.from_text(text=prompt)],
             config=types.GenerateContentConfig(response_mime_type="application/json"),
         )
         generated_text = response.candidates[0].content.parts[0].text
-        # logger.info(f"****** Raw LLM Response: {generated_text}")
+        logger.debug(f"****** Raw LLM Response: {generated_text}")
         cleaned_json = _extract_json_content(generated_text)
-        # logger.info(f"****** Cleaned JSON Extracted from LLM Response:\n{cleaned_json}")
+        logger.debug(f"****** Cleaned JSON Extracted from LLM Response:\n{cleaned_json}")
         llm_output = json.loads(cleaned_json)
         inferred = llm_output.get("inferred_relationships", [])
         anomalies = llm_output.get("anomalies", [])
