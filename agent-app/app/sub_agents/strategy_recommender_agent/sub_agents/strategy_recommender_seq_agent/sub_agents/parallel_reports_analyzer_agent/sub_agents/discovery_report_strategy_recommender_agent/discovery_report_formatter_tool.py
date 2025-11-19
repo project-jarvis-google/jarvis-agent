@@ -1,4 +1,5 @@
 import logging
+
 from google.adk.tools import FunctionTool, ToolContext
 
 logger = logging.getLogger(__name__)
@@ -12,8 +13,8 @@ def _extract_client_name(full_text: str) -> str:
     if start_index != -1:
         # Start after the marker
         start_index += len(client_marker)
-        end_of_line = full_text.find('\n', start_index)
-        date_marker_pos = full_text.find('Date:', start_index)
+        end_of_line = full_text.find("\n", start_index)
+        date_marker_pos = full_text.find("Date:", start_index)
         possible_ends = [p for p in (end_of_line, date_marker_pos) if p != -1]
         end_index = min(possible_ends) if possible_ends else len(full_text)
         return full_text[start_index:end_index].strip()
@@ -55,7 +56,10 @@ def analyze_discovery_results(tool_context: ToolContext) -> bool:
         return is_report_formatted
 
     except Exception as e:
-        logger.error(f"An unexpected error occurred during data formatting: {e}", exc_info=True)
+        logger.error(
+            f"An unexpected error occurred during data formatting: {e}", exc_info=True
+        )
         return is_report_formatted
+
 
 report_from_context_tool = FunctionTool(func=analyze_discovery_results)

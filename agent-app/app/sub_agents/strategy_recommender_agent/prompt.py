@@ -1,4 +1,4 @@
-""" Prompt for strategy_recommender_agent """
+"""Prompt for strategy_recommender_agent"""
 
 STRATEGY_RECOMMENDER_PROMPT = """
 You are a helpful assistant designed to generate a strategy recommendation. Your process is conditional based on user input.

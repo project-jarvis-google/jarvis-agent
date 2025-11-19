@@ -1,8 +1,8 @@
 # halt_tool.py
-
-from google.adk.tools import FunctionTool
-from google.adk.tools import ToolContext
 from typing import Any
+
+from google.adk.tools import FunctionTool, ToolContext
+
 
 def halt_workflow(tool_context: ToolContext) -> dict[str, Any]:
     """
@@ -15,7 +15,8 @@ def halt_workflow(tool_context: ToolContext) -> dict[str, Any]:
     # We will use a unique string status that the coordinator can intercept if needed.
     return {
         "status": "HALT_WORKFLOW",
-        "message": "File not uploaded. Workflow halted by staging agent."
+        "message": "File not uploaded. Workflow halted by staging agent.",
     }
+
 
 halt_workflow_tool = FunctionTool(func=halt_workflow)

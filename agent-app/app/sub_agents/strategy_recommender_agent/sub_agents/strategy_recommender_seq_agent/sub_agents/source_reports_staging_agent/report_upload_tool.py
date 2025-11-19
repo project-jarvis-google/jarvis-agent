@@ -3,29 +3,11 @@ import logging
 import os
 import uuid
 from typing import Any
+
 import google.auth
 import pdfplumber
 from google.adk.tools import FunctionTool, ToolContext
 from google.genai import types as gt
-from google.api_core import exceptions
-from google import genai
-import google.genai.types as types
-
-from pathlib import Path
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter
-import asyncio
-
-from google.adk.agents.callback_context import CallbackContext
-from typing import Optional
-
-import base64
-from typing import Dict, Any
-from google.adk.agents import Agent
-
-
-
-import io
 
 _, project_id = google.auth.default()
 
@@ -58,7 +40,11 @@ def _looks_like_pdf(b: bytes) -> bool:
 
 # ----------------- PDF part checkers ----------------
 def _is_pdf_part(part: gt.Part) -> bool:
-    if getattr(part, "inline_data", None) and part.inline_data and part.inline_data.data:
+    if (
+        getattr(part, "inline_data", None)
+        and part.inline_data
+        and part.inline_data.data
+    ):
         data = part.inline_data.data
         if part.inline_data.mime_type == "application/pdf":
             return True
@@ -85,14 +71,20 @@ def _obtain_part_and_name(
         if getattr(p, "inline_data", None) and p.inline_data and p.inline_data.data:
             result.append((p, p.inline_data.display_name))
         elif (
-            getattr(p, "file_data", None) and p.file_data and getattr(p.file_data, "file_uri", None)
+            getattr(p, "file_data", None)
+            and p.file_data
+            and getattr(p.file_data, "file_uri", None)
         ):
             result.append((p, getattr(p.file_data, "display_name", None)))
     return result
 
 
 async def _bytes_from_any(part: gt.Part, tool_context: ToolContext) -> bytes:
-    if getattr(part, "inline_data", None) and part.inline_data and part.inline_data.data:
+    if (
+        getattr(part, "inline_data", None)
+        and part.inline_data
+        and part.inline_data.data
+    ):
         return part.inline_data.data
     if (
         getattr(part, "file_data", None)
@@ -102,7 +94,9 @@ async def _bytes_from_any(part: gt.Part, tool_context: ToolContext) -> bytes:
         loader = getattr(tool_context, "load_artifact_bytes", None)
         if callable(loader):
             return await loader(part.file_data.file_uri)  # type: ignore[reportUnknownVariableType]
-        raise ValueError("file_data present but tool_context.load_artifact_bytes is unavailable.")
+        raise ValueError(
+            "file_data present but tool_context.load_artifact_bytes is unavailable."
+        )
     raise ValueError("Part has no inline_data or file_data.")
 
 
@@ -123,13 +117,17 @@ def _preliminary_part_checks(parts: list[Any], rid: str) -> dict[str, Any] | Non
 
 
 # ---------------- the tool (ONE ARG, ASYNC) ----------------
-async def save_and_report_size(tool_context: ToolContext, ) -> dict[str, Any]:  # noqa: PLR0911
+
+
+async def save_and_report_size(
+    tool_context: ToolContext,
+) -> dict[str, Any]:
     """
     Accepts binary file input (PDF preferred) and reports its size in bytes.
     Returns a dict with {status, message?, filename, size_bytes, version, rid}.
     """
     rid = uuid.uuid4().hex[:8]
-    
+
     content = tool_context.user_content
 
     try:
@@ -138,7 +136,7 @@ async def save_and_report_size(tool_context: ToolContext, ) -> dict[str, Any]:  
         if preliminary_error is not None:
             return preliminary_error
 
-        uploaded_pdfs_info = [] # List to store details of all uploaded PDFs
+        uploaded_pdfs_info = []  # List to store details of all uploaded PDFs
         total_size = 0
 
         for pdf_part, inferred_name in parts:
@@ -174,28 +172,45 @@ async def save_and_report_size(tool_context: ToolContext, ) -> dict[str, Any]:  
 
             artifact_name: str = inferred_name or "uploaded.pdf"
             try:
-                part_to_save = gt.Part.from_bytes(data=data, mime_type="application/pdf")
+                part_to_save = gt.Part.from_bytes(
+                    data=data, mime_type="application/pdf"
+                )
 
-                logger.info(f"[{rid}] Attempting to save artifact: {artifact_name} to ADK_ARTIFACT_SERVICE_URI...")
-
+                logger.info(
+                    f"[{rid}] Attempting to save artifact: {artifact_name} to ADK_ARTIFACT_SERVICE_URI..."
+                )
 
                 version = await tool_context.save_artifact(artifact_name, part_to_save)
 
-                 # New logging to confirm success and version
-                logger.info(f"[{rid}] Successfully saved artifact: {artifact_name} with version: {version}")
+                # New logging to confirm success and version
+                logger.info(
+                    f"[{rid}] Successfully saved artifact: {artifact_name} with version: {version}"
+                )
 
-                uploaded_pdfs_info.append({
-                    "name": artifact_name,
-                    "size_bytes": size_bytes,
-                    "version": version,
-                    "rid": rid,
-                })
+                uploaded_pdfs_info.append(
+                    {
+                        "name": artifact_name,
+                        "size_bytes": size_bytes,
+                        "version": version,
+                        "rid": rid,
+                    }
+                )
             except Exception as e:
-                logger.exception("[%s] Failed to save artifact name=%s", rid, artifact_name)
-                return {"status": "error", "message": f"Failed to save artifact: {e!s}", "rid": rid}
+                logger.exception(
+                    "[%s] Failed to save artifact name=%s", rid, artifact_name
+                )
+                return {
+                    "status": "error",
+                    "message": f"Failed to save artifact: {e!s}",
+                    "rid": rid,
+                }
 
         if not uploaded_pdfs_info:
-            return {"status": "error", "message": "No valid PDF bytes received.", "rid": rid}
+            return {
+                "status": "error",
+                "message": "No valid PDF bytes received.",
+                "rid": rid,
+            }
 
         # Store the list of all uploaded PDF details in the state
         tool_context.state["uploaded_pdfs_info"] = uploaded_pdfs_info
@@ -233,7 +248,7 @@ def _extract_target_sections(full_text: str) -> str:
     # Extract text block: starts at 'Executive Summary', ends before 'Referenced GCP Solutions'
     if end_index != -1 and end_index > start_index:
         return full_text[start_index:end_index].strip()
-    
+
     # Fallback: if 'Referenced GCP Solutions' is missing or on a later page, take all from start marker.
     return full_text[start_index:].strip()
 
@@ -243,7 +258,9 @@ def _determine_pdf_type(filename: str, existing_types: set) -> str:
     lower_name = filename.lower()
     if "discovery" in lower_name and "discovery_report" not in existing_types:
         return "discovery_report"
-    if ("tech" in lower_name or "stack" in lower_name or "profile" in lower_name) and "tech_stack_profile" not in existing_types:
+    if (
+        "tech" in lower_name or "stack" in lower_name or "profile" in lower_name
+    ) and "tech_stack_profile" not in existing_types:
         return "tech_stack_profile"
     return "unclassified_pdf"
 
@@ -257,23 +274,31 @@ async def extract_and_summarize_artifact(tool_context: ToolContext) -> dict[str,
     uploaded_pdfs_info = tool_context.state.get("uploaded_pdfs_info")
 
     if not uploaded_pdfs_info:
-        return {"status": "error", "message": "No saved PDF artifact found in agent state."}
+        return {
+            "status": "error",
+            "message": "No saved PDF artifact found in agent state.",
+        }
 
     extracted_results = {}
-    assigned_types = set() # To track which types have been assigned
+    assigned_types = set()  # To track which types have been assigned
 
     for pdf_info in uploaded_pdfs_info:
         artifact_name = pdf_info["name"]
         version = pdf_info["version"]
-        
+
         pdf_type = _determine_pdf_type(artifact_name, assigned_types)
-        
+
         try:
             artifact_part = await tool_context.load_artifact(artifact_name)
 
             if artifact_part is None:
-                logger.error(f"[{rid}] Artifact '{artifact_name}' could not be loaded from service.")
-                extracted_results[artifact_name] = {"status": "error", "message": f"Artifact '{artifact_name}' not found."}
+                logger.error(
+                    f"[{rid}] Artifact '{artifact_name}' could not be loaded from service."
+                )
+                extracted_results[artifact_name] = {
+                    "status": "error",
+                    "message": f"Artifact '{artifact_name}' not found.",
+                }
                 continue
 
             data_bytes = await _bytes_from_any(artifact_part, tool_context)
@@ -286,29 +311,44 @@ async def extract_and_summarize_artifact(tool_context: ToolContext) -> dict[str,
             if pdf_type == "discovery_report":
                 targeted_text = _extract_target_sections(full_text)
                 if not targeted_text.strip():
-                    extracted_results[artifact_name] = {"status": "error", "message": "Could not extract targeted text from Discovery Report."}
+                    extracted_results[artifact_name] = {
+                        "status": "error",
+                        "message": "Could not extract targeted text from Discovery Report.",
+                    }
                 else:
                     tool_context.state["discovery_report_text"] = targeted_text
-                    extracted_results[artifact_name] = {"status": "success", "type": "discovery_report", "summary_snippet": targeted_text[:200] + "..."}
+                    extracted_results[artifact_name] = {
+                        "status": "success",
+                        "type": "discovery_report",
+                        "summary_snippet": targeted_text[:200] + "...",
+                    }
                     assigned_types.add("discovery_report")
             elif pdf_type == "tech_stack_profile":
                 tool_context.state["tech_stack_full_text"] = full_text
-                extracted_results[artifact_name] = {"status": "success", "type": "tech_stack_profile", "summary_snippet": full_text[:200] + "..."}
+                extracted_results[artifact_name] = {
+                    "status": "success",
+                    "type": "tech_stack_profile",
+                    "summary_snippet": full_text[:200] + "...",
+                }
                 assigned_types.add("tech_stack_profile")
-            
+
         except Exception as e:
-            logger.exception(f"[{rid}] Error processing and extracting text from artifact '{artifact_name}'")
-            extracted_results[artifact_name] = {"status": "error", "message": f"An unhandled error occurred: {e!s}"}
+            logger.exception(
+                f"[{rid}] Error processing and extracting text from artifact '{artifact_name}'"
+            )
+            extracted_results[artifact_name] = {
+                "status": "error",
+                "message": f"An unhandled error occurred: {e!s}",
+            }
             continue
 
     return {
         "status": "success",
         "processed_pdfs_count": len(uploaded_pdfs_info),
         "extracted_results": extracted_results,
-        "rid": rid
+        "rid": rid,
     }
 
-        
 
 save_generated_report_tool = FunctionTool(func=save_and_report_size)
 extract_sections_tool = FunctionTool(func=extract_and_summarize_artifact)

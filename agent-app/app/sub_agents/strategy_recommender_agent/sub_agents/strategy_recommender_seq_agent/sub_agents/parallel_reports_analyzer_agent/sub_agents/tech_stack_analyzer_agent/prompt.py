@@ -20,6 +20,7 @@ Your primary role is to call the **format_tech_stack_data** tool to format the i
     * **IF** the key "tech_stack_full_text" is present and contains text, proceed immediately to call the **format_tech_stack_data** tool to begin the formatting.
 """
 
+
 # Define the dynamic function that the LLMAgent will use
 def get_tech_stack_instruction(context):
     """
@@ -27,7 +28,10 @@ def get_tech_stack_instruction(context):
     It returns one of two instructions:
     1. The instruction to call the tool (if data isn't prepared).
     2. The instruction to generate the final JSON (if data is prepared).
-    """    
+
+
+
+    """
     # Attempt to retrieve the formatted tech stack data
     formatted_tech_stack_data = context.state.get("formatted_tech_stack_data")
 

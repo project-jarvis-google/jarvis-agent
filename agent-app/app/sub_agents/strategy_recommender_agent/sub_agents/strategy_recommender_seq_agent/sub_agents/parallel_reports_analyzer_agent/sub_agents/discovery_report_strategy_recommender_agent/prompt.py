@@ -26,8 +26,9 @@ def get_final_report_instruction(context):
     It returns one of two instructions:
     1. The instruction to call the tool (if data isn't prepared).
     2. The instruction to generate the final JSON (if data is prepared).
+
     """
-    
+
     # Attempt to retrieve the prompt set by the previous tool
     prepared_prompt = context.state.get("discovery_summary_prompt")
 
@@ -52,4 +53,3 @@ You are an expert at interpreting discovery reports. Your primary role is to gen
     else:
         # **STAGE 1 INSTRUCTION: The data needs formatting, call the tool.**
         return DISCOVERY_REPORT_FORMATTER_INSTRUCTION_TEMPLATE
-    
