@@ -14,20 +14,16 @@
 
 """
 Strategy Recommender Agent: Answers user's query about the GCP Migration/Modernization Strategy Recommendations 
-against the discovered application characterstics and business goals.
+against the discovered application characteristics and business goals.
 Provides Strategy Recommendation Report evaluating various "Rs" and a data-driven justification for the chosen strategy
 """
 
-import os
-import logging
 from google.adk.agents import LlmAgent
+from google.adk.artifacts import InMemoryArtifactService 
+from google.adk.runners import Runner
+from google.adk.sessions import InMemorySessionService
 from .prompt import STRATEGY_RECOMMENDER_PROMPT
 from .sub_agents.strategy_recommender_seq_agent import strategy_recommender_seq_agent
-from google.adk.agents import SequentialAgent
-from google.adk.agents import LlmAgent
-from google.adk.runners import Runner
-from google.adk.artifacts import InMemoryArtifactService 
-from google.adk.sessions import InMemorySessionService
 
 MODEL = "gemini-2.5-flash"
 
@@ -36,7 +32,7 @@ strategy_recommender_agent = LlmAgent(
     model=MODEL,
     description=(
     """ 
-        You are a helpful assistant design to scan the input Discovery Report and evaluates the discovered application characterstics like summary, pain points
+        You are a helpful assistant design to scan the input Discovery Report and evaluates the discovered application characteristics like summary, pain points
         and business outcomes against various "Rs"(rehost, replatform, refactor, re-architect, rebuild, replace, retire) and
         provide the recommended strategy considering the Discovery Report provided as input.
         Ask user for the Discovery Report as input to provide a data-driven justification for the chosen strategy.

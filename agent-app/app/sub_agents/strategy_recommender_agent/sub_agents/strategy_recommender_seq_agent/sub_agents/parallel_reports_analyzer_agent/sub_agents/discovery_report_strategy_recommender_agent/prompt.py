@@ -52,3 +52,4 @@ You are an expert at interpreting discovery reports. Your primary role is to gen
     else:
         # **STAGE 1 INSTRUCTION: The data needs formatting, call the tool.**
         return DISCOVERY_REPORT_FORMATTER_INSTRUCTION_TEMPLATE
+    

@@ -1,10 +1,6 @@
 from google.adk.agents import ParallelAgent
-
 from .sub_agents.discovery_report_strategy_recommender_agent import discovery_report_strategy_recommender_agent
 from .sub_agents.tech_stack_analyzer_agent import tech_stack_analyzer_agent
-
-
-
 
 MODEL = "gemini-2.5-flash"
 
