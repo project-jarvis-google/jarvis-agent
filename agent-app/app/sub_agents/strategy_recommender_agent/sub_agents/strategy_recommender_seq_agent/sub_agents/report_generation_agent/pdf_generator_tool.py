@@ -1,23 +1,22 @@
 import json
+import logging
+import os
+import re
+from io import BytesIO
+from typing import Any, cast
+import google.auth
 from google.adk.tools import FunctionTool, ToolContext
+from google.cloud import storage
+from google.genai.types import Part, Blob
+from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Frame, Spacer, ListFlowable, ListItem, Table, TableStyle, Flowable
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
-from reportlab.lib import colors
-from google.genai.types import Part, Blob
-from io import BytesIO
-from google.cloud import storage
-import os
-import google.auth
-import logging
-import re
-from typing import Any, cast
 
 # The following import is commented out to avoid potential ImportError if not universally configured
 # from app.utils.gcs import create_bucket_if_not_exists
-
 
 _, project_id = google.auth.default()
 

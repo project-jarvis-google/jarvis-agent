@@ -27,8 +27,7 @@ def get_tech_stack_instruction(context):
     It returns one of two instructions:
     1. The instruction to call the tool (if data isn't prepared).
     2. The instruction to generate the final JSON (if data is prepared).
-    """
-    
+    """    
     # Attempt to retrieve the formatted tech stack data
     formatted_tech_stack_data = context.state.get("formatted_tech_stack_data")
 

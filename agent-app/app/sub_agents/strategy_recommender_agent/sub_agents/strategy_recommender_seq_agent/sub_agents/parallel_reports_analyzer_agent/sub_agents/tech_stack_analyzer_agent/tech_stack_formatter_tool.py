@@ -1,6 +1,5 @@
 import logging
-from google.adk.tools import FunctionTool
-from google.adk.tools import ToolContext
+from google.adk.tools import FunctionTool, ToolContext
 from typing import Any
 
 logger = logging.getLogger(__name__)
