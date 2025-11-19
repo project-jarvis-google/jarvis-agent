@@ -1,1 +1,1 @@
-from .agent import parallel_reports_analyzer_agent as parallel_reports_analyzer_agent
+from .agent import parallel_reports_analyzer_agent

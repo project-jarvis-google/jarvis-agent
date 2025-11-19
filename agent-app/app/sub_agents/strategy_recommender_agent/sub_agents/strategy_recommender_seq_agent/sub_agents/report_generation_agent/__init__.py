@@ -1,1 +1,1 @@
-from .agent import strategy_report_generator_agent as strategy_report_generator_agent
+from .agent import strategy_report_generator_agent
