@@ -1,13 +1,14 @@
-import logging
-from typing import Dict, Any, List
-import mysql.connector
 import json
+import logging
 import os
 import re
+from typing import Any
+
+import google.auth
+import mysql.connector
 from google import genai
 from google.api_core import exceptions
 from google.genai import types
-import google.auth
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
@@ -46,7 +47,7 @@ else:
     logger.error("Cannot initialize GenAI Client: GOOGLE_CLOUD_PROJECT is not set.")
 
 
-def _execute_query(conn: Any, query: str) -> List[Dict[str, Any]]:
+def _execute_query(conn: Any, query: str) -> list[dict[str, Any]]:
     """Executes a SQL query and returns results as a list of dicts."""
     cursor = conn.cursor(dictionary=True)
     try:
@@ -57,7 +58,7 @@ def _execute_query(conn: Any, query: str) -> List[Dict[str, Any]]:
 
 
 def _construct_llm_prompt(
-    schema_name: str, db_type: str, schema_details: Dict[str, Any]
+    schema_name: str, db_type: str, schema_details: dict[str, Any]
 ) -> str:
     """Constructs a prompt for the LLM to analyze relationships and anomalies with formatted JSON."""
 
@@ -157,8 +158,8 @@ def _extract_json_content(text: str) -> str:
 
 
 def _analyze_with_llm(
-    schema_name: str, db_type: str, schema_details: Dict[str, Any]
-) -> Dict[str, List[Dict[str, Any]]]:
+    schema_name: str, db_type: str, schema_details: dict[str, Any]
+) -> dict[str, list[dict[str, Any]]]:
     """Calls an LLM to get inferred relationships and anomalies."""
     if not client:
         logger.error("GenAI Client not initialized. Skipping LLM analysis.")
@@ -219,7 +220,7 @@ def _analyze_with_llm(
         }
 
 
-def get_mysql_schema_details(conn: Any, schema_name: str) -> Dict[str, Any]:
+def get_mysql_schema_details(conn: Any, schema_name: str) -> dict[str, Any]:
     # For MySQL, schema_name is the database name.
     logger.info(f"Fetching MySQL schema details for: {schema_name}")
     try:
@@ -239,7 +240,7 @@ def get_mysql_schema_details(conn: Any, schema_name: str) -> Dict[str, Any]:
     # 1. Fetch Basic Schema Info
     tables_query = "SHOW FULL TABLES WHERE Table_type = 'BASE TABLE';"
     tables = _execute_query(conn, tables_query)
-    table_names = [list(t.values())[0] for t in tables]
+    table_names = [next(iter(t.values())) for t in tables]
 
     for t_name in table_names:
         details["tables"][t_name] = {"columns": {}, "constraints": [], "indexes": []}
@@ -290,7 +291,7 @@ def get_mysql_schema_details(conn: Any, schema_name: str) -> Dict[str, Any]:
 
     views_query = "SHOW FULL TABLES WHERE Table_type = 'VIEW';"
     views = _execute_query(conn, views_query)
-    for v_name in [list(v.values())[0] for v in views]:
+    for v_name in [next(iter(v.values())) for v in views]:
         try:
             definition_query = f"SHOW CREATE VIEW `{v_name}`;"
             definition = _execute_query(conn, definition_query)

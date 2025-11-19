@@ -1,8 +1,11 @@
 from google.adk.agents.llm_agent import LlmAgent
-from .tools import generate_summary_report, export_full_report, generate_erd_script
+
+from app.config import MODEL
+
+from .tools import export_full_report, generate_erd_script, generate_summary_report
 
 reporting_agent = LlmAgent(
-    model="gemini-2.5-flash",
+    model=MODEL,
     name="reporting_agent",
     description="Generates reports, exports data, and creates schema diagrams.",
     instruction="""

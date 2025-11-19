@@ -1,16 +1,16 @@
-from google.adk.tools import ToolContext
 import logging
-from typing import Dict, Any, List
+from typing import Any
 
-import psycopg2
 import mysql.connector
+import psycopg2
 import pyodbc
+from google.adk.tools import ToolContext
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 
-def _get_schemas(conn: Any, db_type: str) -> List[str]:
+def _get_schemas(conn: Any, db_type: str) -> list[str]:
     """Fetches list of schemas/databases based on db type."""
     schemas = []
     cursor = conn.cursor()
@@ -52,8 +52,8 @@ def _get_schemas(conn: Any, db_type: str) -> List[str]:
 
 
 async def validate_db_connection(
-    connection_details: Dict[str, Any], tool_context: ToolContext
-) -> Dict[str, Any]:
+    connection_details: dict[str, Any], tool_context: ToolContext
+) -> dict[str, Any]:
     """Validates a database connection for PostgreSQL, MySQL, or MSSQL,
     fetches available schemas, and saves metadata to session memory.
 

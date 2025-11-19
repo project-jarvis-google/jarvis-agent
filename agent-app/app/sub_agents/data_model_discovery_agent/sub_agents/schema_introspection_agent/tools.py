@@ -1,20 +1,21 @@
 import logging
-from typing import Dict, Any, List
-from google.adk.tools import ToolContext
+from typing import Any
+
+import mysql.connector
 
 # Import database connectors
 import psycopg2
-import mysql.connector
 import pyodbc
+from google.adk.tools import ToolContext
 
 # Import utils
-from .utils import postgresql_utils, mysql_utils, mssql_utils
+from .utils import mssql_utils, mysql_utils, postgresql_utils
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 
-def _get_db_connection(metadata: Dict[str, Any], password: str) -> Any:
+def _get_db_connection(metadata: dict[str, Any], password: str) -> Any:
     db_type = metadata.get("db_type")
     host = metadata.get("host")
     port = metadata.get("port")
@@ -44,7 +45,7 @@ def _get_db_connection(metadata: Dict[str, Any], password: str) -> Any:
         raise ValueError(f"Unsupported database type: {db_type}")
 
 
-def _generate_summary(schema_details: Dict[str, Any]) -> Dict[str, int]:
+def _generate_summary(schema_details: dict[str, Any]) -> dict[str, int]:
     """Generates a summary of the introspected schema structure."""
     summary = {
         "tables": len(schema_details.get("tables", {})),
@@ -64,8 +65,8 @@ def _generate_summary(schema_details: Dict[str, Any]) -> Dict[str, int]:
 
 
 async def get_schema_details(
-    tool_context: ToolContext, args: Dict[str, Any]
-) -> Dict[str, Any]:
+    tool_context: ToolContext, args: dict[str, Any]
+) -> dict[str, Any]:
     """
     Retrieves detailed schema information and a summary for the given schema_name.
     Updates the session state with the selected_schema and schema_structure.
@@ -123,7 +124,7 @@ async def get_schema_details(
     except Exception as e:
         logger.error(f"Error during schema introspection: {e}", exc_info=True)
         return {
-            "error": f"Failed to get schema details for {db_type} ({schema_name}): {str(e)}"
+            "error": f"Failed to get schema details for {db_type} ({schema_name}): {e!s}"
         }
     finally:
         if conn:

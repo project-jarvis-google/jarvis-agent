@@ -28,6 +28,7 @@ from .sub_agents.common_utility_agent.mosaic_rag_agent_presales import (
     mosaic_rag_agent_presales,
 )
 from .sub_agents.compliance_and_security_baseline_agent import compliance_agent
+from .sub_agents.data_model_discovery_agent import data_model_discovery_agent
 from .sub_agents.detailed_architecture_design_agent import (
     detailed_architecture_design_agent,
 )
@@ -38,8 +39,6 @@ from .sub_agents.otel_agent import otel_coordinator
 from .sub_agents.recommendation_agent import recommendation_agent
 from .sub_agents.strategy_recommender_agent import strategy_recommender_agent
 from .sub_agents.tech_stack_profiler_agent import tech_stack_profiler
-from .sub_agents.data_model_discovery_agent import data_model_discovery_agent
-
 from .tools import (
     transfer_to_capability_mapper_agent_tool,
     transfer_to_discovery_agent_tool,

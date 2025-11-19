@@ -1,13 +1,15 @@
+import logging
+
 from google.adk.agents.llm_agent import LlmAgent
 from google.adk.agents.readonly_context import ReadonlyContext
-from .sub_agents.database_cred_agent.agent import database_cred_agent
-from .sub_agents.schema_introspection_agent.agent import schema_introspection_agent
-from .sub_agents.qa_agent.agent import qa_agent
-from .sub_agents.data_profiling_agent.agent import data_profiling_agent
-from .sub_agents.reporting_agent.agent import reporting_agent
 
-import logging
-import json
+from app.config import MODEL
+
+from .sub_agents.data_profiling_agent.agent import data_profiling_agent
+from .sub_agents.database_cred_agent.agent import database_cred_agent
+from .sub_agents.qa_agent.agent import qa_agent
+from .sub_agents.reporting_agent.agent import reporting_agent
+from .sub_agents.schema_introspection_agent.agent import schema_introspection_agent
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -200,7 +202,7 @@ def root_agent_instruction(ctx: ReadonlyContext) -> str:
 
 
 data_model_discovery_agent = LlmAgent(
-    model="gemini-2.5-flash",
+    model=MODEL,
     name="data_model_discovery_agent",
     description=(
         "A helpful root agent that orchestrates sub-agents to introspect and profile legacy databases."

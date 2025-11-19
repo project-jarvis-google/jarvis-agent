@@ -1,7 +1,10 @@
 import json
 from decimal import Decimal
+
 from google.adk.agents.llm_agent import LlmAgent
 from google.adk.agents.readonly_context import ReadonlyContext
+
+from app.config import MODEL
 
 
 def json_encoder_default(obj):
@@ -99,7 +102,7 @@ def qa_agent_instruction(ctx: ReadonlyContext) -> str:
 
 
 qa_agent = LlmAgent(
-    model="gemini-2.5-flash",
+    model=MODEL,
     name="qa_agent",
     description="Answers natural language questions about the discovered database schema structure and data profiling results.",
     instruction=qa_agent_instruction,

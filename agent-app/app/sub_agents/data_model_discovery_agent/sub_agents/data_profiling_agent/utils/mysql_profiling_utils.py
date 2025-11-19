@@ -1,10 +1,10 @@
 import logging
-from typing import Dict, Any, List
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
-def _execute_query(conn: Any, query: str) -> List[Dict[str, Any]]:
+def _execute_query(conn: Any, query: str) -> list[dict[str, Any]]:
     cursor = conn.cursor(dictionary=True)
     try:
         cursor.execute(query)
@@ -16,9 +16,9 @@ def _execute_query(conn: Any, query: str) -> List[Dict[str, Any]]:
 def profile_mysql_data(
     conn: Any,
     schema_name: str,
-    schema_structure: Dict[str, Any],
+    schema_structure: dict[str, Any],
     sample_size: int = 10000,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     try:
         conn.database = schema_name
     except Exception as e:

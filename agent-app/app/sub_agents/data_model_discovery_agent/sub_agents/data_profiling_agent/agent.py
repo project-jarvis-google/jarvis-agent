@@ -1,9 +1,11 @@
 from google.adk.agents.llm_agent import LlmAgent
+
+from app.config import MODEL
+
 from .tools import profile_schema_data
-from ..qa_agent.agent import qa_agent
 
 data_profiling_agent = LlmAgent(
-    model="gemini-2.5-flash",
+    model=MODEL,
     name="data_profiling_agent",
     description="Profiles data quality for the selected schema and then calls QA agent to summarize.",
     instruction="""
