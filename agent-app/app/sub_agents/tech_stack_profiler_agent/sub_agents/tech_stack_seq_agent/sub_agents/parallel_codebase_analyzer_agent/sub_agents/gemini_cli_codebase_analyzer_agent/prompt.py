@@ -38,11 +38,11 @@ There might be many more categories other than the ones listed in the examples.
 
 ## Output Format
 The final result MUST be a single JSON array.
-Each object within the array represents one identified tool/framework and MUST contain three keys:
-1. "name": The name of the framework, tool, etc (e.g., "Spring Boot").
+Each object within the array represents one identified tool/framework/library/cloud-provider and MUST contain three keys:
+1. "name": The name of the framework, tool, library, cloud provider etc (e.g., "Spring Boot").
 2. "category": The assigned category (e.g., "Application Framework").
 3. "version": The software version of the framework/library/tool identified (if available).
-4. "description": A brief description of what the framework/library/tool, etc is used for.
-5. "evidence": A brief explanation of how it was identified, including the file name (e.g., "Identified as a dependency in pom.xml").
+4. "description": A brief description of what the framework/library/tool/cloud provider, etc is used for.
+5. "evidence": A brief explanation of how it was identified, including the file name (e.g., "Identified as a dependency in pom.xml", "Identified based on deployment scripts").
 
 If no frameworks, libraries, tools or cloud providers are identified, you MUST return an empty array []."""
