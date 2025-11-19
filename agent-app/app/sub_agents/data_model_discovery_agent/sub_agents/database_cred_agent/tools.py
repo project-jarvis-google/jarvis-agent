@@ -9,6 +9,7 @@ import pyodbc
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
+
 def _get_schemas(conn: Any, db_type: str) -> List[str]:
     """Fetches list of schemas/databases based on db type."""
     schemas = []
@@ -23,22 +24,36 @@ def _get_schemas(conn: Any, db_type: str) -> List[str]:
         elif db_type == "mysql":
             cursor.execute("SHOW DATABASES;")
             # Filtering out default mysql databases
-            default_dbs = {'information_schema', 'mysql', 'performance_schema', 'sys'}
+            default_dbs = {"information_schema", "mysql", "performance_schema", "sys"}
             schemas = [row[0] for row in cursor.fetchall() if row[0] not in default_dbs]
         elif db_type == "mssql":
             cursor.execute("SELECT name FROM sys.schemas;")
-             # Filter out default mssql schemas
+            # Filter out default mssql schemas
             default_schemas = {
-                'db_accessadmin', 'db_backupoperator', 'db_datareader', 'db_datawriter',
-                'db_ddladmin', 'db_denydatareader', 'db_denydatawriter', 'db_owner',
-                'db_securityadmin', 'guest', 'INFORMATION_SCHEMA', 'sys'
+                "db_accessadmin",
+                "db_backupoperator",
+                "db_datareader",
+                "db_datawriter",
+                "db_ddladmin",
+                "db_denydatareader",
+                "db_denydatawriter",
+                "db_owner",
+                "db_securityadmin",
+                "guest",
+                "INFORMATION_SCHEMA",
+                "sys",
             }
-            schemas = [row[0] for row in cursor.fetchall() if row[0] not in default_schemas]
+            schemas = [
+                row[0] for row in cursor.fetchall() if row[0] not in default_schemas
+            ]
     finally:
         cursor.close()
     return schemas
 
-async def validate_db_connection(connection_details: Dict[str, Any], tool_context: ToolContext) -> Dict[str, Any]:
+
+async def validate_db_connection(
+    connection_details: Dict[str, Any], tool_context: ToolContext
+) -> Dict[str, Any]:
     """Validates a database connection for PostgreSQL, MySQL, or MSSQL,
     fetches available schemas, and saves metadata to session memory.
 
@@ -96,7 +111,9 @@ async def validate_db_connection(connection_details: Dict[str, Any], tool_contex
             logger.error(error_msg)
             return {"status": "error", "message": error_msg}
 
-        logger.info(f"{db_type.upper()} connection established successfully for validation.")
+        logger.info(
+            f"{db_type.upper()} connection established successfully for validation."
+        )
 
         # Fetch schemas
         schemas = _get_schemas(conn, db_type)
@@ -106,7 +123,7 @@ async def validate_db_connection(connection_details: Dict[str, Any], tool_contex
         if "db_connection" in tool_context.state:
             del tool_context.state["db_connection"]
         if "db_creds_temp" in tool_context.state:
-             del tool_context.state["db_creds_temp"]
+            del tool_context.state["db_creds_temp"]
         if "selected_schema" in tool_context.state:
             del tool_context.state["selected_schema"]
 
@@ -120,13 +137,15 @@ async def validate_db_connection(connection_details: Dict[str, Any], tool_contex
             },
             "status": "connected",
         }
-        tool_context.state["db_creds_temp"] = {"password": connection_details["password"]}
+        tool_context.state["db_creds_temp"] = {
+            "password": connection_details["password"]
+        }
 
         logger.info("Connection metadata saved in session memory.")
         return {
             "status": "success",
             "message": f"{db_type.upper()} connection validated successfully.",
-            "schemas": schemas
+            "schemas": schemas,
         }
 
     except Exception as e:
@@ -135,4 +154,7 @@ async def validate_db_connection(connection_details: Dict[str, Any], tool_contex
             del tool_context.state["db_connection"]
         if "db_creds_temp" in tool_context.state:
             del tool_context.state["db_creds_temp"]
-        return {"status": "error", "message": f"Connection/Schema fetch failed for {db_type}: {e}"}
+        return {
+            "status": "error",
+            "message": f"Connection/Schema fetch failed for {db_type}: {e}",
+        }

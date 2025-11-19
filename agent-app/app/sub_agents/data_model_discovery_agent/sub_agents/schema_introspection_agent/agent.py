@@ -3,9 +3,9 @@ from .tools import get_schema_details
 import json
 
 schema_introspection_agent = LlmAgent(
-    model='gemini-2.5-flash',
-    name='schema_introspection_agent',
-    description='Introspects the selected database schema to discover tables, columns, constraints, relationships, indexes, and views.',
+    model="gemini-2.5-flash",
+    name="schema_introspection_agent",
+    description="Introspects the selected database schema to discover tables, columns, constraints, relationships, indexes, and views.",
     instruction="""
     ### Role
     You are a **Database Schema Introspection Agent**. Your sole task is to fetch and summarize the schema structure of a database.  
@@ -68,7 +68,5 @@ schema_introspection_agent = LlmAgent(
         ```
     - Focus **only** on fetching and summarizing schema details.
     """,
-    tools=[
-        get_schema_details
-    ],
+    tools=[get_schema_details],
 )

@@ -19,10 +19,14 @@ except google.auth.exceptions.DefaultCredentialsError:
     GOOGLE_CLOUD_PROJECT = os.environ.get("GOOGLE_CLOUD_PROJECT")
 
 if not GOOGLE_CLOUD_PROJECT:
-    logger.warning("GOOGLE_CLOUD_PROJECT not set in environment or Application Default Credentials.")
+    logger.warning(
+        "GOOGLE_CLOUD_PROJECT not set in environment or Application Default Credentials."
+    )
 
 GOOGLE_CLOUD_LOCATION = os.environ.get("GOOGLE_CLOUD_LOCATION", "us-central1")
-GOOGLE_GENAI_USE_VERTEXAI = os.environ.get("GOOGLE_GENAI_USE_VERTEXAI", "True").lower() in ("true", "1")
+GOOGLE_GENAI_USE_VERTEXAI = os.environ.get(
+    "GOOGLE_GENAI_USE_VERTEXAI", "True"
+).lower() in ("true", "1")
 MODEL = "gemini-2.5-pro"
 
 client = None
@@ -33,11 +37,14 @@ if GOOGLE_CLOUD_PROJECT:
             project=GOOGLE_CLOUD_PROJECT,
             location=GOOGLE_CLOUD_LOCATION,
         )
-        logger.info(f"GenAI Client initialized. VertexAI: {GOOGLE_GENAI_USE_VERTEXAI}, Project: {GOOGLE_CLOUD_PROJECT}, Location: {GOOGLE_CLOUD_LOCATION}, Model: {MODEL}")
+        logger.info(
+            f"GenAI Client initialized. VertexAI: {GOOGLE_GENAI_USE_VERTEXAI}, Project: {GOOGLE_CLOUD_PROJECT}, Location: {GOOGLE_CLOUD_LOCATION}, Model: {MODEL}"
+        )
     except Exception as e:
         logger.error(f"Failed to initialize GenAI Client: {e}")
 else:
     logger.error("Cannot initialize GenAI Client: GOOGLE_CLOUD_PROJECT is not set.")
+
 
 def _execute_query(conn: Any, query: str) -> List[Dict[str, Any]]:
     """Executes a SQL query and returns results as a list of dicts."""
@@ -48,21 +55,24 @@ def _execute_query(conn: Any, query: str) -> List[Dict[str, Any]]:
     finally:
         cursor.close()
 
-def _construct_llm_prompt(schema_name: str, db_type: str, schema_details: Dict[str, Any]) -> str:
+
+def _construct_llm_prompt(
+    schema_name: str, db_type: str, schema_details: Dict[str, Any]
+) -> str:
     """Constructs a prompt for the LLM to analyze relationships and anomalies with formatted JSON."""
 
     tables_context = {}
     for table_name, table_info in schema_details.get("tables", {}).items():
         tables_context[table_name] = {
             "columns": list(table_info.get("columns", {}).keys()),
-            "constraints": table_info.get("constraints", [])
+            "constraints": table_info.get("constraints", []),
         }
 
     context = {
         "db_type": db_type,
         "schema_name": schema_name,
         "tables": tables_context,
-        "existing_foreign_keys": schema_details.get("foreign_keys", [])
+        "existing_foreign_keys": schema_details.get("foreign_keys", []),
     }
 
     # Format JSON for readability
@@ -124,6 +134,7 @@ def _construct_llm_prompt(schema_name: str, db_type: str, schema_details: Dict[s
     """
     return prompt
 
+
 def _extract_json_content(text: str) -> str:
     """
     Extracts JSON content from Markdown-style code fences (```json ... ```).
@@ -144,13 +155,16 @@ def _extract_json_content(text: str) -> str:
     except json.JSONDecodeError:
         return extracted
 
-def _analyze_with_llm(schema_name: str, db_type: str, schema_details: Dict[str, Any]) -> Dict[str, List[Dict[str, Any]]]:
+
+def _analyze_with_llm(
+    schema_name: str, db_type: str, schema_details: Dict[str, Any]
+) -> Dict[str, List[Dict[str, Any]]]:
     """Calls an LLM to get inferred relationships and anomalies."""
     if not client:
         logger.error("GenAI Client not initialized. Skipping LLM analysis.")
         return {
             "inferred_relationships": [],
-            "anomalies": [{"error": "LLM client not available."}]
+            "anomalies": [{"error": "LLM client not available."}],
         }
 
     prompt = _construct_llm_prompt(schema_name, db_type, schema_details)
@@ -167,7 +181,9 @@ def _analyze_with_llm(schema_name: str, db_type: str, schema_details: Dict[str, 
 
         # handles ```json blocks
         cleaned_json = _extract_json_content(generated_text)
-        logger.debug(f"****** Cleaned JSON Extracted from LLM Response:\n{cleaned_json}")
+        logger.debug(
+            f"****** Cleaned JSON Extracted from LLM Response:\n{cleaned_json}"
+        )
 
         # Parse the cleaned JSON
         llm_output = json.loads(cleaned_json)
@@ -175,31 +191,33 @@ def _analyze_with_llm(schema_name: str, db_type: str, schema_details: Dict[str, 
         anomalies = llm_output.get("anomalies", [])
 
         if not isinstance(inferred, list) or not isinstance(anomalies, list):
-            raise ValueError("LLM response is not in the expected list format for keys.")
+            raise ValueError(
+                "LLM response is not in the expected list format for keys."
+            )
 
-        return {
-            "inferred_relationships": inferred,
-            "anomalies": anomalies
-        }
+        return {"inferred_relationships": inferred, "anomalies": anomalies}
 
     except json.JSONDecodeError as e:
-        logger.error(f"Error decoding LLM JSON response: {e}. Cleaned Response: {cleaned_json}")
+        logger.error(
+            f"Error decoding LLM JSON response: {e}. Cleaned Response: {cleaned_json}"
+        )
         return {
             "inferred_relationships": [],
-            "anomalies": [{"error": f"LLM response was not valid JSON: {e}"}]
+            "anomalies": [{"error": f"LLM response was not valid JSON: {e}"}],
         }
     except (exceptions.GoogleAPICallError, IndexError, AttributeError, ValueError) as e:
         logger.error(f"Error calling LLM or processing response: {e}")
         return {
             "inferred_relationships": [],
-            "anomalies": [{"error": f"LLM analysis failed: {e}"}]
+            "anomalies": [{"error": f"LLM analysis failed: {e}"}],
         }
     except Exception as e:
         logger.error(f"Unexpected error during LLM analysis: {e}")
         return {
             "inferred_relationships": [],
-            "anomalies": [{"error": f"Unexpected LLM analysis error: {e}"}]
+            "anomalies": [{"error": f"Unexpected LLM analysis error: {e}"}],
         }
+
 
 def get_mysql_schema_details(conn: Any, schema_name: str) -> Dict[str, Any]:
     # For MySQL, schema_name is the database name.
@@ -210,7 +228,13 @@ def get_mysql_schema_details(conn: Any, schema_name: str) -> Dict[str, Any]:
         logger.error(f"MySQL change database failed: {err}")
         raise
 
-    details = {"tables": {}, "views": {}, "foreign_keys": [], "inferred_relationships": [], "anomalies": []}
+    details = {
+        "tables": {},
+        "views": {},
+        "foreign_keys": [],
+        "inferred_relationships": [],
+        "anomalies": [],
+    }
 
     # 1. Fetch Basic Schema Info
     tables_query = "SHOW FULL TABLES WHERE Table_type = 'BASE TABLE';"
@@ -222,9 +246,12 @@ def get_mysql_schema_details(conn: Any, schema_name: str) -> Dict[str, Any]:
         cols_query = f"DESCRIBE `{t_name}`;"
         columns = _execute_query(conn, cols_query)
         for col in columns:
-            details["tables"][t_name]["columns"][col['Field']] = {
-                "type": col['Type'], "nullable": col['Null'] == 'YES', "default": col['Default'],
-                "key": col['Key'], "extra": col['Extra'],
+            details["tables"][t_name]["columns"][col["Field"]] = {
+                "type": col["Type"],
+                "nullable": col["Null"] == "YES",
+                "default": col["Default"],
+                "key": col["Key"],
+                "extra": col["Extra"],
             }
 
         constraints_query = f"""
@@ -235,16 +262,22 @@ def get_mysql_schema_details(conn: Any, schema_name: str) -> Dict[str, Any]:
             WHERE TC.TABLE_SCHEMA = '{schema_name}' AND TC.TABLE_NAME = '{t_name}'
             AND TC.CONSTRAINT_TYPE IN ('PRIMARY KEY', 'UNIQUE', 'FOREIGN KEY', 'CHECK');
         """
-        details["tables"][t_name]["constraints"] = _execute_query(conn, constraints_query)
+        details["tables"][t_name]["constraints"] = _execute_query(
+            conn, constraints_query
+        )
 
         indexes_query = f"SHOW INDEX FROM `{t_name}`;"
         indexes = _execute_query(conn, indexes_query)
         grouped_indexes = {}
         for index in indexes:
-            idx_name = index['Key_name']
+            idx_name = index["Key_name"]
             if idx_name not in grouped_indexes:
-                grouped_indexes[idx_name] = {"name": idx_name, "columns": [], "unique": index['Non_unique'] == 0}
-            grouped_indexes[idx_name]["columns"].append(index['Column_name'])
+                grouped_indexes[idx_name] = {
+                    "name": idx_name,
+                    "columns": [],
+                    "unique": index["Non_unique"] == 0,
+                }
+            grouped_indexes[idx_name]["columns"].append(index["Column_name"])
         details["tables"][t_name]["indexes"] = list(grouped_indexes.values())
 
     fks_query = f"""
@@ -261,7 +294,7 @@ def get_mysql_schema_details(conn: Any, schema_name: str) -> Dict[str, Any]:
         try:
             definition_query = f"SHOW CREATE VIEW `{v_name}`;"
             definition = _execute_query(conn, definition_query)
-            details["views"][v_name] = {"definition": definition[0]['Create View']}
+            details["views"][v_name] = {"definition": definition[0]["Create View"]}
         except Exception as e:
             logger.warning(f"Could not fetch view definition for {v_name}: {e}")
             details["views"][v_name] = {"definition": "N/A"}
@@ -271,11 +304,13 @@ def get_mysql_schema_details(conn: Any, schema_name: str) -> Dict[str, Any]:
     details["inferred_relationships"] = llm_analysis.get("inferred_relationships", [])
     details["anomalies"] = llm_analysis.get("anomalies", [])
 
-    logger.info(f"Found {len(details['inferred_relationships'])} potential inferred relationships.")
+    logger.info(
+        f"Found {len(details['inferred_relationships'])} potential inferred relationships."
+    )
     logger.info(f"Found {len(details['anomalies'])} potential relationship anomalies.")
 
     logger.debug("************************")
     logger.info(details)
     logger.debug("************************")
-    
+
     return details

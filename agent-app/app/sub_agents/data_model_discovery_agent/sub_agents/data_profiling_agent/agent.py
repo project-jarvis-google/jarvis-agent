@@ -3,9 +3,9 @@ from .tools import profile_schema_data
 from ..qa_agent.agent import qa_agent
 
 data_profiling_agent = LlmAgent(
-    model='gemini-2.5-flash',
-    name='data_profiling_agent',
-    description='Profiles data quality for the selected schema and then calls QA agent to summarize.',
+    model="gemini-2.5-flash",
+    name="data_profiling_agent",
+    description="Profiles data quality for the selected schema and then calls QA agent to summarize.",
     instruction="""
     ### Role
     You are a **Data Profiling Agent**. Your sole responsibility is to run data profiling on a schema and then immediately hand off the summary of findings to the QA agent for user-facing reporting.  

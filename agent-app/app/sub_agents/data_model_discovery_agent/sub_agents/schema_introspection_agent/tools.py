@@ -13,6 +13,7 @@ from .utils import postgresql_utils, mysql_utils, mssql_utils
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
+
 def _get_db_connection(metadata: Dict[str, Any], password: str) -> Any:
     db_type = metadata.get("db_type")
     host = metadata.get("host")
@@ -21,18 +22,27 @@ def _get_db_connection(metadata: Dict[str, Any], password: str) -> Any:
     user = metadata.get("user")
 
     if not all([db_type, host, port, dbname, user, password is not None]):
-        raise ValueError("Missing one or more required connection parameters in metadata or password.")
+        raise ValueError(
+            "Missing one or more required connection parameters in metadata or password."
+        )
     port = int(port)
-    logger.info(f"Attempting to connect to {db_type} at {host}:{port} as {user} to database {dbname}")
+    logger.info(
+        f"Attempting to connect to {db_type} at {host}:{port} as {user} to database {dbname}"
+    )
     if db_type == "postgresql":
-        return psycopg2.connect(host=host, port=port, dbname=dbname, user=user, password=password)
+        return psycopg2.connect(
+            host=host, port=port, dbname=dbname, user=user, password=password
+        )
     elif db_type == "mysql":
-        return mysql.connector.connect(host=host, port=port, database=dbname, user=user, password=password)
+        return mysql.connector.connect(
+            host=host, port=port, database=dbname, user=user, password=password
+        )
     elif db_type == "mssql":
         conn_str = f"DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={host},{port};DATABASE={dbname};UID={user};PWD={password}"
         return pyodbc.connect(conn_str)
     else:
         raise ValueError(f"Unsupported database type: {db_type}")
+
 
 def _generate_summary(schema_details: Dict[str, Any]) -> Dict[str, int]:
     """Generates a summary of the introspected schema structure."""
@@ -52,7 +62,10 @@ def _generate_summary(schema_details: Dict[str, Any]) -> Dict[str, int]:
         summary["indexes"] += len(table_info.get("indexes", []))
     return summary
 
-async def get_schema_details(tool_context: ToolContext, args: Dict[str, Any]) -> Dict[str, Any]:
+
+async def get_schema_details(
+    tool_context: ToolContext, args: Dict[str, Any]
+) -> Dict[str, Any]:
     """
     Retrieves detailed schema information and a summary for the given schema_name.
     Updates the session state with the selected_schema and schema_structure.
@@ -81,10 +94,14 @@ async def get_schema_details(tool_context: ToolContext, args: Dict[str, Any]) ->
     conn = None
     try:
         conn = _get_db_connection(metadata, password)
-        logger.info(f"Successfully reconnected to {db_type} for introspection of schema '{schema_name}'.")
+        logger.info(
+            f"Successfully reconnected to {db_type} for introspection of schema '{schema_name}'."
+        )
 
         if db_type == "postgresql":
-            schema_details = postgresql_utils.get_postgres_schema_details(conn, schema_name)
+            schema_details = postgresql_utils.get_postgres_schema_details(
+                conn, schema_name
+            )
         elif db_type == "mysql":
             schema_details = mysql_utils.get_mysql_schema_details(conn, schema_name)
         elif db_type == "mssql":
@@ -101,12 +118,16 @@ async def get_schema_details(tool_context: ToolContext, args: Dict[str, Any]) ->
             "status": "success",
             "message": f"Schema details for '{schema_name}' ({db_type}) retrieved and stored.",
             "schema_name": schema_name,
-            "summary": summary # Include the summary
+            "summary": summary,  # Include the summary
         }
     except Exception as e:
         logger.error(f"Error during schema introspection: {e}", exc_info=True)
-        return {"error": f"Failed to get schema details for {db_type} ({schema_name}): {str(e)}"}
+        return {
+            "error": f"Failed to get schema details for {db_type} ({schema_name}): {str(e)}"
+        }
     finally:
         if conn:
-            try: conn.close()
-            except Exception as e: logger.error(f"Error closing {db_type} connection: {e}")
+            try:
+                conn.close()
+            except Exception as e:
+                logger.error(f"Error closing {db_type} connection: {e}")

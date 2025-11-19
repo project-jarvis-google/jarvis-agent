@@ -68,6 +68,6 @@ root_agent = LlmAgent(
         capability_mapper_agent,
         strategy_recommender_agent,
         detailed_architecture_design_agent,
-        data_model_discovery_agent
+        data_model_discovery_agent,
     ],
 )

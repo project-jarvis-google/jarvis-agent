@@ -2,9 +2,9 @@ from google.adk.agents.llm_agent import LlmAgent
 from .tools import generate_summary_report, export_full_report, generate_erd_script
 
 reporting_agent = LlmAgent(
-    model='gemini-2.5-flash',
-    name='reporting_agent',
-    description='Generates reports, exports data, and creates schema diagrams.',
+    model="gemini-2.5-flash",
+    name="reporting_agent",
+    description="Generates reports, exports data, and creates schema diagrams.",
     instruction="""
     ### Role
     You are a Reporting Agent. You generate human-readable summaries, export detailed data, and create scripts for schema visualizations based on the analysis performed by other agents.
