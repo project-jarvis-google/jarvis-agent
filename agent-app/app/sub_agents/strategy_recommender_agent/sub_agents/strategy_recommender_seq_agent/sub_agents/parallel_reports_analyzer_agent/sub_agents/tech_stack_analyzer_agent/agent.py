@@ -1,4 +1,5 @@
 from google.adk.agents import LlmAgent
+
 from .prompt import get_tech_stack_instruction
 from .tech_stack_formatter_tool import tech_stack_formatter_tool
 
@@ -12,4 +13,3 @@ tech_stack_analyzer_agent = LlmAgent(
     instruction=get_tech_stack_instruction,
     tools=[tech_stack_formatter_tool],
 )
-

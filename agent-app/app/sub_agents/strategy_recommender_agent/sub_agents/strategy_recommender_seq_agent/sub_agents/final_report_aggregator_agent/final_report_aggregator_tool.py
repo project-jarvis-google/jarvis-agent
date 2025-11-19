@@ -1,9 +1,12 @@
 import logging
+
 from google.adk.tools import FunctionTool, ToolContext
+
 from .common_prompt import FINAL_STRATEGY_PROMPT
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
+
 
 def aggregate_and_prepare_final_prompt(tool_context: ToolContext) -> bool:
     """
@@ -41,12 +44,17 @@ def aggregate_and_prepare_final_prompt(tool_context: ToolContext) -> bool:
         tool_context.state["final_strategy_generation_prompt"] = final_combined_prompt
 
         is_prompt_prepared = True
-        logger.info("Final strategy generation prompt has been successfully prepared and saved to state.")
+        logger.info(
+            "Final strategy generation prompt has been successfully prepared and saved to state."
+        )
 
     except Exception as e:
-        logger.error(f"An unexpected error occurred during final prompt aggregation: {e}", exc_info=True)
+        logger.error(
+            f"An unexpected error occurred during final prompt aggregation: {e}",
+            exc_info=True,
+        )
 
     return is_prompt_prepared
 
-final_report_aggregator_tool = FunctionTool(func=aggregate_and_prepare_final_prompt)
 
+final_report_aggregator_tool = FunctionTool(func=aggregate_and_prepare_final_prompt)

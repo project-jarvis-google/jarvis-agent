@@ -14,9 +14,8 @@ def get_final_strategy_instruction(context):
     #    The master prompt contains all the rules for generating the final JSON.
     return final_prompt
 
+
 def save_final_json(tool_context, llm_response: str) -> str:
     """Saves the raw LLM response (the final JSON) to the state."""
     tool_context.state["final_recommendation_json"] = llm_response
     return "Final JSON recommendation has been saved to the state."
-
-
