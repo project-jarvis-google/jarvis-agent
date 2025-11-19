@@ -115,7 +115,6 @@ async def export_full_report(tool_context: ToolContext, args: dict) -> dict:
         Handles Decimal, datetime, UUID, set, custom objects, etc.
         """
         try:
-            # First try normal encoding
             return json.JSONEncoder().default(obj)
         except Exception:
             # Fallback: convert everything else to string
