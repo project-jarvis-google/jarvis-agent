@@ -2,7 +2,7 @@ import io
 import logging
 import os
 import uuid
-from typing import Any
+from typing import Any, cast
 
 import google.auth
 import pdfplumber
@@ -93,7 +93,8 @@ async def _bytes_from_any(part: gt.Part, tool_context: ToolContext) -> bytes:
     ):
         loader = getattr(tool_context, "load_artifact_bytes", None)
         if callable(loader):
-            return await loader(part.file_data.file_uri)  # type: ignore[reportUnknownVariableType]
+            # Cast is used to inform the type checker of the expected return type.
+            return cast(bytes, loader(part.file_data.file_uri))
         raise ValueError(
             "file_data present but tool_context.load_artifact_bytes is unavailable."
         )
@@ -280,7 +281,7 @@ async def extract_and_summarize_artifact(tool_context: ToolContext) -> dict[str,
         }
 
     extracted_results = {}
-    assigned_types = set()  # To track which types have been assigned
+    assigned_types: set[str] = set()  # To track which types have been assigned
 
     for pdf_info in uploaded_pdfs_info:
         artifact_name = pdf_info["name"]
