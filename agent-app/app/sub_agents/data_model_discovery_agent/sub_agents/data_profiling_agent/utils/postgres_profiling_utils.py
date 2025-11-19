@@ -29,7 +29,6 @@ def profile_postgres_data(conn: Any, schema_name: str, schema_structure: Dict[st
         profile_results["cardinality"][table_name] = {}
         full_table_name = f'"{schema_name}"."{table_name}"'
 
-        # Nullability (AC 4.1)
         for col_name in table_info.get("columns", {}):
             null_q = f"""
             SELECT
@@ -47,7 +46,6 @@ def profile_postgres_data(conn: Any, schema_name: str, schema_structure: Dict[st
                 logger.error(f"Error profiling nulls for {full_table_name}.\"{col_name}\": {e}")
                 profile_results["nullability"][table_name][col_name] = "Error"
 
-        # Cardinality (AC 4.2) - PKs, FKs
         key_columns = set()
         for const in table_info.get("constraints", []):
             if const.get("type") in ("PRIMARY KEY", "UNIQUE") and const.get("columns"):
@@ -66,7 +64,6 @@ def profile_postgres_data(conn: Any, schema_name: str, schema_structure: Dict[st
                     logger.error(f"Error profiling cardinality for {full_table_name}.\"{col_name}\": {e}")
                     profile_results["cardinality"][table_name][col_name] = "Error"
 
-    # Orphan Records (AC 4.3)
     for fk in schema_structure.get("foreign_keys", []):
         from_table, from_col = fk.get("from_table"), fk.get("from_column")
         to_table, to_col = fk.get("to_table"), fk.get("to_column")
@@ -93,7 +90,6 @@ def profile_postgres_data(conn: Any, schema_name: str, schema_structure: Dict[st
                 logger.error(f"Error checking orphans for {fk_name}: {e}")
                 profile_results["orphan_records"][fk_name] = "Error"
 
-    # Type Anomalies (AC 4.4) - Heuristic for phone/zip
     for table_name, table_info in tables.items():
         full_table_name = f'"{schema_name}"."{table_name}"'
         for col_name, col_info in table_info.get("columns", {}).items():

@@ -12,7 +12,6 @@ import google.auth
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
-# --- LLM Client Setup ---
 try:
     _, project_id = google.auth.default()
     GOOGLE_CLOUD_PROJECT = os.environ.get("GOOGLE_CLOUD_PROJECT", project_id)
