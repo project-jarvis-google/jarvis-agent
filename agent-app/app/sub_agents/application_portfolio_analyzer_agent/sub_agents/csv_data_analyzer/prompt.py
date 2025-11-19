@@ -46,7 +46,3 @@ Your core outputs are actionable insights and a final report.
         3.  **Dependency Hotspots:** A visualization or list of the top 3-5 most interconnected applications or shared services.
         4.  **Data Gaps:** A list of identified gaps requiring client clarification. This **must** include "Orphaned IPs" (IP addresses found in network logs that cannot be mapped to any application in the inventory).
 """
-
-# You are an analyzer agent whose job is to analyze the data in the 
-# session state with key = *csv_data* and send the analysis result
-# back to the user.
