@@ -12,6 +12,7 @@ import json
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
+
 def root_agent_instruction(ctx: ReadonlyContext) -> str:
     """Dynamically builds the Root Agent's instruction based on session state."""
     selected_schema = ctx.state.get("selected_schema")
@@ -110,7 +111,9 @@ def root_agent_instruction(ctx: ReadonlyContext) -> str:
     """
 
     if not db_connection or db_connection.get("status") != "connected":
-        return base_instruction + """
+        return (
+            base_instruction
+            + """
         **Current State:** No active database connection.
 
         **Your Task:**
@@ -140,8 +143,11 @@ def root_agent_instruction(ctx: ReadonlyContext) -> str:
             - Answer questions about your data and schema structure
           To do any of this, I'll first need to connect to your database. Just let me know when you want to proceed!"
         """
+        )
     elif available_schemas and not selected_schema:
-        return base_instruction + """
+        return (
+            base_instruction
+            + """
     **Current Task:** The user has been presented with a list of available schemas by the `database_cred_agent`. Their current input is expected to be the name of the schema they wish to analyze.
 
     1.  Consider the user's entire input as the desired schema name.
@@ -149,9 +155,12 @@ def root_agent_instruction(ctx: ReadonlyContext) -> str:
         - Example AgentTool Call: `schema_introspection_agent(user_input)`
     3.  The `schema_introspection_agent` will handle storing the selected schema and fetching the details. Await its response.
         """
+        )
     elif selected_schema and schema_structure:
         profile_status = "Completed" if data_profile else "Not Yet Run"
-        return base_instruction + f"""
+        return (
+            base_instruction
+            + f"""
     **Current Context:** The database is connected. The schema '{selected_schema}' has been successfully introspected.
     Data Quality Profile Status: {profile_status}
 
@@ -171,20 +180,28 @@ def root_agent_instruction(ctx: ReadonlyContext) -> str:
 
     If the user's intent is unclear, ask for clarification. You can remind them of the available actions.
         """
+        )
     elif selected_schema and not schema_structure:
-         return base_instruction + f"""
+        return (
+            base_instruction
+            + f"""
     **Current Context:** The schema '{selected_schema}' was selected, but the introspection data is missing or incomplete.
     - Recall `schema_introspection_agent` and pass the schema name '{selected_schema}' as the input to it to ensure the structure is loaded.
     - Example AgentTool Call: `schema_introspection_agent("{selected_schema}")`
          """
+        )
     else:
-        return base_instruction + """
+        return (
+            base_instruction
+            + """
     **Current Task:** Determine the next step based on the conversation history and session state. If unsure, ask the user for clarification.
         """
+        )
+
 
 data_model_discovery_agent = LlmAgent(
-    model='gemini-2.5-flash',
-    name='data_model_discovery_agent',
+    model="gemini-2.5-flash",
+    name="data_model_discovery_agent",
     description=(
         "A helpful root agent that orchestrates sub-agents to introspect and profile legacy databases."
     ),
@@ -195,5 +212,5 @@ data_model_discovery_agent = LlmAgent(
         qa_agent,
         data_profiling_agent,
         reporting_agent,
-    ]
+    ],
 )

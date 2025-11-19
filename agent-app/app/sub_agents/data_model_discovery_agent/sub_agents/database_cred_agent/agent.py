@@ -3,9 +3,9 @@ from .tools import validate_db_connection
 
 
 database_cred_agent = LlmAgent(
-    model='gemini-2.5-flash',
-    name='database_cred_agent',
-    description='A helpful assistant that collects and validates database connection details, and lists available schemas.',
+    model="gemini-2.5-flash",
+    name="database_cred_agent",
+    description="A helpful assistant that collects and validates database connection details, and lists available schemas.",
     instruction="""
     ### Role
     You are a helpful assistant responsible for gathering, validating, and confirming database connection details from the user, then listing the available schemas for selection. Your responses containing lists of schemas MUST be in raw Markdown format.
@@ -69,7 +69,5 @@ database_cred_agent = LlmAgent(
     - Do not assume or confirm which schema the user will select. Your task ends after presenting the list of schemas and asking the user to choose.
     - If the user asks for database connection details, you may display the host, port, and database name, but you must **never** reveal the password or any sensitive credentials.
     """,
-    tools=[
-        validate_db_connection
-    ],
+    tools=[validate_db_connection],
 )

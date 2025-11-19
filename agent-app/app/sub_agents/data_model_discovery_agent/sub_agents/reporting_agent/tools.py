@@ -7,7 +7,10 @@ import yaml
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-async def generate_summary_report(tool_context: ToolContext, args: Dict[str, Any]) -> Dict[str, Any]:
+
+async def generate_summary_report(
+    tool_context: ToolContext, args: Dict[str, Any]
+) -> Dict[str, Any]:
     """
     Generates a high-level summary report of the database analysis.
 
@@ -39,9 +42,14 @@ async def generate_summary_report(tool_context: ToolContext, args: Dict[str, Any
         "tables": len(schema_structure.get("tables", {})),
         "views": len(schema_structure.get("views", {})),
         "explicit_fks": len(schema_structure.get("foreign_keys", [])),
-        "inferred_relationships": len(schema_structure.get("inferred_relationships", [])),
+        "inferred_relationships": len(
+            schema_structure.get("inferred_relationships", [])
+        ),
         "schema_anomalies": len(schema_structure.get("anomalies", [])),
-        "columns": sum(len(t.get("columns", {})) for t in schema_structure.get("tables", {}).values()),
+        "columns": sum(
+            len(t.get("columns", {}))
+            for t in schema_structure.get("tables", {}).values()
+        ),
     }
 
     report = f"### Data Discovery Summary for Schema: {selected_schema}\n\n"
@@ -50,27 +58,42 @@ async def generate_summary_report(tool_context: ToolContext, args: Dict[str, Any
     report += f"-   Total Columns: {summary['columns']}\n"
     report += f"-   Views Found: {summary['views']}\n"
     report += f"-   Explicit Foreign Keys: {summary['explicit_fks']}\n"
-    report += f"-   Potential Inferred Relationships: {summary['inferred_relationships']}\n"
+    report += (
+        f"-   Potential Inferred Relationships: {summary['inferred_relationships']}\n"
+    )
     report += f"-   Schema Anomalies Detected: {summary['schema_anomalies']}\n\n"
 
     if data_profile:
         report += "**Data Quality Profile Highlights:**\n"
-        null_issues = sum(1 for table in data_profile.get("nullability", {}).values() for null_pct in table.values() if isinstance(null_pct, (int, float)) and null_pct > 50)
-        orphan_issues = sum(1 for orphan_pct in data_profile.get("orphan_records", {}).values() if isinstance(orphan_pct, (int, float)) and orphan_pct > 10)
+        null_issues = sum(
+            1
+            for table in data_profile.get("nullability", {}).values()
+            for null_pct in table.values()
+            if isinstance(null_pct, (int, float)) and null_pct > 50
+        )
+        orphan_issues = sum(
+            1
+            for orphan_pct in data_profile.get("orphan_records", {}).values()
+            if isinstance(orphan_pct, (int, float)) and orphan_pct > 10
+        )
         type_anomalies = len(data_profile.get("type_anomalies", {}))
 
         report += f"-   Columns with >50% NULLs: {null_issues} (in sampled data)\n"
-        report += f"-   FKs with >10% Orphan Records: {orphan_issues} (in sampled data)\n"
+        report += (
+            f"-   FKs with >10% Orphan Records: {orphan_issues} (in sampled data)\n"
+        )
         report += f"-   Columns with Potential Type Anomalies: {type_anomalies} (in sampled data)\n"
     else:
         report += "**Data Quality Profile:** Not yet run.\n"
 
     return {"status": "success", "report_text": report}
 
+
 import json
 import logging
 
 logger = logging.getLogger(__name__)
+
 
 async def export_full_report(tool_context: ToolContext, args: dict) -> dict:
     """
@@ -92,21 +115,30 @@ async def export_full_report(tool_context: ToolContext, args: dict) -> dict:
         }
     """
     if not isinstance(args, dict):
-        return {"status": "error", "error": "Invalid arguments. Expected a dictionary for args."}
+        return {
+            "status": "error",
+            "error": "Invalid arguments. Expected a dictionary for args.",
+        }
 
     schema_structure = tool_context.state.get("schema_structure")
     data_profile = tool_context.state.get("data_profile")
 
     if not schema_structure:
-        return {"status": "error", "error": "Schema structure not found. Please run introspection first."}
+        return {
+            "status": "error",
+            "error": "Schema structure not found. Please run introspection first.",
+        }
 
     requested_format = args.get("format", "json").lower()
     if requested_format != "json":
-        return {"status": "error", "error": f"Unsupported format '{requested_format}'. Only JSON is supported."}
+        return {
+            "status": "error",
+            "error": f"Unsupported format '{requested_format}'. Only JSON is supported.",
+        }
 
     full_report = {
         "schema_structure": schema_structure,
-        "data_profile": data_profile or "Not run"
+        "data_profile": data_profile or "Not run",
     }
 
     def safe_encoder(obj):
@@ -122,17 +154,14 @@ async def export_full_report(tool_context: ToolContext, args: dict) -> dict:
 
     try:
         json_output = json.dumps(
-            full_report,
-            indent=2,
-            ensure_ascii=False,
-            default=safe_encoder
+            full_report, indent=2, ensure_ascii=False, default=safe_encoder
         )
 
         return {
             "status": "success",
             "message": "Full report generated in JSON format. You can copy the content below.",
             "report_content": json_output,
-            "format": "JSON"
+            "format": "JSON",
         }
 
     except Exception as e:
@@ -140,7 +169,9 @@ async def export_full_report(tool_context: ToolContext, args: dict) -> dict:
         return {"status": "error", "error": f"Failed to generate JSON report: {str(e)}"}
 
 
-async def generate_erd_script(tool_context: ToolContext, args: Dict[str, Any]) -> Dict[str, Any]:
+async def generate_erd_script(
+    tool_context: ToolContext, args: Dict[str, Any]
+) -> Dict[str, Any]:
     """
     Generates a complete, valid Mermaid ER Diagram script.
 
@@ -171,14 +202,14 @@ async def generate_erd_script(tool_context: ToolContext, args: Dict[str, Any]) -
     if not isinstance(args, dict):
         return {
             "status": "error",
-            "error": "Invalid arguments. Expected a dictionary for args."
+            "error": "Invalid arguments. Expected a dictionary for args.",
         }
 
     schema_structure = tool_context.state.get("schema_structure")
     if not schema_structure:
         return {
             "status": "error",
-            "error": "Schema structure not found. Please run introspection first."
+            "error": "Schema structure not found. Please run introspection first.",
         }
 
     def sanitize_datatype(dtype: str) -> str:
@@ -198,9 +229,16 @@ async def generate_erd_script(tool_context: ToolContext, args: Dict[str, Any]) -
             return "enum"
         if "timestamp" in dtype:
             return "timestamp"
-        return dtype.replace("(", "").replace(")", "").replace(",", "").replace(" ", "_")
+        return (
+            dtype.replace("(", "").replace(")", "").replace(",", "").replace(" ", "_")
+        )
 
-    def format_column(table_name: str, col_name: str, col_info: Dict[str, Any], constraints_info: List[Dict[str, Any]]) -> str:
+    def format_column(
+        table_name: str,
+        col_name: str,
+        col_info: Dict[str, Any],
+        constraints_info: List[Dict[str, Any]],
+    ) -> str:
         """Format a column entry with proper constraints for Mermaid."""
         dtype = sanitize_datatype(col_info.get("type", "text"))
         constraints = []
@@ -238,7 +276,9 @@ async def generate_erd_script(tool_context: ToolContext, args: Dict[str, Any]) -
         constraints_info = table_info.get("constraints", [])
 
         for col_name, col_info in columns.items():
-            lines.append(format_column(table_name, col_name, col_info, constraints_info))
+            lines.append(
+                format_column(table_name, col_name, col_info, constraints_info)
+            )
 
         lines.append("    }")
         lines.append("")
@@ -273,5 +313,5 @@ async def generate_erd_script(tool_context: ToolContext, args: Dict[str, Any]) -
         "status": "success",
         "message": "Mermaid ERD script generated successfully. Paste this code into any Mermaid renderer.",
         "script_type": "Mermaid",
-        "script": mermaid_script
+        "script": mermaid_script,
     }

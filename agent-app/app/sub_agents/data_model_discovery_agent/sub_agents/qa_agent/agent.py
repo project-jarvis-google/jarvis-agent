@@ -3,10 +3,12 @@ from decimal import Decimal
 from google.adk.agents.llm_agent import LlmAgent
 from google.adk.agents.readonly_context import ReadonlyContext
 
+
 def json_encoder_default(obj):
     if isinstance(obj, Decimal):
         return str(obj)
     raise TypeError(f"Object of type {obj.__class__.__name__} is not JSON serializable")
+
 
 def qa_agent_instruction(ctx: ReadonlyContext) -> str:
     """Builds the QA agent's instruction for schema and data profiling queries."""
@@ -28,7 +30,9 @@ def qa_agent_instruction(ctx: ReadonlyContext) -> str:
         """
 
     try:
-        schema_json = json.dumps(schema_structure, indent=2, default=json_encoder_default)
+        schema_json = json.dumps(
+            schema_structure, indent=2, default=json_encoder_default
+        )
     except Exception as e:
         schema_json = f"Error serializing schema structure: {e}"
 
@@ -41,11 +45,15 @@ def qa_agent_instruction(ctx: ReadonlyContext) -> str:
                 "Nullability": data_profile.get("nullability", "Not available"),
                 "Cardinality": data_profile.get("cardinality", "Not available"),
                 "Orphan Records": data_profile.get("orphan_records", "Not available"),
-                "Type Anomalies": data_profile.get("type_anomalies", "Not available")
+                "Type Anomalies": data_profile.get("type_anomalies", "Not available"),
             }
-            profile_message = json.dumps(profile_summary, indent=2, default=json_encoder_default)
+            profile_message = json.dumps(
+                profile_summary, indent=2, default=json_encoder_default
+            )
         except Exception:
-            profile_message = "Data profiling results exist but could not be summarized."
+            profile_message = (
+                "Data profiling results exist but could not be summarized."
+            )
     else:
         profile_message = (
             "Data profiling has not been run yet. "
@@ -89,10 +97,11 @@ def qa_agent_instruction(ctx: ReadonlyContext) -> str:
     Always respond in clear, human-readable sentences. If profiling data is missing, offer to run profiling on a sample of up to 10,000 rows to provide a summary.
     """
 
+
 qa_agent = LlmAgent(
-    model='gemini-2.5-flash',
-    name='qa_agent',
-    description='Answers natural language questions about the discovered database schema structure and data profiling results.',
+    model="gemini-2.5-flash",
+    name="qa_agent",
+    description="Answers natural language questions about the discovered database schema structure and data profiling results.",
     instruction=qa_agent_instruction,
-    tools=[]
+    tools=[],
 )
