@@ -24,7 +24,7 @@ def profile_mssql_data(
     schema_structure: dict[str, Any],
     sample_size: int = 10000,
 ) -> dict[str, Any]:
-    profile_results = {
+    profile_results: dict[str, Any] = {
         "nullability": {},
         "cardinality": {},
         "orphan_records": {},

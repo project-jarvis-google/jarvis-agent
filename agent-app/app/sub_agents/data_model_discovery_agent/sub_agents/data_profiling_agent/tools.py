@@ -19,7 +19,8 @@ logging.basicConfig(level=logging.INFO)
 def _get_db_connection(metadata: dict[str, Any], password: str) -> Any:
     db_type = metadata.get("db_type")
     host = metadata.get("host")
-    port = int(metadata.get("port"))
+    port_value = metadata.get("port")
+    port = int(port_value) if port_value is not None else None
     dbname = metadata.get("dbname")
     user = metadata.get("user")
     logger.info(
@@ -48,8 +49,6 @@ async def profile_schema_data(
     Calculates nullability, cardinality, orphan records, and type anomalies.
     Sets a flag on successful completion.
     """
-    if not isinstance(args, dict):
-        return {"error": "Invalid arguments. Expected a dictionary for args."}
 
     db_conn_state = tool_context.state.get("db_connection")
     db_creds = tool_context.state.get("db_creds_temp")

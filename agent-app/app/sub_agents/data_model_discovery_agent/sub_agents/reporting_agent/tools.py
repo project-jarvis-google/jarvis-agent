@@ -28,8 +28,6 @@ async def generate_summary_report(
         - report_text: The markdown formatted summary report (on success).
         - error: An error message (on failure).
     """
-    if not isinstance(args, dict):
-        return {"error": "Invalid arguments. Expected a dictionary for args."}
 
     schema_structure = tool_context.state.get("schema_structure")
     data_profile = tool_context.state.get("data_profile")
@@ -108,11 +106,6 @@ async def export_full_report(tool_context: ToolContext, args: dict) -> dict:
             "error": Optional error message
         }
     """
-    if not isinstance(args, dict):
-        return {
-            "status": "error",
-            "error": "Invalid arguments. Expected a dictionary for args.",
-        }
 
     schema_structure = tool_context.state.get("schema_structure")
     data_profile = tool_context.state.get("data_profile")
@@ -192,12 +185,6 @@ async def generate_erd_script(
             "error": Optional error message (if failure)
         }
     """
-
-    if not isinstance(args, dict):
-        return {
-            "status": "error",
-            "error": "Invalid arguments. Expected a dictionary for args.",
-        }
 
     schema_structure = tool_context.state.get("schema_structure")
     if not schema_structure:

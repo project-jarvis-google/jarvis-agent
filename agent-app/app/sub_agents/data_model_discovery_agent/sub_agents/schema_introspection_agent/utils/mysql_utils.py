@@ -17,7 +17,7 @@ try:
     _, project_id = google.auth.default()
     GOOGLE_CLOUD_PROJECT = os.environ.get("GOOGLE_CLOUD_PROJECT", project_id)
 except google.auth.exceptions.DefaultCredentialsError:
-    GOOGLE_CLOUD_PROJECT = os.environ.get("GOOGLE_CLOUD_PROJECT")
+    GOOGLE_CLOUD_PROJECT = os.environ.get("GOOGLE_CLOUD_PROJECT")  # type: ignore[assignment]
 
 if not GOOGLE_CLOUD_PROJECT:
     logger.warning(
@@ -175,9 +175,9 @@ def _analyze_with_llm(
         logger.debug(f"****** Custom_LLM_Request: {prompt}")
         response = client.models.generate_content(
             model=MODEL,
-            contents=[types.Part.from_text(text=prompt)],
+            contents=[types.Part.from_text(text=prompt)],  # type: ignore[arg-type]
         )
-        generated_text = response.candidates[0].content.parts[0].text
+        generated_text = response.candidates[0].content.parts[0].text  # type: ignore[index, union-attr, assignment]
         logger.debug(f"****** Raw LLM Response: {generated_text}")
 
         # handles ```json blocks
@@ -229,7 +229,7 @@ def get_mysql_schema_details(conn: Any, schema_name: str) -> dict[str, Any]:
         logger.error(f"MySQL change database failed: {err}")
         raise
 
-    details = {
+    details: dict[str, Any] = {
         "tables": {},
         "views": {},
         "foreign_keys": [],

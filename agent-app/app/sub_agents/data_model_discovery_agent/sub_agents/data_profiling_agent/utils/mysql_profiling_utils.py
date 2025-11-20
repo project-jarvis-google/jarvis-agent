@@ -25,7 +25,7 @@ def profile_mysql_data(
         logger.error(f"Failed to set database {schema_name}: {e}")
         raise
 
-    profile_results = {
+    profile_results: dict[str, Any] = {
         "nullability": {},
         "cardinality": {},
         "orphan_records": {},

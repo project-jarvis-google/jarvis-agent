@@ -26,7 +26,7 @@ def _get_db_connection(metadata: dict[str, Any], password: str) -> Any:
         raise ValueError(
             "Missing one or more required connection parameters in metadata or password."
         )
-    port = int(port)
+    port = int(port)  # type: ignore[arg-type]
     logger.info(
         f"Attempting to connect to {db_type} at {host}:{port} as {user} to database {dbname}"
     )
@@ -86,7 +86,7 @@ async def get_schema_details(
 
     tool_context.state["selected_schema"] = schema_name
     if "available_schemas" in tool_context.state:
-        del tool_context.state["available_schemas"]
+        tool_context.state["available_schemas"] = None
 
     metadata = db_conn_state["metadata"]
     password = db_creds["password"]
