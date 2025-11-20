@@ -16,7 +16,7 @@ try:
     _, project_id = google.auth.default()
     GOOGLE_CLOUD_PROJECT = os.environ.get("GOOGLE_CLOUD_PROJECT", project_id)
 except google.auth.exceptions.DefaultCredentialsError:
-    GOOGLE_CLOUD_PROJECT = os.environ.get("GOOGLE_CLOUD_PROJECT")
+    GOOGLE_CLOUD_PROJECT = os.environ.get("GOOGLE_CLOUD_PROJECT")  # type: ignore[assignment]
 
 if not GOOGLE_CLOUD_PROJECT:
     logger.warning(
@@ -167,10 +167,10 @@ def _analyze_with_llm(
         logger.debug(f"****** Custom_LLM_Request: {prompt}")
         response = client.models.generate_content(
             model=MODEL,
-            contents=[types.Part.from_text(text=prompt)],
+            contents=[types.Part.from_text(text=prompt)],  # type: ignore[arg-type]
             config=types.GenerateContentConfig(response_mime_type="application/json"),
         )
-        generated_text = response.candidates[0].content.parts[0].text
+        generated_text = response.candidates[0].content.parts[0].text  # type: ignore[index, union-attr, assignment]
         logger.debug(f"****** Raw LLM Response: {generated_text}")
         cleaned_json = _extract_json_content(generated_text)
         logger.debug(
@@ -207,7 +207,7 @@ def _analyze_with_llm(
 
 
 def get_postgres_schema_details(conn: Any, schema_name: str) -> dict[str, Any]:
-    details = {
+    details: dict[str, Any] = {
         "tables": {},
         "views": {},
         "foreign_keys": [],

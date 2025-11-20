@@ -5,6 +5,7 @@ import re
 from typing import Any
 
 import google.auth
+import pyodbc
 from google import genai
 from google.api_core import exceptions
 from google.genai import types
@@ -12,11 +13,12 @@ from google.genai import types
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
+
 try:
     _, project_id = google.auth.default()
     GOOGLE_CLOUD_PROJECT = os.environ.get("GOOGLE_CLOUD_PROJECT", project_id)
 except google.auth.exceptions.DefaultCredentialsError:
-    GOOGLE_CLOUD_PROJECT = os.environ.get("GOOGLE_CLOUD_PROJECT")
+    GOOGLE_CLOUD_PROJECT = os.environ.get("GOOGLE_CLOUD_PROJECT")  # type: ignore[assignment]
 
 if not GOOGLE_CLOUD_PROJECT:
     logger.warning(
@@ -27,7 +29,7 @@ GOOGLE_CLOUD_LOCATION = os.environ.get("GOOGLE_CLOUD_LOCATION", "us-central1")
 GOOGLE_GENAI_USE_VERTEXAI = os.environ.get(
     "GOOGLE_GENAI_USE_VERTEXAI", "True"
 ).lower() in ("true", "1")
-MODEL = os.environ.get("MODEL", "gemini-2.5-pro")
+MODEL = os.environ.get("MODEL", "gemini-1.5-pro")
 
 client = None
 if GOOGLE_CLOUD_PROJECT:
@@ -38,26 +40,30 @@ if GOOGLE_CLOUD_PROJECT:
             location=GOOGLE_CLOUD_LOCATION,
         )
         logger.info(
-            f"GenAI Client initialized in postgres_utils. VertexAI: {GOOGLE_GENAI_USE_VERTEXAI}, Project: {GOOGLE_CLOUD_PROJECT}, Location: {GOOGLE_CLOUD_LOCATION}, Model: {MODEL}"
+            f"GenAI Client initialized in mssql_utils. VertexAI: {GOOGLE_GENAI_USE_VERTEXAI}, Project: {GOOGLE_CLOUD_PROJECT}, Location: {GOOGLE_CLOUD_LOCATION}, Model: {MODEL}"
         )
     except Exception as e:
-        logger.error(f"Failed to initialize GenAI Client in postgres_utils: {e}")
+        logger.error(f"Failed to initialize GenAI Client in mssql_utils: {e}")
 else:
     logger.error(
-        "Cannot initialize GenAI Client in postgres_utils: GOOGLE_CLOUD_PROJECT is not set."
+        "Cannot initialize GenAI Client in mssql_utils: GOOGLE_CLOUD_PROJECT is not set."
     )
 
 
 def _execute_query(conn: Any, query: str) -> list[dict[str, Any]]:
-    """Executes a SQL query and returns results as a list of dicts for PostgreSQL."""
+    """Executes a SQL query and returns results as a list of dicts for SQL Server."""
     cursor = conn.cursor()
     try:
         cursor.execute(query)
         if cursor.description:
-            columns = [desc[0] for desc in cursor.description]
+            columns = [column[0] for column in cursor.description]
             rows = cursor.fetchall()
             return [dict(zip(columns, row, strict=False)) for row in rows]
         return []
+    except pyodbc.Error as ex:
+        sqlstate = ex.args[0]
+        logger.error(f"SQL Error ({sqlstate}): {ex} for query: {query}")
+        raise
     finally:
         cursor.close()
 
@@ -163,10 +169,10 @@ def _analyze_with_llm(
         logger.debug(f"****** Custom_LLM_Request: {prompt}")
         response = client.models.generate_content(
             model=MODEL,
-            contents=[types.Part.from_text(text=prompt)],
+            contents=[types.Part.from_text(text=prompt)],  # type: ignore[arg-type]
             config=types.GenerateContentConfig(response_mime_type="application/json"),
         )
-        generated_text = response.candidates[0].content.parts[0].text
+        generated_text = response.candidates[0].content.parts[0].text  # type: ignore[index, union-attr, assignment]
         logger.debug(f"****** Raw LLM Response: {generated_text}")
         cleaned_json = _extract_json_content(generated_text)
         logger.debug(
@@ -202,99 +208,90 @@ def _analyze_with_llm(
         }
 
 
-def get_postgres_schema_details(conn: Any, schema_name: str) -> dict[str, Any]:
-    details = {
+def get_mssql_schema_details(conn: Any, schema_name: str) -> dict[str, Any]:
+    logger.info(f"Fetching MSSQL schema details for: {schema_name}")
+    details: dict[str, Any] = {
         "tables": {},
         "views": {},
         "foreign_keys": [],
         "inferred_relationships": [],
         "anomalies": [],
     }
-    logger.info(f"Fetching PostgreSQL schema details for: {schema_name}")
 
-    tables_query = f"""
-    SELECT table_name
-    FROM information_schema.tables
-    WHERE table_schema = '{schema_name}' AND table_type = 'BASE TABLE';
-    """
+    tables_query = f"SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '{schema_name}' AND TABLE_TYPE = 'BASE TABLE';"
     tables = _execute_query(conn, tables_query)
     for table in tables:
-        t_name = table["table_name"]
+        t_name = table["TABLE_NAME"]
         details["tables"][t_name] = {"columns": {}, "constraints": [], "indexes": []}
-        cols_query = f"""
-        SELECT column_name, data_type, character_maximum_length, numeric_precision, numeric_scale, is_nullable, column_default
-        FROM information_schema.columns WHERE table_schema = '{schema_name}' AND table_name = '{t_name}';
-        """
+        cols_query = f"SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH, NUMERIC_PRECISION, NUMERIC_SCALE, IS_NULLABLE, COLUMN_DEFAULT FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '{schema_name}' AND TABLE_NAME = '{t_name}';"
         for col in _execute_query(conn, cols_query):
-            details["tables"][t_name]["columns"][col["column_name"]] = {
-                "type": col["data_type"],
-                "length": col["character_maximum_length"],
-                "precision": col["numeric_precision"],
-                "scale": col["numeric_scale"],
-                "nullable": col["is_nullable"] == "YES",
-                "default": col["column_default"],
+            details["tables"][t_name]["columns"][col["COLUMN_NAME"]] = {
+                "type": col["DATA_TYPE"],
+                "length": col["CHARACTER_MAXIMUM_LENGTH"],
+                "precision": col["NUMERIC_PRECISION"],
+                "scale": col["NUMERIC_SCALE"],
+                "nullable": col["IS_NULLABLE"] == "YES",
+                "default": col["COLUMN_DEFAULT"],
             }
+
         constraints_query = f"""
-        SELECT tc.table_name, tc.constraint_name, tc.constraint_type, kcu.column_name, cc.check_clause
-        FROM information_schema.table_constraints tc
-        LEFT JOIN information_schema.key_column_usage kcu ON tc.constraint_name = kcu.constraint_name AND tc.table_schema = kcu.table_schema AND tc.table_name = kcu.table_name
-        LEFT JOIN information_schema.check_constraints cc ON tc.constraint_name = cc.constraint_name AND tc.table_schema = cc.constraint_schema
-        WHERE tc.table_schema = '{schema_name}' AND tc.table_name = '{t_name}';
+            SELECT KCU.TABLE_NAME, TC.CONSTRAINT_NAME, TC.CONSTRAINT_TYPE, KCU.COLUMN_NAME, CC.CHECK_CLAUSE
+            FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS AS TC
+            LEFT JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS KCU ON TC.CONSTRAINT_NAME = KCU.CONSTRAINT_NAME AND TC.TABLE_SCHEMA = KCU.TABLE_SCHEMA AND TC.TABLE_NAME = KCU.TABLE_NAME
+            LEFT JOIN INFORMATION_SCHEMA.CHECK_CONSTRAINTS AS CC ON TC.CONSTRAINT_NAME = CC.CONSTRAINT_NAME AND TC.CONSTRAINT_SCHEMA = CC.CONSTRAINT_SCHEMA
+            WHERE TC.TABLE_SCHEMA = '{schema_name}' AND KCU.TABLE_NAME = '{t_name}';
         """
         details["tables"][t_name]["constraints"] = _execute_query(
             conn, constraints_query
         )
+
         indexes_query = f"""
-        SELECT
-            t.relname AS table_name, i.relname AS index_name, a.attname AS column_name, ix.indisunique AS is_unique
-        FROM pg_class t JOIN pg_index ix ON t.oid = ix.indrelid JOIN pg_class i ON i.oid = ix.indexrelid
-        LEFT JOIN pg_attribute a ON a.attrelid = t.oid AND a.attnum = ANY(ix.indkey)
-        JOIN pg_namespace n ON t.relnamespace = n.oid WHERE n.nspname = '{schema_name}' AND t.relname = '{t_name}' AND t.relkind = 'r';
+        SELECT t.name AS table_name, ind.name AS index_name, COL_NAME(ic.object_id, ic.column_id) AS column_name, ind.is_unique
+        FROM sys.indexes ind INNER JOIN sys.index_columns ic ON  ind.object_id = ic.object_id AND ind.index_id = ic.index_id
+        INNER JOIN sys.tables t ON ind.object_id = t.object_id INNER JOIN sys.schemas s ON t.schema_id = s.schema_id
+        WHERE s.name = '{schema_name}' AND t.name = '{t_name}' AND ind.is_hypothetical = 0 AND ind.type > 0;
         """
         try:
             indexes = _execute_query(conn, indexes_query)
             grouped_indexes = {}
             for index in indexes:
-                if index["column_name"]:
-                    idx_name = index["index_name"]
-                    if idx_name not in grouped_indexes:
-                        grouped_indexes[idx_name] = {
-                            "name": idx_name,
-                            "columns": [],
-                            "unique": index["is_unique"],
-                        }
-                    if index["column_name"] not in grouped_indexes[idx_name]["columns"]:
-                        grouped_indexes[idx_name]["columns"].append(
-                            index["column_name"]
-                        )
+                idx_name = index["index_name"]
+                if not idx_name:
+                    continue
+                if idx_name not in grouped_indexes:
+                    grouped_indexes[idx_name] = {
+                        "name": idx_name,
+                        "columns": [],
+                        "unique": index["is_unique"],
+                    }
+                if index["column_name"] not in grouped_indexes[idx_name]["columns"]:
+                    grouped_indexes[idx_name]["columns"].append(index["column_name"])
             details["tables"][t_name]["indexes"] = list(grouped_indexes.values())
         except Exception as e:
-            logger.error(f"Error fetching PostgreSQL indexes for {t_name}: {e}")
+            logger.error(f"Error fetching MSSQL indexes for {t_name}: {e}")
 
     fks_query = f"""
-    SELECT
-        tc.constraint_name, tc.table_name AS from_table, kcu.column_name AS from_column,
-        ccu.table_schema AS to_schema, ccu.table_name AS to_table, ccu.column_name AS to_column
-    FROM information_schema.table_constraints AS tc JOIN information_schema.key_column_usage AS kcu
-        ON tc.constraint_name = kcu.constraint_name AND tc.table_schema = kcu.table_schema
-    JOIN information_schema.constraint_column_usage AS ccu
-        ON ccu.constraint_name = tc.constraint_name AND ccu.table_schema = tc.table_schema
-    WHERE tc.constraint_type = 'FOREIGN KEY' AND tc.table_schema = '{schema_name}';
+    SELECT KCU1.CONSTRAINT_NAME AS constraint_name, KCU1.TABLE_NAME AS from_table, KCU1.COLUMN_NAME AS from_column,
+           KCU2.TABLE_SCHEMA AS to_schema, KCU2.TABLE_NAME AS to_table, KCU2.COLUMN_NAME AS to_column
+    FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS RC
+    JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE KCU1 ON KCU1.CONSTRAINT_SCHEMA = RC.CONSTRAINT_SCHEMA AND KCU1.CONSTRAINT_NAME = RC.CONSTRAINT_NAME
+    JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE KCU2 ON KCU2.CONSTRAINT_SCHEMA = RC.UNIQUE_CONSTRAINT_SCHEMA AND KCU2.CONSTRAINT_NAME = RC.UNIQUE_CONSTRAINT_NAME AND KCU2.ORDINAL_POSITION = KCU1.ORDINAL_POSITION
+    WHERE KCU1.TABLE_SCHEMA = '{schema_name}';
     """
     details["foreign_keys"] = _execute_query(conn, fks_query)
-    views_query = f"SELECT table_name AS view_name, view_definition FROM information_schema.views WHERE table_schema = '{schema_name}';"
+    views_query = f"SELECT TABLE_NAME AS view_name, VIEW_DEFINITION FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_SCHEMA = '{schema_name}';"
     details["views"] = {
-        view["view_name"]: {"definition": view["view_definition"]}
+        view["view_name"]: {"definition": view["VIEW_DEFINITION"]}
         for view in _execute_query(conn, views_query)
     }
 
-    llm_analysis = _analyze_with_llm(schema_name, "PostgreSQL", details)
+    llm_analysis = _analyze_with_llm(schema_name, "Microsoft SQL Server", details)
     details["inferred_relationships"] = llm_analysis.get("inferred_relationships", [])
     details["anomalies"] = llm_analysis.get("anomalies", [])
     logger.info(
-        f"Found {len(details['inferred_relationships'])} potential inferred relationships for PostgreSQL."
+        f"Found {len(details['inferred_relationships'])} potential inferred relationships for MSSQL."
     )
     logger.info(
-        f"Found {len(details['anomalies'])} potential relationship anomalies for PostgreSQL."
+        f"Found {len(details['anomalies'])} potential relationship anomalies for MSSQL."
     )
     return details

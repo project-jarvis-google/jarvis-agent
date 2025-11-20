@@ -121,11 +121,11 @@ async def validate_db_connection(
 
         # Clear any previous connection state
         if "db_connection" in tool_context.state:
-            del tool_context.state["db_connection"]
+            tool_context.state["db_connection"] = None
         if "db_creds_temp" in tool_context.state:
-            del tool_context.state["db_creds_temp"]
+            tool_context.state["db_creds_temp"] = None
         if "selected_schema" in tool_context.state:
-            del tool_context.state["selected_schema"]
+            tool_context.state["selected_schema"] = None
 
         tool_context.state["db_connection"] = {
             "metadata": {
@@ -151,9 +151,9 @@ async def validate_db_connection(
     except Exception as e:
         logger.error(f"Database connection or schema fetch failed for {db_type}: {e}")
         if "db_connection" in tool_context.state:
-            del tool_context.state["db_connection"]
+            tool_context.state["db_connection"] = None
         if "db_creds_temp" in tool_context.state:
-            del tool_context.state["db_creds_temp"]
+            tool_context.state["db_creds_temp"] = None
         return {
             "status": "error",
             "message": f"Connection/Schema fetch failed for {db_type}: {e}",

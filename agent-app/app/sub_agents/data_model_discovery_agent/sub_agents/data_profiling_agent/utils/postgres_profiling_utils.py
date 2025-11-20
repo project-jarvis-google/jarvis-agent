@@ -25,7 +25,7 @@ def profile_postgres_data(
     schema_structure: dict[str, Any],
     sample_size: int = 10000,
 ) -> dict[str, Any]:
-    profile_results = {
+    profile_results: dict[str, dict] = {
         "nullability": {},
         "cardinality": {},
         "orphan_records": {},
