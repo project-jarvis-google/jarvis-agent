@@ -3,7 +3,7 @@ from typing import Any
 
 import mysql.connector
 import psycopg2
-import pyodbc
+import pytds as tds
 from google.adk.tools import ToolContext
 
 logger = logging.getLogger(__name__)
@@ -98,14 +98,16 @@ async def validate_db_connection(
                 password=connection_details["password"],
             )
         elif db_type == "mssql":
-            conn_str = (
-                f"DRIVER={{ODBC Driver 17 for SQL Server}};"
-                f"SERVER={connection_details['host']},{connection_details['port']};"
-                f"DATABASE={connection_details['dbname']};"
-                f"UID={connection_details['user']};"
-                f"PWD={connection_details['password']}"
+            conn = tds.connect(
+                server=connection_details["host"],
+                port=int(connection_details["port"]),
+                database=connection_details["dbname"],
+                user=connection_details["user"],
+                password=connection_details["password"],
+                login_timeout=5,
+                timeout=5,
+                as_dict=False,
             )
-            conn = pyodbc.connect(conn_str)
         else:
             error_msg = f"Unsupported database type: {db_type}. Supported types are: postgresql, mysql, mssql."
             logger.error(error_msg)

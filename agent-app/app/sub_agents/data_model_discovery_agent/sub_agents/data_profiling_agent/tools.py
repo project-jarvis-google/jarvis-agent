@@ -3,7 +3,7 @@ from typing import Any
 
 import mysql.connector
 import psycopg2
-import pyodbc
+import pytds as tds
 from google.adk.tools import ToolContext
 
 from .utils import (
@@ -35,8 +35,14 @@ def _get_db_connection(metadata: dict[str, Any], password: str) -> Any:
             host=host, port=port, database=dbname, user=user, password=password
         )
     elif db_type == "mssql":
-        conn_str = f"DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={host},{port};DATABASE={dbname};UID={user};PWD={password}"
-        return pyodbc.connect(conn_str)
+        return tds.connect(
+            server=host,
+            port=port or 1433,
+            user=user,
+            password=password,
+            database=dbname,
+            autocommit=True,
+        )
     else:
         raise ValueError(f"Unsupported database type: {db_type}")
 
