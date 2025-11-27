@@ -5,7 +5,6 @@ import re
 from typing import Any
 
 import google.auth
-import pyodbc
 from google import genai
 from google.api_core import exceptions
 from google.genai import types
@@ -60,9 +59,8 @@ def _execute_query(conn: Any, query: str) -> list[dict[str, Any]]:
             rows = cursor.fetchall()
             return [dict(zip(columns, row, strict=False)) for row in rows]
         return []
-    except pyodbc.Error as ex:
-        sqlstate = ex.args[0]
-        logger.error(f"SQL Error ({sqlstate}): {ex} for query: {query}")
+    except Exception as ex:
+        logger.error(f"SQL Error: {ex} for query: {query}")
         raise
     finally:
         cursor.close()
