@@ -5,6 +5,7 @@ from google.adk.agents import LlmAgent
 
 from .prompt import BUSINESS_LOGIC_EXTRACTION_PROMPT
 from .sub_agents.business_logic_seq_agent.agent import business_logic_seq_agent
+from .sub_agents.hotspot_identification_agent.agent import hotspot_identification_agent
 
 MODEL = "gemini-2.5-flash"
 
@@ -17,6 +18,6 @@ business_logic_extraction_agent = LlmAgent(
         Answers questions about the analyzed code."""
     ),
     instruction=BUSINESS_LOGIC_EXTRACTION_PROMPT,
-    sub_agents=[business_logic_seq_agent],
+    sub_agents=[business_logic_seq_agent, hotspot_identification_agent],
     tools=[],
 )
