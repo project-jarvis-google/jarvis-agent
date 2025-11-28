@@ -5,8 +5,8 @@ from .prompt import LANGUAGE_IDENTIFICATION_PROMPT
 
 MODEL = "gemini-2.5-flash"
 
-language_identifier_agent = LlmAgent(
-    name="language_identifier_agent",
+business_logic_language_identifier_agent = LlmAgent(
+    name="business_logic_language_identifier_agent",
     model=MODEL,
     description=(
         """

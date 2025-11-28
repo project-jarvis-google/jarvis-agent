@@ -5,7 +5,6 @@ from google.adk.agents import LlmAgent
 
 from .prompt import BUSINESS_LOGIC_EXTRACTION_PROMPT
 from .sub_agents.business_logic_seq_agent.agent import business_logic_seq_agent
-from .tools import update_business_rule
 
 MODEL = "gemini-2.5-flash"
 
@@ -19,5 +18,5 @@ business_logic_extraction_agent = LlmAgent(
     ),
     instruction=BUSINESS_LOGIC_EXTRACTION_PROMPT,
     sub_agents=[business_logic_seq_agent],
-    tools=[update_business_rule],
+    tools=[],
 )

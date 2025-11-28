@@ -13,7 +13,10 @@ def fetch_source_code_from_git_repo(
     git_repo_url: str, access_token: str, tool_context: ToolContext
 ) -> bool:
     sourceCodeStored = False
-    custom_temp_path = os.getenv("CUSTOM_TEMP_PATH")
+    # custom_temp_path = os.getenv("CUSTOM_TEMP_PATH")
+    print("manoj is being called")
+    custom_temp_path="/Users/manojmj/Documents/temp"
+
     secure_temp_repo_dir = None
     logging.info("git_repo_url => %s", git_repo_url)
     logging.info("access_token => %s", access_token)
