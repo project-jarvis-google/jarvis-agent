@@ -4,13 +4,17 @@ import os
 import subprocess
 
 from google.adk.tools import ToolContext
+from pydantic import BaseModel
 
 from app.sub_agents.tech_stack_profiler_agent.utils.json_utils import filter_json_arr
 
 # TODO: Error Handling
 
+class LanguageIdentificationResult(BaseModel):
+    is_supported: bool
+    found_languages: str
 
-def identify_languages_from_source_code(tool_context: ToolContext) -> bool:
+def identify_languages_from_source_code(tool_context: ToolContext) -> dict:
     secure_temp_repo_dir = tool_context.state["secure_temp_repo_dir"]
     # secure_temp_repo_dir = "/Users/manojmj/Documents/temp"
 
@@ -55,19 +59,27 @@ def identify_languages_from_source_code(tool_context: ToolContext) -> bool:
         # tool_context.state["languages_breakdown_json_str"] = stdout
 
         languages_breakdown_json = json.loads(stdout)
-        desired_languages_attributes = ["language", "percentage"]
 
-        filtered_language_data = filter_json_arr(
-            languages_breakdown_json, desired_languages_attributes
-        )
+        # Sort by percentage descending
+        languages_breakdown_json.sort(key=lambda x: float(x["percentage"].strip("%")), reverse=True)
 
+        # Format Top 4 for the agent to display
+        top_4_languages = languages_breakdown_json[:4]
         filtered_language_data_final_str = "\n".join(
-            [" - ".join(map(str, inner_list)) for inner_list in filtered_language_data]
+            [f"{lang.get('language', 'Unknown')}: {lang.get('percentage', '0%')}" for lang in top_4_languages]
         )
 
         tool_context.state["filtered_language_data_final_str"] = (
             filtered_language_data_final_str
         )
+
+        is_supported = True
+        if languages_breakdown_json:
+            required_languages = tool_context.state.get("required_languages", ["Java", "C#", "SQL", "PL/SQL", "T-SQL"])
+            top_4_languages_list = [x["language"] for x in languages_breakdown_json[:4]]
+            if required_languages and not any(lang in required_languages for lang in top_4_languages_list):
+                logging.info(f"No required language found in top 4: {top_4_languages_list}. Required: {required_languages}. Exiting.")
+                is_supported = False
 
         # tool_context.state["filtered_language_data"] = filtered_language_data
 
@@ -78,7 +90,13 @@ def identify_languages_from_source_code(tool_context: ToolContext) -> bool:
         # shutil.rmtree(secure_temp_repo_dir)
         # logging.info("Temporary directory cleaned up in identify_languages_from_source_code.")
 
-    return True
+        return LanguageIdentificationResult(
+            is_supported=is_supported, found_languages=filtered_language_data_final_str
+        ).dict()
+
+    return LanguageIdentificationResult(
+        is_supported=False, found_languages="Source code directory not found."
+    ).dict()
 
 
 # FOR TESTING

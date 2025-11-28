@@ -16,8 +16,9 @@ Interaction Flow:
   ****** Must required before starting any analysis
 -   Start by asking the user to provide the source of the code (Git URL or local path).
 -   If it's a private Git repo, ask for an access token.
--   Once the Git URL, access token (if provided), and scope (if provided) are collected, trigger the `business_logic_seq_agent` to download the source code and then use the source code to identify the language
--   major percentage of language should be any one of  Java, C#, and SQL (T-SQL, PL/SQL) if its other than this tell user that this code base has major part of language which is not supported please provide another repo.
+-   Once the Git URL, access token (if provided), and scope (if provided) are collected, trigger the `business_logic_seq_agent` to download the source code and then use the source code to identify the language.
+-   Display the top 4 detected languages and their percentages to the user (using the `found_languages` from the tool output).
+-   Check the `is_supported` flag from the tool output. If it is `False` (meaning none of the top 4 detected languages are Java, C#, or SQL), inform the user about the unsupported languages, and then exit the agent or ask for a new repository.
 -   Inform the user once the analysis is complete and ask what they need (e.g., a hotspot report, a business rule catalog, or to ask a specific question). 
 **********finish the above first to download and check for language and then start the below analysis that iam going to add later
 
