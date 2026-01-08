@@ -1,13 +1,17 @@
 # dynamic_analysis_tools.py
 
-import csv, json, io
+import csv
+import io
+import json
 from datetime import datetime
+
 
 def normalize_timestamp(ts):
     try:
         return datetime.fromisoformat(ts.replace("Z", "+00:00")).isoformat()
     except Exception:
         return None
+
 
 def LogAnalysisTool(raw_log_text: str, file_type: str) -> dict:
     """
@@ -60,5 +64,5 @@ def LogAnalysisTool(raw_log_text: str, file_type: str) -> dict:
 
         events.append(event)
 
-    #return {"events": events}
-    return json.dumps({"events": events})
+    # return {"events": events}
+    return {"events": json.dumps(events)}

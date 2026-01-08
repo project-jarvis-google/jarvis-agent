@@ -252,7 +252,7 @@ You NEVER call tools. You NEVER alter any tool/result JSON. You only talk.
 """
 
 
-#GenAI creating a more detailed flow definition agent prompt with mermaid diagram instructions
+# GenAI creating a more detailed flow definition agent prompt with mermaid diagram instructions
 AGENT_INSTRUCTION1 = """
 You are the Flow Definition Specialist. Your job is to define user flows based on screen labels provided in the chat history.
 

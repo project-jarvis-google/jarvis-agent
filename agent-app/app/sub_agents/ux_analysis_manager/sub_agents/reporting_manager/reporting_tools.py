@@ -4,30 +4,34 @@ import logging
 import re
 from io import BytesIO
 from pathlib import Path
-from typing import Any, Dict, Optional, List
+from typing import Any, Optional
 
 import google.genai.types as types
 
 logger = logging.getLogger(__name__)
 if not logger.handlers:
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+    logging.basicConfig(
+        level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+    )
 
 # ----------------------------
 # PDF libs
 # ----------------------------
 try:
+    from reportlab.lib import colors
+    from reportlab.lib.enums import TA_LEFT
     from reportlab.lib.pagesizes import A4
     from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
     from reportlab.lib.units import mm
-    from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Preformatted
-    from reportlab.lib.enums import TA_LEFT
-    from reportlab.lib import colors
+    from reportlab.platypus import Paragraph, Preformatted, SimpleDocTemplate, Spacer
+
     REPORTLAB_OK = True
 except Exception:
     REPORTLAB_OK = False
 
 try:
     from fpdf import FPDF
+
     FPDF_OK = True
 except Exception:
     FPDF_OK = False
@@ -48,25 +52,33 @@ def _reports_dir() -> Path:
 _LONG_TOKEN_RE = re.compile(r"(\S{120,})")
 _BOLD_RE = re.compile(r"\*\*(.+?)\*\*")
 
+
 def _soft_wrap_long_tokens(text: str, chunk: int = 60) -> str:
     def _break(token: str) -> str:
-        return " ".join(token[i:i + chunk] for i in range(0, len(token), chunk))
+        return " ".join(token[i : i + chunk] for i in range(0, len(token), chunk))
+
     return _LONG_TOKEN_RE.sub(lambda m: _break(m.group(1)), text)
+
 
 def _sanitize_text(text: str) -> str:
     replacements = {
-        "\u2018": "'", "\u2019": "'",
-        "\u201c": '"', "\u201d": '"',
-        "\u2013": "-", "\u2014": "-",
+        "\u2018": "'",
+        "\u2019": "'",
+        "\u201c": '"',
+        "\u201d": '"',
+        "\u2013": "-",
+        "\u2014": "-",
         "…": "...",
-        "\u00A0": " ",
+        "\u00a0": " ",
     }
     for a, b in replacements.items():
         text = text.replace(a, b)
     return _soft_wrap_long_tokens(text)
 
+
 def _escape_xml(s: str) -> str:
     return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
 
 def _md_inline_to_reportlab(text: str) -> str:
     esc = _escape_xml(text)
@@ -84,7 +96,9 @@ def render_markdown_to_pdf_bytes(markdown_text: str) -> bytes:
         return _render_with_reportlab(md)
     if FPDF_OK:
         return _render_with_fpdf(md)
-    raise RuntimeError("PDF generation failed. Install reportlab (recommended) or fpdf.")
+    raise RuntimeError(
+        "PDF generation failed. Install reportlab (recommended) or fpdf."
+    )
 
 
 def _render_with_reportlab(md: str) -> bytes:
@@ -110,9 +124,15 @@ def _render_with_reportlab(md: str) -> bytes:
         spaceAfter=6,
         alignment=TA_LEFT,
     )
-    h1 = ParagraphStyle("H1", parent=base, fontSize=16, leading=20, spaceBefore=8, spaceAfter=10)
-    h2 = ParagraphStyle("H2", parent=base, fontSize=13, leading=18, spaceBefore=8, spaceAfter=8)
-    h3 = ParagraphStyle("H3", parent=base, fontSize=11.5, leading=16, spaceBefore=8, spaceAfter=6)
+    h1 = ParagraphStyle(
+        "H1", parent=base, fontSize=16, leading=20, spaceBefore=8, spaceAfter=10
+    )
+    h2 = ParagraphStyle(
+        "H2", parent=base, fontSize=13, leading=18, spaceBefore=8, spaceAfter=8
+    )
+    h3 = ParagraphStyle(
+        "H3", parent=base, fontSize=11.5, leading=16, spaceBefore=8, spaceAfter=6
+    )
     bullet = ParagraphStyle("Bullet", parent=base, leftIndent=16, bulletIndent=0)
     code = ParagraphStyle(
         "Code",
@@ -130,8 +150,8 @@ def _render_with_reportlab(md: str) -> bytes:
     lines = md.splitlines()
 
     in_code = False
-    code_lines: List[str] = []
-    para_buf: List[str] = []
+    code_lines: list[str] = []
+    para_buf: list[str] = []
 
     def flush_para():
         nonlocal para_buf
@@ -187,7 +207,9 @@ def _render_with_reportlab(md: str) -> bytes:
         if re.match(r"^[-*•]\s+", stripped):
             flush_para()
             txt = re.sub(r"^[-*•]\s+", "", stripped)
-            story.append(Paragraph(_md_inline_to_reportlab(txt), bullet, bulletText="•"))
+            story.append(
+                Paragraph(_md_inline_to_reportlab(txt), bullet, bulletText="•")
+            )
             continue
 
         para_buf.append(stripped)
@@ -202,6 +224,7 @@ def _render_with_reportlab(md: str) -> bytes:
 class _MarkdownPDF(FPDF):
     pass
 
+
 def _render_with_fpdf(md: str) -> bytes:
     pdf = _MarkdownPDF(format="A4")
     pdf.add_page()
@@ -209,7 +232,11 @@ def _render_with_fpdf(md: str) -> bytes:
     safe = md.encode("latin-1", "replace").decode("latin-1")
     pdf.multi_cell(0, 5, safe)
     out = pdf.output(dest="S")
-    return bytes(out) if isinstance(out, (bytes, bytearray)) else str(out).encode("latin-1", "replace")
+    return (
+        bytes(out)
+        if isinstance(out, (bytes, bytearray))
+        else str(out).encode("latin-1", "replace")
+    )
 
 
 # ----------------------------
@@ -284,14 +311,19 @@ def _write_html_download_helper(pdf_b64: str, pdf_filename: str) -> Path:
 # ----------------------------
 # TOOL 1: Save report in session
 # ----------------------------
-def save_ux_report(report_markdown: str, tool_context: Optional[Any] = None) -> Dict[str, Any]:
+def save_ux_report(
+    report_markdown: str,
+    tool_context: Optional[Any] = None,  # noqa: UP045
+) -> dict[str, Any]:
     if not tool_context:
         return {"status": "error", "message": "No tool_context."}
 
     tool_context.state["last_ux_report"] = report_markdown
     tool_context.state["last_ux_report_saved_at"] = dt.datetime.utcnow().isoformat()
 
-    logger.info("save_ux_report: report saved in session (len=%s)", len(report_markdown or ""))
+    logger.info(
+        "save_ux_report: report saved in session (len=%s)", len(report_markdown or "")
+    )
 
     return {
         "status": "success",
@@ -305,14 +337,17 @@ def save_ux_report(report_markdown: str, tool_context: Optional[Any] = None) -> 
 # ----------------------------
 async def export_saved_ux_report_to_pdf(
     filename_prefix: str = "ux_audit_report",
-    tool_context: Optional[Any] = None,
-) -> Dict[str, Any]:
+    tool_context: Optional[Any] = None,  # noqa: UP045
+) -> dict[str, Any]:
     if not tool_context:
         return {"status": "error", "message": "No tool_context."}
 
     report_md = tool_context.state.get("last_ux_report", "")
     if not report_md.strip():
-        return {"status": "error", "message": "No report found. Generate the report first."}
+        return {
+            "status": "error",
+            "message": "No report found. Generate the report first.",
+        }
 
     logger.info("export_saved_ux_report_to_pdf: starting export")
 
@@ -333,12 +368,19 @@ async def export_saved_ux_report_to_pdf(
     artifact_version = None
     try:
         part = types.Part.from_bytes(pdf_bytes, "application/pdf")
-        artifact_version = await tool_context.save_artifact(filename=filename, artifact=part)
+        artifact_version = await tool_context.save_artifact(
+            filename=filename, artifact=part
+        )
         artifact_saved = True
-        logger.info("export_saved_ux_report_to_pdf: artifact saved (version=%s)", artifact_version)
+        logger.info(
+            "export_saved_ux_report_to_pdf: artifact saved (version=%s)",
+            artifact_version,
+        )
     except Exception as e:
         artifact_error = str(e)
-        logger.exception("export_saved_ux_report_to_pdf: artifact save failed: %s", artifact_error)
+        logger.exception(
+            "export_saved_ux_report_to_pdf: artifact save failed: %s", artifact_error
+        )
 
     # HTML helper (ONLY on download step)
     html_path = _write_html_download_helper(pdf_b64=pdf_b64, pdf_filename=filename)

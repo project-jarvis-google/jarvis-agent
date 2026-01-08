@@ -269,5 +269,5 @@ static_analysis_agent = LlmAgent(
     model="gemini-2.5-pro",
     description=DESCRIPTION,
     instruction=INSTRUCTION,
-    tools=[], # Purely visual analysis via LLM
+    tools=[],  # Purely visual analysis via LLM
 )

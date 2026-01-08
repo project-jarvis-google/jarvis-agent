@@ -1,9 +1,8 @@
 # tools/reporting_tools.py
-import base64
 import datetime
 import re
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 try:
     from fpdf import FPDF
@@ -87,18 +86,19 @@ class MarkdownPDF(FPDF):
 
 def save_ux_report(
     report_markdown: str,
-    tool_context: Optional[Any] = None,
-) -> Dict[str, Any]:
+    tool_context: Optional[Any] = None,  # noqa: UP045
+) -> dict[str, Any]:
     if not tool_context:
         return {"status": "error", "message": "No context"}
 
     tool_context.state["last_ux_report"] = report_markdown
     return {"status": "success", "message": "Report saved"}
 
+
 def export_ux_report_markdown(
     filename_prefix: str = "ux_audit",
-    tool_context: Optional[Any] = None,
-) -> Dict[str, Any]:
+    tool_context: Optional[Any] = None,  # noqa: UP045
+) -> dict[str, Any]:
     if not tool_context:
         return {"status": "error", "message": "No context"}
 
@@ -119,5 +119,5 @@ def export_ux_report_markdown(
         "status": "success",
         "filename": filename,
         "path": str(path),
-        "message": "Markdown report exported"
+        "message": "Markdown report exported",
     }
