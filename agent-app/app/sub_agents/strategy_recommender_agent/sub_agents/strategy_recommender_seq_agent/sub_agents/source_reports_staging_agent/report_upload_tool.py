@@ -2,7 +2,7 @@ import io
 import logging
 import os
 import uuid
-from typing import Any
+from typing import Any, cast
 
 import google.auth
 import pdfplumber
@@ -93,7 +93,8 @@ async def _bytes_from_any(part: gt.Part, tool_context: ToolContext) -> bytes:
     ):
         loader = getattr(tool_context, "load_artifact_bytes", None)
         if callable(loader):
-            return await loader(part.file_data.file_uri)
+            # Cast is used to inform the type checker of the expected return type.
+            return cast(bytes, loader(part.file_data.file_uri))
         raise ValueError(
             "file_data present but tool_context.load_artifact_bytes is unavailable."
         )
@@ -117,6 +118,8 @@ def _preliminary_part_checks(parts: list[Any], rid: str) -> dict[str, Any] | Non
 
 
 # ---------------- the tool (ONE ARG, ASYNC) ----------------
+
+
 async def save_and_report_size(
     tool_context: ToolContext,
 ) -> dict[str, Any]:
@@ -134,9 +137,7 @@ async def save_and_report_size(
         if preliminary_error is not None:
             return preliminary_error
 
-        processed_parts: list[
-            tuple[bytes, str, int, int]
-        ] = []  # (data, name, size_bytes, version)
+        uploaded_pdfs_info = []  # List to store details of all uploaded PDFs
         total_size = 0
 
         for pdf_part, inferred_name in parts:
@@ -187,7 +188,14 @@ async def save_and_report_size(
                     f"[{rid}] Successfully saved artifact: {artifact_name} with version: {version}"
                 )
 
-                processed_parts.append((data, artifact_name, size_bytes, version))
+                uploaded_pdfs_info.append(
+                    {
+                        "name": artifact_name,
+                        "size_bytes": size_bytes,
+                        "version": version,
+                        "rid": rid,
+                    }
+                )
             except Exception as e:
                 logger.exception(
                     "[%s] Failed to save artifact name=%s", rid, artifact_name
@@ -198,22 +206,21 @@ async def save_and_report_size(
                     "rid": rid,
                 }
 
-            tool_context.state["last_pdf_name"] = artifact_name
-            tool_context.state["last_pdf_size"] = size_bytes
-            tool_context.state["last_pdf_version"] = version
-
-        if not processed_parts:
+        if not uploaded_pdfs_info:
             return {
                 "status": "error",
                 "message": "No valid PDF bytes received.",
                 "rid": rid,
             }
 
+        # Store the list of all uploaded PDF details in the state
+        tool_context.state["uploaded_pdfs_info"] = uploaded_pdfs_info
+
         return {
             "status": "success",
-            "filename": ",".join(part[1] for part in processed_parts),
-            "size_bytes": ",".join(str(part[2]) for part in processed_parts),
-            "version": ",".join(str(part[3]) for part in processed_parts),
+            "filenames": [p["name"] for p in uploaded_pdfs_info],
+            "size_bytes": [str(p["size_bytes"]) for p in uploaded_pdfs_info],
+            "versions": [str(p["version"]) for p in uploaded_pdfs_info],
             "rid": rid,
         }
 
@@ -247,70 +254,101 @@ def _extract_target_sections(full_text: str) -> str:
     return full_text[start_index:].strip()
 
 
+# Helper to determine PDF type
+def _determine_pdf_type(filename: str, existing_types: set) -> str:
+    lower_name = filename.lower()
+    if "discovery" in lower_name and "discovery_report" not in existing_types:
+        return "discovery_report"
+    if (
+        "tech" in lower_name or "stack" in lower_name or "profile" in lower_name
+    ) and "tech_stack_profile" not in existing_types:
+        return "tech_stack_profile"
+    return "unclassified_pdf"
+
+
 async def extract_and_summarize_artifact(tool_context: ToolContext) -> dict[str, Any]:
     """
-    Loads the last PDF artifact,extract text, and generate a summary.
+    Loads all uploaded PDF artifacts, extracts text, and stores them in the agent state.
+    Attempts to classify PDFs as 'discovery_report' or 'tech_stack_profile' based on filename.
     """
     rid = tool_context.state.get("rid", uuid.uuid4().hex[:8])
-    artifact_name = tool_context.state.get("last_pdf_name")
-    version = tool_context.state.get("last_pdf_version")
+    uploaded_pdfs_info = tool_context.state.get("uploaded_pdfs_info")
 
-    if not artifact_name:
+    if not uploaded_pdfs_info:
         return {
             "status": "error",
             "message": "No saved PDF artifact found in agent state.",
         }
 
-    try:
-        # 2. Load the Artifact Part using the name/version
-        # ADK's ToolContext can load an artifact by its name (and optionally version)
-        artifact_part = await tool_context.load_artifact(artifact_name)
+    extracted_results = {}
+    assigned_types: set[str] = set()  # To track which types have been assigned
 
-        if artifact_part is None:
-            logger.error(
-                f"[{rid}] Artifact '{artifact_name}' could not be loaded from service."
+    for pdf_info in uploaded_pdfs_info:
+        artifact_name = pdf_info["name"]
+        version = pdf_info["version"]
+
+        pdf_type = _determine_pdf_type(artifact_name, assigned_types)
+
+        try:
+            artifact_part = await tool_context.load_artifact(artifact_name)
+
+            if artifact_part is None:
+                logger.error(
+                    f"[{rid}] Artifact '{artifact_name}' could not be loaded from service."
+                )
+                extracted_results[artifact_name] = {
+                    "status": "error",
+                    "message": f"Artifact '{artifact_name}' not found.",
+                }
+                continue
+
+            data_bytes = await _bytes_from_any(artifact_part, tool_context)
+
+            full_text = ""
+            with pdfplumber.open(io.BytesIO(data_bytes)) as pdf:
+                for page in pdf.pages:
+                    full_text += page.extract_text() + "\n"
+
+            if pdf_type == "discovery_report":
+                targeted_text = _extract_target_sections(full_text)
+                if not targeted_text.strip():
+                    extracted_results[artifact_name] = {
+                        "status": "error",
+                        "message": "Could not extract targeted text from Discovery Report.",
+                    }
+                else:
+                    tool_context.state["discovery_report_text"] = targeted_text
+                    extracted_results[artifact_name] = {
+                        "status": "success",
+                        "type": "discovery_report",
+                        "summary_snippet": targeted_text[:200] + "...",
+                    }
+                    assigned_types.add("discovery_report")
+            elif pdf_type == "tech_stack_profile":
+                tool_context.state["tech_stack_full_text"] = full_text
+                extracted_results[artifact_name] = {
+                    "status": "success",
+                    "type": "tech_stack_profile",
+                    "summary_snippet": full_text[:200] + "...",
+                }
+                assigned_types.add("tech_stack_profile")
+
+        except Exception as e:
+            logger.exception(
+                f"[{rid}] Error processing and extracting text from artifact '{artifact_name}'"
             )
-            return {
+            extracted_results[artifact_name] = {
                 "status": "error",
-                "message": f"Artifact '{artifact_name}' not found.",
+                "message": f"An unhandled error occurred: {e!s}",
             }
+            continue
 
-        # 3. Get the Raw Bytes
-        data_bytes = await _bytes_from_any(artifact_part, tool_context)
-
-        # 4. Extract Full Text using pdfplumber
-        full_text = ""
-        with pdfplumber.open(io.BytesIO(data_bytes)) as pdf:
-            for page in pdf.pages:
-                full_text += page.extract_text() + "\n"
-
-        # 5. Extract Targeted Text from specific sections
-        targeted_text = _extract_target_sections(full_text)
-
-        if not targeted_text.strip():
-            return {
-                "status": "error",
-                "message": f"Could not extract text from artifact '{artifact_name}'.",
-            }
-
-        tool_context.state["last_pdf_text"] = targeted_text
-
-        # 6. Return the Summary
-        return {
-            "status": "success",
-            "artifact_name": artifact_name,
-            "summary": targeted_text,
-            "version": version,
-            "rid": rid,
-        }
-
-    except Exception as e:
-        logger.exception("[%s] Error processing and extracting text from artifact", rid)
-        return {
-            "status": "error",
-            "message": f"An unhandled error occurred: {e!s}",
-            "rid": rid,
-        }
+    return {
+        "status": "success",
+        "processed_pdfs_count": len(uploaded_pdfs_info),
+        "extracted_results": extracted_results,
+        "rid": rid,
+    }
 
 
 save_generated_report_tool = FunctionTool(func=save_and_report_size)

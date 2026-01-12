@@ -1,1 +1,1 @@
-from .agent import otel_doc_rag_corpus_agent
+from .agent import otel_doc_rag_corpus_agent as otel_doc_rag_corpus_agent

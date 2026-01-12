@@ -1,1 +1,1 @@
-from .agent import framework_analyzer_agent
+from .agent import framework_analyzer_agent as framework_analyzer_agent

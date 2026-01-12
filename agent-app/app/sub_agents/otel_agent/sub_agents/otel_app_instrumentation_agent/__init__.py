@@ -1,1 +1,1 @@
-from .agent import otel_app_instrumentation_agent
+from .agent import otel_app_instrumentation_agent as otel_app_instrumentation_agent

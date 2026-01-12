@@ -1,1 +1,1 @@
-from .agent import database_analyzer_agent
+from .agent import database_analyzer_agent as database_analyzer_agent

@@ -1,5 +1,4 @@
 # halt_tool.py
-
 from typing import Any
 
 from google.adk.tools import FunctionTool, ToolContext

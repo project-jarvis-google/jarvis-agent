@@ -1,1 +1,1 @@
-from .agent import parallel_codebase_analyzer_agent
+from .agent import parallel_codebase_analyzer_agent as parallel_codebase_analyzer_agent

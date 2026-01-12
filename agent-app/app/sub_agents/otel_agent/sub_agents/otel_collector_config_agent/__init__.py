@@ -1,1 +1,1 @@
-from .agent import otel_collector_config_agent
+from .agent import otel_collector_config_agent as otel_collector_config_agent

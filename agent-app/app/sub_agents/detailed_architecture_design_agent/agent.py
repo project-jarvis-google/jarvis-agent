@@ -1,0 +1,45 @@
+"""Detailed Architecture Design Agent:
+
+This agent acts as a lead orchestrator for creating detailed software architectures.
+It gathers initial requirements and then coordinates with a team of specialist sub-agents
+to produce a comprehensive architecture design.
+"""
+
+import logging
+
+from google.adk.agents import Agent
+from google.adk.planners import BuiltInPlanner
+from google.genai import types
+
+from .config import MODEL
+from .prompt import DETAILED_ARCHITECTURE_DESIGN_AGENT_PROMPT
+from .sub_agents.api_apec_agent import api_spec_agent
+from .sub_agents.component_design_agent import component_design_agent
+from .sub_agents.deployment_architect_agent import deployment_architect_agent
+from .sub_agents.dfd_agent import dfd_agent
+
+logger = logging.getLogger(__name__)
+
+detailed_architecture_design_agent = Agent(
+    name="detailed_architecture_design_agent",
+    model=MODEL,
+    description="""
+        The Detailed Architecture Parent Agent acts as a lead orchestrator in the architecture design process. 
+        It begins by personally gathering the user's conceptual design and non-functional requirements (NFRs) to establish a strong foundation. 
+        Once the initial requirements are clear, it coordinates a team of specialist sub-agents to delve into the specifics of the architecture, including: Component & Interaction Design, API & Data Flow Design and Deployment Architecture. 
+        The agent's primary role is to synthesize the outputs from these specialist agents into a single, cohesive, and comprehensive detailed architecture. 
+        It also manages the interactive design process, allowing users to ask questions, perform what-if analysis, and refine the design iteratively. 
+        
+        By orchestrating this entire workflow, the Detailed Architecture Parent Agent streamlines the creation of a complete and implementable architecture, from high-level concepts to detailed infrastructure and service design.
+    """,
+    instruction=DETAILED_ARCHITECTURE_DESIGN_AGENT_PROMPT,
+    planner=BuiltInPlanner(thinking_config=types.ThinkingConfig(thinking_budget=2048)),
+    sub_agents=[
+        component_design_agent,
+        api_spec_agent,
+        deployment_architect_agent,
+        dfd_agent,
+    ],
+)
+
+logger.info("Detailed Architecture Design Agent initialized successfully.")
