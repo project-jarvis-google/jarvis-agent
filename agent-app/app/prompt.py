@@ -26,5 +26,6 @@ ROOT_AGENT_PROMPT = """
           This agent helps in specifying the exact technologies, configurations, and intricate details required for implementation.
       12. Use the 'application_portfolio_analyzer' agent to help the user with any application or server details related queries and to create an application portfolio report.
       13. If the user asks about database discovery or database profiling please delegate the task to the following agent `data_model_discovery_agent`.
-      14. else use 'google_search_dummy_agent'
+      14. If the user wants to extract business rules, logic, or "IF-THEN" statements from a legacy codebase (Java, C#, SQL), use the `business_logic_extraction_agent`.
+      15. else use 'google_search_dummy_agent'
     """

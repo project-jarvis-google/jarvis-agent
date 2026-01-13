@@ -11,7 +11,6 @@ from app.sub_agents.tech_stack_profiler_agent.utils.json_utils import filter_jso
 # TODO: Error Handling
 
 class LanguageIdentificationResult(BaseModel):
-    is_supported: bool
     found_languages: str
 
 def identify_languages_from_source_code(tool_context: ToolContext) -> dict:
@@ -73,13 +72,13 @@ def identify_languages_from_source_code(tool_context: ToolContext) -> dict:
             filtered_language_data_final_str
         )
 
-        is_supported = True
-        if languages_breakdown_json:
-            required_languages = tool_context.state.get("required_languages", ["Java", "C#", "SQL", "PL/SQL", "T-SQL"])
-            top_4_languages_list = [x["language"] for x in languages_breakdown_json[:4]]
-            if required_languages and not any(lang in required_languages for lang in top_4_languages_list):
-                logging.info(f"No required language found in top 4: {top_4_languages_list}. Required: {required_languages}. Exiting.")
-                is_supported = False
+        # Restriction removed as per user request
+        # if languages_breakdown_json:
+        #     required_languages = tool_context.state.get("required_languages", ["Java", "C#", "SQL", "PL/SQL", "T-SQL"])
+        #     top_4_languages_list = [x["language"] for x in languages_breakdown_json[:4]]
+        #     if required_languages and not any(lang in required_languages for lang in top_4_languages_list):
+        #         logging.info(f"No required language found in top 4: {top_4_languages_list}. Required: {required_languages}. Exiting.")
+        #         is_supported = False
 
         # tool_context.state["filtered_language_data"] = filtered_language_data
 
@@ -91,11 +90,11 @@ def identify_languages_from_source_code(tool_context: ToolContext) -> dict:
         # logging.info("Temporary directory cleaned up in identify_languages_from_source_code.")
 
         return LanguageIdentificationResult(
-            is_supported=is_supported, found_languages=filtered_language_data_final_str
+            found_languages=filtered_language_data_final_str
         ).dict()
 
     return LanguageIdentificationResult(
-        is_supported=False, found_languages="Source code directory not found."
+        found_languages="Source code directory not found."
     ).dict()
 
 
