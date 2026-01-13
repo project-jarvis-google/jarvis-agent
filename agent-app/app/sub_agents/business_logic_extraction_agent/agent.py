@@ -8,7 +8,7 @@ from .sub_agents.business_logic_seq_agent.agent import business_logic_seq_agent
 from .sub_agents.hotspot_identification_agent.agent import hotspot_identification_agent
 from .sub_agents.business_rule_extraction_agent.agent import business_rule_extraction_agent
 
-MODEL = "gemini-2.5-flash"
+MODEL = "gemini-3-pro-preview"
 
 business_logic_extraction_agent = LlmAgent(
     name="business_logic_extraction_agent",
